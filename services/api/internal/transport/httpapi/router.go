@@ -126,7 +126,7 @@ func adminRoutes(h *Handlers) func(chi.Router) {
 			r.With(read(domain.PermCatalogueWrite)).Put("/{id}", h.AdminUpdateCollection)
 			r.With(read(domain.PermCatalogueWrite)).Post("/{id}/retire", h.AdminRetireCollection)
 			r.With(read(domain.PermCatalogueWrite)).Post("/{id}/restore", h.AdminRestoreCollection)
-			r.With(read(domain.PermCatalogueWrite)).Delete("/{id}", h.AdminDeleteCollection)
+			r.With(read(domain.PermCatalogueDelete)).Delete("/{id}", h.AdminDeleteCollection)
 		})
 
 		r.Route("/designs", func(r chi.Router) {
@@ -136,7 +136,7 @@ func adminRoutes(h *Handlers) func(chi.Router) {
 			r.With(read(domain.PermCatalogueWrite)).Post("/retire", h.AdminRetireDesigns)
 			r.With(read(domain.PermCatalogueWrite)).Post("/restore", h.AdminRestoreDesigns)
 			r.With(read(domain.PermCatalogueWrite)).Put("/{id}", h.AdminUpdateDesign)
-			r.With(read(domain.PermCatalogueWrite)).Delete("/{id}", h.AdminDeleteDesign)
+			r.With(read(domain.PermCatalogueDelete)).Delete("/{id}", h.AdminDeleteDesign)
 		})
 	}
 }

@@ -43,6 +43,7 @@ type DialogState = { mode: "create" } | { mode: "edit"; collection: Collection }
 
 export function AdminCollectionsPage() {
   const canWrite = useCan("catalogue:write");
+  const canDelete = useCan("catalogue:delete");
   const [page, setPage] = useState(1);
   const collections = useCollectionsPaged({ page, pageSize: DEFAULT_PAGE_SIZE });
   const retire = useRetireCollection();
@@ -126,7 +127,7 @@ export function AdminCollectionsPage() {
               <TableCell sx={hideUntilMd}>Slug</TableCell>
               <TableCell>Status</TableCell>
               <TableCell sx={hideUntilMd}>Created</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              {(canWrite || canDelete) && <TableCell align="right">Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -140,41 +141,49 @@ export function AdminCollectionsPage() {
                 <TableCell sx={{ color: "text.secondary", ...hideUntilMd }}>
                   {formatDate(collection.createdAt)}
                 </TableCell>
-                <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                  <IconButton
-                    size="small"
-                    aria-label={`Edit ${collection.name}`}
-                    onClick={() => setDialog({ mode: "edit", collection })}
-                  >
-                    <EditOutlinedIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    aria-label={
-                      collection.status === "live"
-                        ? `Retire ${collection.name}`
-                        : `Restore ${collection.name}`
-                    }
-                    disabled={rowBusy(collection.id)}
-                    onClick={() => toggleRetired(collection)}
-                  >
-                    {collection.status === "live" ? (
-                      <ArchiveOutlinedIcon fontSize="small" />
-                    ) : (
-                      <UnarchiveOutlinedIcon fontSize="small" />
+                {(canWrite || canDelete) && (
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                    {canWrite && (
+                      <IconButton
+                        size="small"
+                        aria-label={`Edit ${collection.name}`}
+                        onClick={() => setDialog({ mode: "edit", collection })}
+                      >
+                        <EditOutlinedIcon fontSize="small" />
+                      </IconButton>
                     )}
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    aria-label={`Delete ${collection.name}`}
-                    onClick={() => {
-                      setDeleteError(null);
-                      setDeleteTarget(collection);
-                    }}
-                  >
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
+                    {canWrite && (
+                      <IconButton
+                        size="small"
+                        aria-label={
+                          collection.status === "live"
+                            ? `Retire ${collection.name}`
+                            : `Restore ${collection.name}`
+                        }
+                        disabled={rowBusy(collection.id)}
+                        onClick={() => toggleRetired(collection)}
+                      >
+                        {collection.status === "live" ? (
+                          <ArchiveOutlinedIcon fontSize="small" />
+                        ) : (
+                          <UnarchiveOutlinedIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    )}
+                    {canDelete && (
+                      <IconButton
+                        size="small"
+                        aria-label={`Delete ${collection.name}`}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setDeleteTarget(collection);
+                        }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

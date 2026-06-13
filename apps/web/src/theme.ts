@@ -1,4 +1,8 @@
-import { createTheme, type PaletteOptions, type Theme } from "@mui/material/styles";
+import {
+  createTheme,
+  type PaletteOptions,
+  type Theme,
+} from "@mui/material/styles";
 
 export type ThemeModeName = "light" | "dark";
 
@@ -79,19 +83,76 @@ export function createAppTheme(mode: ThemeModeName): Theme {
     shape: { borderRadius: 0 },
     typography: {
       fontFamily: bodyFamily,
-      h1: { fontFamily: displayFamily, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 0.95, fontSize: "clamp(3.2rem, 10vw, 8rem)" },
-      h2: { fontFamily: displayFamily, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 0.98, fontSize: "clamp(2.2rem, 5.2vw, 3.8rem)" },
-      h3: { fontFamily: displayFamily, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.04, fontSize: "clamp(1.7rem, 3.2vw, 2.5rem)" },
-      h4: { fontFamily: displayFamily, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.1, letterSpacing: "-0.015em" },
-      h5: { fontFamily: displayFamily, fontWeight: 600, fontSize: "1.35rem", lineHeight: 1.15, letterSpacing: "-0.01em" },
+      h1: {
+        fontFamily: displayFamily,
+        fontWeight: 700,
+        letterSpacing: "-0.03em",
+        lineHeight: 0.95,
+        fontSize: "clamp(3.2rem, 10vw, 8rem)",
+      },
+      h2: {
+        fontFamily: displayFamily,
+        fontWeight: 700,
+        letterSpacing: "-0.025em",
+        lineHeight: 0.98,
+        fontSize: "clamp(2.2rem, 5.2vw, 3.8rem)",
+      },
+      h3: {
+        fontFamily: displayFamily,
+        fontWeight: 600,
+        letterSpacing: "-0.02em",
+        lineHeight: 1.04,
+        fontSize: "clamp(1.7rem, 3.2vw, 2.5rem)",
+      },
+      h4: {
+        fontFamily: displayFamily,
+        fontWeight: 600,
+        fontSize: "1.6rem",
+        lineHeight: 1.1,
+        letterSpacing: "-0.015em",
+      },
+      h5: {
+        fontFamily: displayFamily,
+        fontWeight: 600,
+        fontSize: "1.35rem",
+        lineHeight: 1.15,
+        letterSpacing: "-0.01em",
+      },
       h6: { fontFamily: displayFamily, fontWeight: 600, fontSize: "1.1rem" },
       subtitle1: { fontSize: "1.0625rem", lineHeight: 1.65 },
       body1: { fontSize: "1rem", lineHeight: 1.7 },
       body2: { fontSize: "0.875rem", lineHeight: 1.65 },
-      overline: { fontFamily: monoFamily, fontWeight: 500, letterSpacing: "0.18em", fontSize: "0.6875rem", lineHeight: 1.6 },
-      button: { fontFamily: monoFamily, textTransform: "uppercase", letterSpacing: "0.16em", fontWeight: 500, fontSize: "0.75rem" },
+      overline: {
+        fontFamily: monoFamily,
+        fontWeight: 500,
+        letterSpacing: "0.18em",
+        fontSize: "0.6875rem",
+        lineHeight: 1.6,
+      },
+      button: {
+        fontFamily: monoFamily,
+        textTransform: "uppercase",
+        letterSpacing: "0.16em",
+        fontWeight: 500,
+        fontSize: "0.75rem",
+      },
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            textRendering: "optimizeLegibility",
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
+          },
+          "::selection": {
+            backgroundColor: isDark
+              ? "rgba(224, 164, 74, 0.32)"
+              : "rgba(207, 154, 63, 0.28)",
+            color: isDark ? cream : ink,
+          },
+        },
+      },
       MuiButton: {
         defaultProps: { disableElevation: true },
         styleOverrides: {
@@ -100,11 +161,46 @@ export function createAppTheme(mode: ThemeModeName): Theme {
             paddingInline: 32,
             paddingBlock: 16,
             boxShadow: "none",
-            transition: "background-color 200ms ease, color 200ms ease, border-color 200ms ease",
+            transition:
+              "background-color 200ms ease, color 200ms ease, border-color 200ms ease",
             "&:hover": { boxShadow: "none" },
-            "&.Mui-focusVisible": { outline: `2px solid ${amber}`, outlineOffset: "3px" },
+            "&.Mui-focusVisible": {
+              outline: `2px solid ${amber}`,
+              outlineOffset: "3px",
+            },
           },
-          outlined: { borderColor: "currentColor", "&:hover": { backgroundColor: "transparent" } },
+          outlined: {
+            borderColor: "currentColor",
+            "&:hover": { backgroundColor: "transparent" },
+          },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 0,
+            transition: "background-color 180ms ease, color 180ms ease",
+            "&:hover": {
+              backgroundColor: isDark
+                ? "rgba(232, 222, 203, 0.08)"
+                : "rgba(22, 18, 13, 0.06)",
+            },
+            "&.Mui-focusVisible": {
+              outline: `2px solid ${amber}`,
+              outlineOffset: "3px",
+            },
+          },
+        },
+      },
+      MuiLink: {
+        styleOverrides: {
+          root: {
+            textUnderlineOffset: "0.18em",
+            "&.Mui-focusVisible, &:focus-visible": {
+              outline: `2px solid ${amber}`,
+              outlineOffset: "3px",
+            },
+          },
         },
       },
       MuiTextField: { defaultProps: { variant: "outlined" } },
@@ -114,14 +210,64 @@ export function createAppTheme(mode: ThemeModeName): Theme {
             borderRadius: 0,
             backgroundColor: isDark ? darkPaper : "#fffdf8",
             "& .MuiOutlinedInput-notchedOutline": { borderColor: inputBorder },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: inputBorderHover },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: inputFocus, borderWidth: 1 },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: inputBorderHover,
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: inputFocus,
+              borderWidth: 1,
+            },
           },
         },
       },
-      MuiFormHelperText: { styleOverrides: { root: { marginLeft: 0, fontFamily: monoFamily } } },
-      MuiAlert: { defaultProps: { variant: "outlined" }, styleOverrides: { root: { borderRadius: 0 } } },
+      MuiFormHelperText: {
+        styleOverrides: { root: { marginLeft: 0, fontFamily: monoFamily } },
+      },
+      MuiAlert: {
+        defaultProps: { variant: "outlined" },
+        styleOverrides: { root: { borderRadius: 0 } },
+      },
       MuiPaper: { styleOverrides: { root: { backgroundImage: "none" } } },
+      MuiTableCell: {
+        styleOverrides: {
+          root: {
+            borderBottomColor: isDark
+              ? "rgba(232, 222, 203, 0.13)"
+              : "rgba(22, 18, 13, 0.1)",
+          },
+          head: {
+            color: isDark ? creamMuted : stone,
+            fontFamily: monoFamily,
+            fontSize: "0.6875rem",
+            fontWeight: 500,
+            textTransform: "uppercase",
+            backgroundColor: isDark
+              ? "rgba(232, 222, 203, 0.035)"
+              : "rgba(22, 18, 13, 0.035)",
+          },
+        },
+      },
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 0,
+            fontFamily: monoFamily,
+            textTransform: "uppercase",
+            "&.Mui-focusVisible": {
+              outline: `2px solid ${amber}`,
+              outlineOffset: "2px",
+            },
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 0,
+            fontFamily: monoFamily,
+          },
+        },
+      },
     },
   });
 }

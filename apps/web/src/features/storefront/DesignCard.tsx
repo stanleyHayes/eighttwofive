@@ -6,7 +6,15 @@ import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import { Link as RouterLink } from "react-router";
 import type { Design } from "@/features/catalog/api";
 import { formatPesewas } from "@/features/catalog/money";
-import { amber, brass, cream, GRAIN_URL, ink, monoFamily, sandDeep } from "@/theme";
+import {
+  amber,
+  brass,
+  cream,
+  GRAIN_URL,
+  ink,
+  monoFamily,
+  sandDeep,
+} from "@/theme";
 import { CARD_TRANSFORM, minBandPesewas, photoUrl, sortedPhotos } from "./api";
 
 /**
@@ -37,14 +45,24 @@ export function PhotoPlaceholder({ name }: { name: string }) {
       >
         No image yet
       </Typography>
-      <Typography variant="h5" component="span" sx={{ color: cream, position: "relative" }}>
+      <Typography
+        variant="h5"
+        component="span"
+        sx={{ color: cream, position: "relative" }}
+      >
         {name}
       </Typography>
     </Box>
   );
 }
 
-export function DesignCard({ design, cloudName }: { design: Design; cloudName: string }) {
+export function DesignCard({
+  design,
+  cloudName,
+}: {
+  design: Design;
+  cloudName: string;
+}) {
   const photos = sortedPhotos(design);
   const cover = photos[0];
   const min = minBandPesewas(design);
@@ -57,14 +75,32 @@ export function DesignCard({ design, cloudName }: { design: Design; cloudName: s
       sx={{
         color: "text.primary",
         display: "block",
-        "&:hover .e25-view": { opacity: 1, transform: "none" },
-        "&:hover .e25-name": { color: amber },
+        height: "100%",
+        "&:hover .e25-view, &:focus-visible .e25-view": {
+          opacity: 1,
+          transform: "none",
+        },
+        "&:hover .e25-frame, &:focus-visible .e25-frame": {
+          borderColor: amber,
+        },
+        "&:hover .e25-name, &:focus-visible .e25-name": { color: amber },
         "@media (prefers-reduced-motion: no-preference)": {
-          "&:hover .e25-cover": { transform: "scale(1.05)" },
+          "&:hover .e25-cover, &:focus-visible .e25-cover": {
+            transform: "scale(1.045)",
+          },
         },
       }}
     >
-      <Box sx={{ position: "relative", overflow: "hidden", aspectRatio: "600 / 780" }}>
+      <Box
+        sx={{
+          position: "relative",
+          overflow: "hidden",
+          aspectRatio: "600 / 780",
+          bgcolor: sandDeep,
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      >
         {cover && cloudName ? (
           <Box
             className="e25-cover"
@@ -85,10 +121,29 @@ export function DesignCard({ design, cloudName }: { design: Design; cloudName: s
             }}
           />
         ) : (
-          <Box className="e25-cover" sx={{ position: "absolute", inset: 0, transition: "transform 600ms" }}>
+          <Box
+            className="e25-cover"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              transition: "transform 600ms",
+            }}
+          >
             <PhotoPlaceholder name={design.name} />
           </Box>
         )}
+
+        <Box
+          className="e25-frame"
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 8,
+            border: "1px solid transparent",
+            transition: "border-color 240ms ease",
+            pointerEvents: "none",
+          }}
+        />
 
         {/* Hover reveal */}
         <Box
@@ -103,20 +158,29 @@ export function DesignCard({ design, cloudName }: { design: Design; cloudName: s
             alignItems: "center",
             justifyContent: "space-between",
             color: cream,
-            background: "linear-gradient(to top, rgba(22,18,13,0.78), transparent)",
+            background:
+              "linear-gradient(to top, rgba(22,18,13,0.78), transparent)",
             opacity: 0,
             transform: "translateY(8px)",
             transition: "opacity 280ms ease, transform 280ms ease",
           }}
         >
-          <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+          <Box
+            component="span"
+            sx={{
+              fontFamily: monoFamily,
+              fontSize: "0.6875rem",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
+          >
             View
           </Box>
           <ArrowOutwardIcon sx={{ fontSize: 16 }} />
         </Box>
       </Box>
 
-      <Stack spacing={0.25} sx={{ pt: 1.5 }}>
+      <Stack spacing={0.25} sx={{ pt: 1.5, minHeight: 58 }}>
         <Typography
           className="e25-name"
           variant="body2"
@@ -126,8 +190,13 @@ export function DesignCard({ design, cloudName }: { design: Design; cloudName: s
           {design.name}
         </Typography>
         {min !== null && (
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            {design.sizeBands.length > 1 ? `From ${formatPesewas(min)}` : formatPesewas(min)}
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}
+          >
+            {design.sizeBands.length > 1
+              ? `From ${formatPesewas(min)}`
+              : formatPesewas(min)}
           </Typography>
         )}
       </Stack>
@@ -136,7 +205,13 @@ export function DesignCard({ design, cloudName }: { design: Design; cloudName: s
 }
 
 /** Responsive storefront card grid: 2-up on phones, 4-up on desktop. */
-export function DesignGrid({ designs, cloudName }: { designs: Design[]; cloudName: string }) {
+export function DesignGrid({
+  designs,
+  cloudName,
+}: {
+  designs: Design[];
+  cloudName: string;
+}) {
   return (
     <Box
       sx={{

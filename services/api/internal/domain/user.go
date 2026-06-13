@@ -38,6 +38,7 @@ const (
 	PermSlotsWrite      Permission = "slots:write"
 	PermCatalogueRead   Permission = "catalogue:read"
 	PermCatalogueWrite  Permission = "catalogue:write"
+	PermCatalogueDelete Permission = "catalogue:delete"
 	PermSubscribersRead Permission = "subscribers:read"
 	PermSettingsWrite   Permission = "settings:write"
 	PermTeamRead        Permission = "team:read"
@@ -48,8 +49,8 @@ const (
 func allPermissions() []Permission {
 	return []Permission{
 		PermAnalyticsRead, PermOrdersRead, PermOrdersWrite, PermSlotsRead, PermSlotsWrite,
-		PermCatalogueRead, PermCatalogueWrite, PermSubscribersRead, PermSettingsWrite,
-		PermTeamRead, PermTeamWrite,
+		PermCatalogueRead, PermCatalogueWrite, PermCatalogueDelete, PermSubscribersRead,
+		PermSettingsWrite, PermTeamRead, PermTeamWrite,
 	}
 }
 

@@ -43,11 +43,18 @@ import {
 } from "@/features/storefront/api";
 import { PhotoPlaceholder } from "@/features/storefront/DesignCard";
 import { RetiredPanel } from "@/features/storefront/RetiredPanel";
-import { usePublicDesign, usePublicSettings } from "@/features/storefront/hooks";
+import {
+  usePublicDesign,
+  usePublicSettings,
+} from "@/features/storefront/hooks";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { formatGhanaPhone, isValidGhanaPhone, normalizeGhanaPhone } from "@/lib/phone";
+import {
+  formatGhanaPhone,
+  isValidGhanaPhone,
+  normalizeGhanaPhone,
+} from "@/lib/phone";
 import { ApiError } from "@/lib/api";
-import { clayDeep, noir, noirAlpha50, sandDeep, stone } from "@/theme";
+import { amber, clayDeep, noir, noirAlpha50, sandDeep, stone } from "@/theme";
 
 /** Canonical public origin, used for structured-data URLs. */
 const SITE_ORIGIN = "https://eighttwofive.vercel.app";
@@ -73,13 +80,22 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
   return (
     <Box>
       <Box
-        component="img"
-        src={photoUrl(cloudName, current.publicId, DETAIL_TRANSFORM)}
-        alt={`${design.name} — photo ${selected + 1} of ${photos.length}`}
-        loading="lazy"
-        decoding="async"
-        sx={{ width: "100%", display: "block", bgcolor: sandDeep }}
-      />
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: sandDeep,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          component="img"
+          src={photoUrl(cloudName, current.publicId, DETAIL_TRANSFORM)}
+          alt={`${design.name} — photo ${selected + 1} of ${photos.length}`}
+          loading="lazy"
+          decoding="async"
+          sx={{ width: "100%", display: "block", bgcolor: sandDeep }}
+        />
+      </Box>
       {photos.length > 1 && (
         <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: "wrap" }}>
           {photos.map((photo, index) => (
@@ -95,9 +111,17 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
                 cursor: "pointer",
                 bgcolor: "transparent",
                 border: "1px solid",
-                borderColor: index === selected ? noir : "divider",
+                borderColor: index === selected ? amber : "divider",
                 opacity: index === selected ? 1 : 0.75,
-                "&:hover": { opacity: 1 },
+                transition: "border-color 160ms ease, opacity 160ms ease",
+                "&:hover": {
+                  opacity: 1,
+                  borderColor: index === selected ? amber : noirAlpha50,
+                },
+                "&:focus-visible": {
+                  outline: `2px solid ${amber}`,
+                  outlineOffset: "2px",
+                },
               }}
             >
               <Box
@@ -106,7 +130,12 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
                 alt=""
                 loading="lazy"
                 decoding="async"
-                sx={{ width: 60, height: 78, objectFit: "cover", display: "block" }}
+                sx={{
+                  width: 60,
+                  height: 78,
+                  objectFit: "cover",
+                  display: "block",
+                }}
               />
             </Box>
           ))}
@@ -172,8 +201,8 @@ function MeasurementForm({
   return (
     <Box>
       <Typography variant="body2" sx={{ color: "text.secondary", mb: 1.5 }}>
-        Enter your measurements in centimetres — the atelier confirms the final fit with you
-        before cutting.
+        Enter your measurements in centimetres — the atelier confirms the final
+        fit with you before cutting.
       </Typography>
       <Box
         sx={{
@@ -187,12 +216,16 @@ function MeasurementForm({
             key={key}
             label={MEASUREMENT_LABELS[key]}
             value={values[key] ?? ""}
-            onChange={(event) => onChange({ ...values, [key]: sanitizeCm(event.target.value) })}
+            onChange={(event) =>
+              onChange({ ...values, [key]: sanitizeCm(event.target.value) })
+            }
             size="small"
             slotProps={{
               htmlInput: { inputMode: "decimal" },
               input: {
-                endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                endAdornment: (
+                  <InputAdornment position="end">cm</InputAdornment>
+                ),
               },
             }}
           />
@@ -219,7 +252,9 @@ function DeliverySelector({
     <FormControl component="fieldset" fullWidth>
       <RadioGroup
         value={mode}
-        onChange={(event) => onModeChange(event.target.value as "pickup" | "dispatch")}
+        onChange={(event) =>
+          onModeChange(event.target.value as "pickup" | "dispatch")
+        }
       >
         <Stack spacing={1}>
           <FormControlLabel
@@ -299,7 +334,9 @@ function CustomerFields({
         label="Phone number"
         type="tel"
         value={phone}
-        onChange={(event) => onPhoneChange(formatGhanaPhone(event.target.value))}
+        onChange={(event) =>
+          onPhoneChange(formatGhanaPhone(event.target.value))
+        }
         fullWidth
         required
         error={phone.trim() !== "" && !isValidGhanaPhone(phone)}
@@ -331,16 +368,21 @@ function DesignDetail({
   // Structured data for search engines that render the SPA: a Product (with a
   // made-to-order price range) and a breadcrumb trail for rich results.
   const structuredData = useMemo(() => {
-    const prices = design.sizeBands.map((entry) => entry.pricePesewas).filter((price) => price > 0);
+    const prices = design.sizeBands
+      .map((entry) => entry.pricePesewas)
+      .filter((price) => price > 0);
     const images = cloudName
-      ? sortedPhotos(design).map((photo) => photoUrl(cloudName, photo.publicId, DETAIL_TRANSFORM))
+      ? sortedPhotos(design).map((photo) =>
+          photoUrl(cloudName, photo.publicId, DETAIL_TRANSFORM),
+        )
       : [];
 
     const product: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: design.name,
-      description: design.note || `${design.name} — made-to-measure by Eight Two Five.`,
+      description:
+        design.note || `${design.name} — made-to-measure by Eight Two Five.`,
       brand: { "@type": "Brand", name: "Eight Two Five" },
     };
     if (images.length > 0) product.image = images;
@@ -358,9 +400,24 @@ function DesignDetail({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
-        { "@type": "ListItem", position: 2, name: "Store", item: `${SITE_ORIGIN}/store` },
-        { "@type": "ListItem", position: 3, name: design.name, item: `${SITE_ORIGIN}/designs/${design.slug}` },
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${SITE_ORIGIN}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Store",
+          item: `${SITE_ORIGIN}/store`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: design.name,
+          item: `${SITE_ORIGIN}/designs/${design.slug}`,
+        },
       ],
     };
 
@@ -368,8 +425,11 @@ function DesignDetail({
   }, [design, cloudName]);
 
   const [customSizeOpen, setCustomSizeOpen] = useState(false);
-  const [sizeMode, setSizeMode] = useState<"self" | "home_visit" | "workplace">("self");
-  const [measurements, setMeasurements] = useState<Record<MeasurementKey, string>>(defaultMeasurements);
+  const [sizeMode, setSizeMode] = useState<"self" | "home_visit" | "workplace">(
+    "self",
+  );
+  const [measurements, setMeasurements] =
+    useState<Record<MeasurementKey, string>>(defaultMeasurements);
   const [designChangeOpen, setDesignChangeOpen] = useState(false);
   const [designChange, setDesignChange] = useState("");
 
@@ -377,7 +437,9 @@ function DesignDetail({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
 
-  const [deliveryMode, setDeliveryMode] = useState<"pickup" | "dispatch">("pickup");
+  const [deliveryMode, setDeliveryMode] = useState<"pickup" | "dispatch">(
+    "pickup",
+  );
   const [deliveryArea, setDeliveryArea] = useState("");
 
   const [formError, setFormError] = useState<string | null>(null);
@@ -385,7 +447,8 @@ function DesignDetail({
   const standardOrder = useCreateStandardOrder();
   const customRequest = useCreateCustomRequest();
 
-  const isCustom = customSizeOpen || designChangeOpen || designChange.trim() !== "";
+  const isCustom =
+    customSizeOpen || designChangeOpen || designChange.trim() !== "";
   const isHomeVisit = customSizeOpen && sizeMode === "home_visit";
   const requestSizeMode = customSizeOpen ? sizeMode : "band";
 
@@ -450,9 +513,9 @@ function DesignDetail({
     }
 
     if (requestSizeMode === "self") {
-      const missing = (Object.keys(defaultMeasurements) as MeasurementKey[]).filter(
-        (key) => !measurements[key]?.trim(),
-      );
+      const missing = (
+        Object.keys(defaultMeasurements) as MeasurementKey[]
+      ).filter((key) => !measurements[key]?.trim());
       if (missing.length > 0) {
         setFormError(`Please fill in all measurements: ${missing.join(", ")}.`);
         return;
@@ -505,7 +568,8 @@ function DesignDetail({
         mb: { xs: 6, md: 10 },
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "7fr 5fr" },
-        gap: { xs: 4, md: 8 },
+        gap: { xs: 3.5, md: 7 },
+        alignItems: "start",
       }}
     >
       {structuredData.map((data, index) => (
@@ -513,7 +577,14 @@ function DesignDetail({
       ))}
       <Gallery design={design} cloudName={cloudName} />
 
-      <Box>
+      <Box
+        sx={{
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          p: { xs: 3, sm: 4 },
+        }}
+      >
         <Typography variant="overline" component="p" sx={{ color: clayDeep }}>
           made to measure
         </Typography>
@@ -528,7 +599,11 @@ function DesignDetail({
 
         {bands.length > 0 && band ? (
           <>
-            <Typography variant="overline" component="p" sx={{ color: "text.secondary", mt: 4 }}>
+            <Typography
+              variant="overline"
+              component="p"
+              sx={{ color: "text.secondary", mt: 4 }}
+            >
               size band
             </Typography>
             <ToggleButtonGroup
@@ -564,7 +639,17 @@ function DesignDetail({
 
             {!isCustom && (
               <>
-                <Typography variant="h5" component="p" sx={{ mt: 3 }}>
+                <Typography
+                  variant="h5"
+                  component="p"
+                  sx={{
+                    mt: 3,
+                    pt: 2,
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
                   {formatPesewas(band.pricePesewas)}
                 </Typography>
               </>
@@ -572,20 +657,38 @@ function DesignDetail({
 
             {isCustom && (
               <Alert severity="info" sx={{ mt: 3 }}>
-                Custom requests are quoted directly — no price shown until the merchant replies.
+                Custom requests are quoted directly — no price shown until the
+                merchant replies.
               </Alert>
             )}
 
-            <Typography variant="overline" component="p" sx={{ color: "text.secondary", mt: 4 }}>
+            <Typography
+              variant="overline"
+              component="p"
+              sx={{ color: "text.secondary", mt: 4 }}
+            >
               size chart — band {band.label}
             </Typography>
             {chartEntries.length > 0 ? (
-              <Table size="small" sx={{ mt: 1, maxWidth: 360 }}>
+              <Table
+                size="small"
+                sx={{
+                  mt: 1,
+                  maxWidth: 360,
+                  borderTop: "1px solid",
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
                 <TableBody>
                   {chartEntries.map(([measure, value]) => (
                     <TableRow key={measure}>
                       <TableCell
-                        sx={{ color: "text.secondary", textTransform: "capitalize", pl: 0 }}
+                        sx={{
+                          color: "text.secondary",
+                          textTransform: "capitalize",
+                          pl: 0,
+                        }}
                       >
                         {measure}
                       </TableCell>
@@ -597,9 +700,12 @@ function DesignDetail({
                 </TableBody>
               </Table>
             ) : (
-              <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
-                The chart for this band is being finalised — every piece is still cut to your
-                measurements.
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mt: 1 }}
+              >
+                The chart for this band is being finalised — every piece is
+                still cut to your measurements.
               </Typography>
             )}
           </>
@@ -609,7 +715,10 @@ function DesignDetail({
           </Typography>
         )}
 
-        <Stack spacing={2.5} sx={{ mt: 5 }}>
+        <Stack
+          spacing={2.5}
+          sx={{ mt: 4, pt: 4, borderTop: "1px solid", borderColor: "divider" }}
+        >
           <FormControlLabel
             control={
               <Checkbox
@@ -627,13 +736,22 @@ function DesignDetail({
             <FormControl component="fieldset" fullWidth>
               <RadioGroup
                 value={sizeMode}
-                onChange={(event) => setSizeMode(event.target.value as typeof sizeMode)}
+                onChange={(event) =>
+                  setSizeMode(event.target.value as typeof sizeMode)
+                }
               >
                 <Stack spacing={1}>
-                  <FormControlLabel value="self" control={<Radio />} label="Measure yourself" />
+                  <FormControlLabel
+                    value="self"
+                    control={<Radio />}
+                    label="Measure yourself"
+                  />
                   <Collapse in={sizeMode === "self"}>
                     <Box sx={{ pl: 4 }}>
-                      <MeasurementForm values={measurements} onChange={setMeasurements} />
+                      <MeasurementForm
+                        values={measurements}
+                        onChange={setMeasurements}
+                      />
                     </Box>
                   </Collapse>
 
@@ -644,8 +762,12 @@ function DesignDetail({
                   />
                   <Collapse in={sizeMode === "home_visit"}>
                     <Box sx={{ pl: 4 }}>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        Choose an open slot and pay a deposit that counts toward your garment.
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        Choose an open slot and pay a deposit that counts toward
+                        your garment.
                       </Typography>
                     </Box>
                   </Collapse>
@@ -657,8 +779,12 @@ function DesignDetail({
                   />
                   <Collapse in={sizeMode === "workplace"}>
                     <Box sx={{ pl: 4 }}>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        Visit the Eight Two Five workspace — no booking or deposit needed.
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        Visit the Eight Two Five workspace — no booking or
+                        deposit needed.
                       </Typography>
                     </Box>
                   </Collapse>
@@ -697,7 +823,11 @@ function DesignDetail({
           <Divider />
 
           <Box>
-            <Typography variant="overline" component="p" sx={{ color: "text.secondary", mb: 1 }}>
+            <Typography
+              variant="overline"
+              component="p"
+              sx={{ color: "text.secondary", mb: 1 }}
+            >
               your details
             </Typography>
             <CustomerFields
@@ -711,7 +841,11 @@ function DesignDetail({
           </Box>
 
           <Box>
-            <Typography variant="overline" component="p" sx={{ color: "text.secondary", mb: 1 }}>
+            <Typography
+              variant="overline"
+              component="p"
+              sx={{ color: "text.secondary", mb: 1 }}
+            >
               delivery
             </Typography>
             <DeliverySelector
@@ -729,11 +863,20 @@ function DesignDetail({
             <Button
               variant="contained"
               loading={isSubmitting}
-              onClick={isHomeVisit ? handleHomeVisit : isCustom ? handleCustomRequest : handleStandardOrder}
+              onClick={
+                isHomeVisit
+                  ? handleHomeVisit
+                  : isCustom
+                    ? handleCustomRequest
+                    : handleStandardOrder
+              }
+              sx={{ flex: { sm: 1 } }}
             >
               {submitLabel}
             </Button>
-            <CopyLinkButton />
+            <Box sx={{ flex: { sm: "0 0 auto" } }}>
+              <CopyLinkButton />
+            </Box>
           </Stack>
 
           <FormHelperText sx={{ color: stone, mt: 0 }}>
@@ -754,11 +897,14 @@ export function DesignPage() {
 
   useDocumentTitle(
     design.data?.name,
-    design.data?.note || `${design.data?.name ?? "A design"} — made-to-measure by Eight Two Five.`,
+    design.data?.note ||
+      `${design.data?.name ?? "A design"} — made-to-measure by Eight Two Five.`,
   );
 
   const notFound =
-    design.isError && design.error instanceof ApiError && design.error.status === 404;
+    design.isError &&
+    design.error instanceof ApiError &&
+    design.error.status === 404;
 
   return (
     <StorefrontLayout>
@@ -777,7 +923,10 @@ export function DesignPage() {
             gap: { xs: 4, md: 8 },
           }}
         >
-          <Skeleton variant="rectangular" sx={{ aspectRatio: "600 / 780", height: "auto" }} />
+          <Skeleton
+            variant="rectangular"
+            sx={{ aspectRatio: "600 / 780", height: "auto" }}
+          />
           <Box>
             <Skeleton width={120} />
             <Skeleton width={280} height={56} sx={{ mt: 1 }} />
@@ -786,10 +935,17 @@ export function DesignPage() {
         </Box>
       ) : design.isError ? (
         <Box sx={{ py: { xs: 6, md: 9 } }}>
-          <ErrorState message={errorMessage(design.error)} onRetry={() => design.refetch()} />
+          <ErrorState
+            message={errorMessage(design.error)}
+            onRetry={() => design.refetch()}
+          />
         </Box>
       ) : (
-        <DesignDetail key={design.data.id} design={design.data} settings={settings.data} />
+        <DesignDetail
+          key={design.data.id}
+          design={design.data}
+          settings={settings.data}
+        />
       )}
     </StorefrontLayout>
   );

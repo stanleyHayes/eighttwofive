@@ -31,12 +31,20 @@ function CardGridSkeleton({ count }: { count: number }) {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(4, 1fr)" },
+        gridTemplateColumns: {
+          xs: "repeat(2, 1fr)",
+          sm: "repeat(3, 1fr)",
+          md: "repeat(4, 1fr)",
+        },
         gap: { xs: 2, md: 3 },
       }}
     >
       {Array.from({ length: count }, (_, i) => (
-        <Skeleton key={i} variant="rectangular" sx={{ aspectRatio: "600 / 780", height: "auto" }} />
+        <Skeleton
+          key={i}
+          variant="rectangular"
+          sx={{ aspectRatio: "600 / 780", height: "auto" }}
+        />
       ))}
     </Box>
   );
@@ -71,6 +79,11 @@ export function StorePage() {
   const allDesigns = usePublicDesigns({});
 
   const cloudName = settings.data?.cloudName ?? "";
+  const designCountLabel = designs.isSuccess
+    ? `${designs.data.length.toLocaleString("en-GH")} ${designs.data.length === 1 ? "design" : "designs"}`
+    : q
+      ? "Searching"
+      : "Live catalog";
 
   const coverByCollection = useMemo(() => {
     const covers = new Map<string, string>();
@@ -96,9 +109,31 @@ export function StorePage() {
 
       {/* Collections */}
       <Box component="section" sx={{ mb: { xs: 8, md: 10 } }}>
-        <Typography variant="h2" component="h2" sx={{ mb: 3 }}>
-          Collections
-        </Typography>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{
+            mb: 3,
+            justifyContent: "space-between",
+            alignItems: { sm: "baseline" },
+          }}
+        >
+          <Typography variant="h2" component="h2">
+            Collections
+          </Typography>
+          {collections.isSuccess && (
+            <Typography
+              variant="overline"
+              sx={{
+                color: "text.secondary",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {collections.data.length.toLocaleString("en-GH")}{" "}
+              {collections.data.length === 1 ? "collection" : "collections"}
+            </Typography>
+          )}
+        </Stack>
         {collections.isPending ? (
           <CardGridSkeleton count={3} />
         ) : collections.isError ? (
@@ -144,11 +179,27 @@ export function StorePage() {
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
-          sx={{ mb: 3, justifyContent: "space-between", alignItems: { sm: "flex-end" } }}
+          sx={{
+            mb: 3,
+            justifyContent: "space-between",
+            alignItems: { sm: "flex-end" },
+          }}
         >
-          <Typography variant="h2" component="h2">
-            All designs
-          </Typography>
+          <Box>
+            <Typography variant="h2" component="h2">
+              All designs
+            </Typography>
+            <Typography
+              variant="overline"
+              component="p"
+              sx={{
+                color: "text.secondary",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {q ? `${designCountLabel} matching "${q}"` : designCountLabel}
+            </Typography>
+          </Box>
           <TextField
             value={term}
             onChange={(event) => setTerm(event.target.value)}
@@ -170,7 +221,10 @@ export function StorePage() {
         {designs.isPending ? (
           <CardGridSkeleton count={4} />
         ) : designs.isError ? (
-          <ErrorState message={errorMessage(designs.error)} onRetry={() => designs.refetch()} />
+          <ErrorState
+            message={errorMessage(designs.error)}
+            onRetry={() => designs.refetch()}
+          />
         ) : designs.data.length === 0 ? (
           q ? (
             <Stack spacing={2.5} sx={{ alignItems: "flex-start" }}>

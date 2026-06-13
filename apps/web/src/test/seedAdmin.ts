@@ -15,6 +15,7 @@ export const ADMIN_ME: User = {
     "slots:write",
     "catalogue:read",
     "catalogue:write",
+    "catalogue:delete",
     "subscribers:read",
     "settings:write",
     "team:read",

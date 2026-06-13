@@ -9,6 +9,7 @@ export const PERMISSIONS = {
   slotsWrite: "slots:write",
   catalogueRead: "catalogue:read",
   catalogueWrite: "catalogue:write",
+  catalogueDelete: "catalogue:delete",
   subscribersRead: "subscribers:read",
   settingsWrite: "settings:write",
   teamRead: "team:read",

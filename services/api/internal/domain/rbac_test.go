@@ -18,6 +18,8 @@ func TestRolePermissions(t *testing.T) {
 		{domain.RoleAdmin, domain.PermTeamWrite, true},
 		{domain.RoleStaff, domain.PermOrdersWrite, true},
 		{domain.RoleStaff, domain.PermCatalogueWrite, true},
+		{domain.RoleStaff, domain.PermCatalogueDelete, false},
+		{domain.RoleAdmin, domain.PermCatalogueDelete, true},
 		{domain.RoleStaff, domain.PermSettingsWrite, false},
 		{domain.RoleStaff, domain.PermTeamRead, false},
 		{domain.RoleViewer, domain.PermOrdersRead, true},
