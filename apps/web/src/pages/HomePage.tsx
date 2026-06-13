@@ -14,11 +14,30 @@ import { StorefrontLayout } from "@/components/StorefrontLayout";
 import type { Collection, Design } from "@/features/catalog/api";
 import { errorMessage } from "@/features/catalog/api";
 import { DesignGrid } from "@/features/storefront/DesignCard";
-import { CARD_TRANSFORM, photoUrl, sortedPhotos } from "@/features/storefront/api";
-import { usePublicCollections, usePublicDesigns, usePublicSettings } from "@/features/storefront/hooks";
+import {
+  CARD_TRANSFORM,
+  photoUrl,
+  sortedPhotos,
+} from "@/features/storefront/api";
+import {
+  usePublicCollections,
+  usePublicDesigns,
+  usePublicSettings,
+} from "@/features/storefront/hooks";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { WaitlistForm } from "@/features/waitlist/WaitlistForm";
-import { amber, brass, cream, creamMuted, creamText, displayFamily, GRAIN_URL, ink, inkSoft, monoFamily } from "@/theme";
+import {
+  amber,
+  brass,
+  cream,
+  creamMuted,
+  creamText,
+  displayFamily,
+  GRAIN_URL,
+  ink,
+  inkSoft,
+  monoFamily,
+} from "@/theme";
 
 const HERO_PUBLIC_ID = "eightfivetwo/hero-atelier";
 
@@ -27,15 +46,29 @@ function byCreatedAtDesc<T extends { createdAt: string }>(a: T, b: T): number {
 }
 
 const STEPS = [
-  { n: "01", title: "Choose a design", body: "Browse the live collections, each priced in Ghana Cedis." },
-  { n: "02", title: "Measured your way", body: "A standard band, your own measurements, or a home visit." },
-  { n: "03", title: "Cut & delivered", body: "Made to order, tracked, then dispatched or picked up." },
+  {
+    n: "01",
+    title: "Choose a design",
+    body: "Browse the live collections, each priced in Ghana Cedis.",
+  },
+  {
+    n: "02",
+    title: "Measured your way",
+    body: "A standard band, your own measurements, or a home visit.",
+  },
+  {
+    n: "03",
+    title: "Cut & delivered",
+    body: "Made to order, tracked, then dispatched or picked up.",
+  },
 ];
 
 // --- Hero (full-bleed image) ------------------------------------------------
 
 function Hero({ cloudName }: { cloudName: string }) {
-  const bg = cloudName ? photoUrl(cloudName, HERO_PUBLIC_ID, "f_auto,q_auto,w_2000") : "";
+  const bg = cloudName
+    ? photoUrl(cloudName, HERO_PUBLIC_ID, "f_auto,q_auto,w_2000")
+    : "";
 
   return (
     <Box
@@ -75,19 +108,42 @@ function Hero({ cloudName }: { cloudName: string }) {
           },
         }}
       />
-      <Box aria-hidden sx={{ position: "absolute", inset: 0, backgroundImage: GRAIN_URL, opacity: 0.05 }} />
+      <Box
+        aria-hidden
+        sx={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: GRAIN_URL,
+          opacity: 0.05,
+        }}
+      />
 
-      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, py: { xs: 6, md: 0 } }}>
+      <Container
+        maxWidth="lg"
+        sx={{ position: "relative", zIndex: 1, py: { xs: 6, md: 0 } }}
+      >
         <Box sx={{ maxWidth: { xs: "100%", md: 620 } }}>
           <Reveal delay={0}>
-            <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.24em", color: brass, textTransform: "uppercase" }}>
+            <Box
+              component="span"
+              sx={{
+                fontFamily: monoFamily,
+                fontSize: "0.6875rem",
+                letterSpacing: "0.24em",
+                color: brass,
+                textTransform: "uppercase",
+              }}
+            >
               The 852 Atelier · Est. Accra
             </Box>
           </Reveal>
           <Reveal delay={90}>
             <Typography variant="h1" sx={{ mt: 2, mb: 3 }}>
               Made-to-measure{" "}
-              <Box component="br" sx={{ display: { xs: "none", sm: "block" } }} />
+              <Box
+                component="br"
+                sx={{ display: { xs: "none", sm: "block" } }}
+              />
               womenswear,{" "}
               <Box component="span" sx={{ color: amber, fontStyle: "italic" }}>
                 cut to you.
@@ -95,13 +151,22 @@ function Hero({ cloudName }: { cloudName: string }) {
             </Typography>
           </Reveal>
           <Reveal delay={180}>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ alignItems: { sm: "center" } }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{ alignItems: { sm: "center" } }}
+            >
               <Button
                 component={RouterLink}
                 to="/store"
                 size="large"
                 endIcon={<ArrowOutwardIcon sx={{ fontSize: 18 }} />}
-                sx={{ bgcolor: amber, color: ink, "&:hover": { bgcolor: brass }, width: { xs: "100%", sm: "auto" } }}
+                sx={{
+                  bgcolor: amber,
+                  color: ink,
+                  "&:hover": { bgcolor: brass },
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 Shop the store
               </Button>
@@ -109,7 +174,12 @@ function Hero({ cloudName }: { cloudName: string }) {
                 href="#how-its-made"
                 variant="outlined"
                 size="large"
-                sx={{ color: cream, borderColor: "rgba(232,222,203,0.45)", "&:hover": { borderColor: cream }, width: { xs: "100%", sm: "auto" } }}
+                sx={{
+                  color: cream,
+                  borderColor: "rgba(232,222,203,0.45)",
+                  "&:hover": { borderColor: cream },
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 How it's made
               </Button>
@@ -123,11 +193,23 @@ function Hero({ cloudName }: { cloudName: string }) {
 
 // --- Section heading --------------------------------------------------------
 
-function SectionHead({ fig, title, action }: { fig: string; title: string; action?: { to: string; label: string } }) {
+function SectionHead({
+  fig,
+  title,
+  action,
+}: {
+  fig: string;
+  title: string;
+  action?: { to: string; label: string };
+}) {
   return (
     <Box sx={{ mb: { xs: 3.5, md: 5 } }}>
       <MeasureRule label={fig} sx={{ mb: 2.5 }} />
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ justifyContent: "space-between", alignItems: { sm: "flex-end" } }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{ justifyContent: "space-between", alignItems: { sm: "flex-end" } }}
+      >
         <Typography variant="h2" component="h2">
           {title}
         </Typography>
@@ -137,7 +219,14 @@ function SectionHead({ fig, title, action }: { fig: string; title: string; actio
             to={action.to}
             underline="none"
             variant="overline"
-            sx={{ color: "text.primary", display: "inline-flex", alignItems: "center", gap: 0.75, whiteSpace: "nowrap", "&:hover": { color: amber } }}
+            sx={{
+              color: "text.primary",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.75,
+              whiteSpace: "nowrap",
+              "&:hover": { color: amber },
+            }}
           >
             {action.label} <ArrowOutwardIcon sx={{ fontSize: 15 }} />
           </Link>
@@ -149,7 +238,17 @@ function SectionHead({ fig, title, action }: { fig: string; title: string; actio
 
 // --- Collection tile --------------------------------------------------------
 
-function CollectionTile({ collection, cover, cloudName, index }: { collection: Collection; cover: string | null; cloudName: string; index: number }) {
+function CollectionTile({
+  collection,
+  cover,
+  cloudName,
+  index,
+}: {
+  collection: Collection;
+  cover: string | null;
+  cloudName: string;
+  index: number;
+}) {
   return (
     <Reveal delay={index * 70}>
       <Link
@@ -174,15 +273,64 @@ function CollectionTile({ collection, cover, cloudName, index }: { collection: C
             src={photoUrl(cloudName, cover, CARD_TRANSFORM)}
             alt=""
             loading="lazy"
-            sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transition: "transform 600ms cubic-bezier(0.22,1,0.36,1)" }}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transition: "transform 600ms cubic-bezier(0.22,1,0.36,1)",
+            }}
           />
         ) : (
-          <Box className="e25-cover" sx={{ position: "absolute", inset: 0, background: `linear-gradient(150deg, ${inkSoft}, ${ink})`, transition: "transform 600ms" }} />
+          <Box
+            className="e25-cover"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(150deg, ${inkSoft}, ${ink})`,
+              transition: "transform 600ms",
+            }}
+          />
         )}
-        <Box aria-hidden sx={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(22,18,13,0.85) 0%, rgba(22,18,13,0.05) 55%, rgba(22,18,13,0.3) 100%)" }} />
-        <Box className="e25-frame" aria-hidden sx={{ position: "absolute", inset: 10, border: "1px solid transparent", transition: "border-color 280ms ease" }} />
-        <Box sx={{ position: "absolute", inset: 0, p: { xs: 2.5, md: 3 }, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.18em", color: brass }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(22,18,13,0.85) 0%, rgba(22,18,13,0.05) 55%, rgba(22,18,13,0.3) 100%)",
+          }}
+        />
+        <Box
+          className="e25-frame"
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 10,
+            border: "1px solid transparent",
+            transition: "border-color 280ms ease",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            p: { xs: 2.5, md: 3 },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              fontFamily: monoFamily,
+              fontSize: "0.6875rem",
+              letterSpacing: "0.18em",
+              color: brass,
+            }}
+          >
             {`0${index + 1}`} / Collection
           </Box>
           <Typography variant="h4" component="h3" sx={{ color: cream }}>
@@ -194,13 +342,240 @@ function CollectionTile({ collection, cover, cloudName, index }: { collection: C
   );
 }
 
+function CurrentDrop({
+  collection,
+  designs,
+  cover,
+  cloudName,
+}: {
+  collection: Collection;
+  designs: Design[];
+  cover: string | null;
+  cloudName: string;
+}) {
+  const designCount = designs.length;
+  const previewNames = designs.slice(0, 3).map((design) => design.name);
+
+  return (
+    <Box
+      component="section"
+      sx={{
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "1.05fr 0.95fr" },
+        minHeight: { md: 520 },
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        sx={{
+          p: { xs: 3, sm: 4, md: 6 },
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <MeasureRule
+          label="Fig. 00 — Current drop"
+          sx={{ mb: { xs: 4, md: 5 } }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="overline" component="p" sx={{ color: brass }}>
+            Live collection
+          </Typography>
+          <Typography
+            variant="h2"
+            component="p"
+            sx={{ mt: 1.5, maxWidth: "12ch" }}
+          >
+            {collection.name}
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{ mt: 2.5, maxWidth: "48ch", color: "text.secondary" }}
+          >
+            {collection.note ||
+              "A limited run cut only after an order is placed. When the fabric is gone, this collection retires."}
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+              gap: 0,
+              borderTop: "1px solid",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              mt: { xs: 4, md: 5 },
+            }}
+          >
+            {[
+              {
+                label: "Designs",
+                value:
+                  designCount > 0
+                    ? designCount.toLocaleString("en-GH")
+                    : "Opening",
+              },
+              { label: "Make", value: "To order" },
+              { label: "Run", value: "Limited" },
+            ].map((item, index) => (
+              <Box
+                key={item.label}
+                sx={{
+                  py: 2,
+                  pr: 2,
+                  borderLeft: { sm: index === 0 ? "none" : "1px solid" },
+                  borderColor: { sm: "divider" },
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  component="p"
+                  sx={{ color: "text.secondary" }}
+                >
+                  {item.label}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ mt: 0.5 }}>
+                  {item.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+
+          {previewNames.length > 0 && (
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", mt: 3, maxWidth: "48ch" }}
+            >
+              Includes {previewNames.join(", ")}
+              {designCount > previewNames.length ? " and more." : "."}
+            </Typography>
+          )}
+        </Box>
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ mt: { xs: 4, md: 5 } }}
+        >
+          <Button
+            component={RouterLink}
+            to={`/collections/${collection.slug}`}
+            variant="contained"
+            endIcon={<ArrowOutwardIcon sx={{ fontSize: 18 }} />}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
+            View the drop
+          </Button>
+          <Button
+            component={RouterLink}
+            to="/fit-guide"
+            variant="outlined"
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
+            Fit guide
+          </Button>
+        </Stack>
+      </Box>
+
+      <Box
+        sx={{
+          position: "relative",
+          minHeight: { xs: 360, md: "auto" },
+          bgcolor: ink,
+          overflow: "hidden",
+        }}
+      >
+        {cover && cloudName ? (
+          <Box
+            component="img"
+            src={photoUrl(cloudName, cover, "c_fill,w_900,h_1000")}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(150deg, ${inkSoft}, ${ink})`,
+            }}
+          />
+        )}
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: GRAIN_URL,
+            opacity: 0.05,
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            p: { xs: 3, md: 4 },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            color: cream,
+            background:
+              "linear-gradient(to top, rgba(22,18,13,0.78), transparent 58%)",
+          }}
+        >
+          <Typography variant="overline" component="p" sx={{ color: brass }}>
+            Fabric-led run
+          </Typography>
+          <Typography
+            variant="h4"
+            component="p"
+            sx={{ maxWidth: "12ch", color: cream }}
+          >
+            Made until the cloth says stop.
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 // --- Loading / error --------------------------------------------------------
 
 function GridSkeleton({ count, ratio }: { count: number; ratio: string }) {
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(4, 1fr)" }, gap: { xs: 2, md: 3 }, rowGap: { xs: 3, md: 4 } }}>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "repeat(2, 1fr)",
+          sm: "repeat(3, 1fr)",
+          md: "repeat(4, 1fr)",
+        },
+        gap: { xs: 2, md: 3 },
+        rowGap: { xs: 3, md: 4 },
+      }}
+    >
       {Array.from({ length: count }, (_, i) => (
-        <Skeleton key={i} variant="rectangular" sx={{ aspectRatio: ratio, height: "auto", bgcolor: "rgba(22,18,13,0.06)" }} />
+        <Skeleton
+          key={i}
+          variant="rectangular"
+          sx={{
+            aspectRatio: ratio,
+            height: "auto",
+            bgcolor: "rgba(22,18,13,0.06)",
+          }}
+        />
       ))}
     </Box>
   );
@@ -231,8 +606,16 @@ export function HomePage() {
   const designs = usePublicDesigns({});
 
   const cloudName = settings.data?.cloudName ?? "";
-  const featuredCollections = collections.data?.slice().sort(byCreatedAtDesc).slice(0, 3) ?? [];
-  const featuredDesigns = designs.data?.slice().sort(byCreatedAtDesc).slice(0, 4) ?? [];
+  const featuredCollections =
+    collections.data?.slice().sort(byCreatedAtDesc).slice(0, 3) ?? [];
+  const featuredDesigns =
+    designs.data?.slice().sort(byCreatedAtDesc).slice(0, 4) ?? [];
+  const currentDrop = featuredCollections[0] ?? null;
+  const currentDropDesigns = currentDrop
+    ? ((designs.data ?? []) as Design[])
+        .filter((design) => design.collectionId === currentDrop.id)
+        .sort(byCreatedAtDesc)
+    : [];
 
   const coverByCollection = useMemo(() => {
     const covers = new Map<string, string>();
@@ -249,36 +632,121 @@ export function HomePage() {
 
   return (
     <StorefrontLayout bleedHero={<Hero cloudName={cloudName} />}>
+      <Box
+        component="section"
+        sx={{ pt: { xs: 7, md: 11 }, pb: { xs: 3, md: 4 } }}
+      >
+        {isPending ? (
+          <Skeleton
+            variant="rectangular"
+            sx={{
+              height: { xs: 620, md: 520 },
+              bgcolor: "rgba(22,18,13,0.06)",
+            }}
+          />
+        ) : !isError && currentDrop ? (
+          <CurrentDrop
+            collection={currentDrop}
+            designs={currentDropDesigns}
+            cover={coverByCollection.get(currentDrop.id) ?? null}
+            cloudName={cloudName}
+          />
+        ) : null}
+      </Box>
+
       {/* Collections */}
-      <Box component="section" sx={{ pt: { xs: 7, md: 11 }, pb: { xs: 6, md: 9 } }}>
-        <SectionHead fig="Fig. 01 — Collections" title="Named, limited runs." action={{ to: "/store", label: "All collections" }} />
+      <Box
+        component="section"
+        sx={{ pt: { xs: 4, md: 7 }, pb: { xs: 6, md: 9 } }}
+      >
+        <SectionHead
+          fig="Fig. 01 — Collections"
+          title="Named, limited runs."
+          action={{ to: "/store", label: "All collections" }}
+        />
         {isPending ? (
           <GridSkeleton count={3} ratio="4 / 5" />
         ) : isError ? (
           <ErrorPanel error={collections.error ?? designs.error} />
         ) : featuredCollections.length > 0 ? (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: { xs: 2.5, md: 3 } }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+              },
+              gap: { xs: 2.5, md: 3 },
+            }}
+          >
             {featuredCollections.map((collection, index) => (
-              <CollectionTile key={collection.id} collection={collection} cover={coverByCollection.get(collection.id) ?? null} cloudName={cloudName} index={index} />
+              <CollectionTile
+                key={collection.id}
+                collection={collection}
+                cover={coverByCollection.get(collection.id) ?? null}
+                cloudName={cloudName}
+                index={index}
+              />
             ))}
           </Box>
         ) : (
-          <Typography sx={{ color: "text.secondary" }}>New collections are on the way.</Typography>
+          <Typography sx={{ color: "text.secondary" }}>
+            New collections are on the way.
+          </Typography>
         )}
       </Box>
 
       {/* How it's made */}
-      <Box component="section" id="how-its-made" sx={{ scrollMarginTop: 80, bgcolor: ink, color: cream, mx: { xs: -2, sm: -3 }, px: { xs: 2, sm: 3 }, py: { xs: 7, md: 11 } }}>
+      <Box
+        component="section"
+        id="how-its-made"
+        sx={{
+          scrollMarginTop: 80,
+          bgcolor: ink,
+          color: cream,
+          mx: { xs: -2, sm: -3 },
+          px: { xs: 2, sm: 3 },
+          py: { xs: 7, md: 11 },
+        }}
+      >
         <Container maxWidth="lg" disableGutters>
-          <MeasureRule variant="light" label="Fig. 02 — Method" caption="Made to measure" sx={{ mb: { xs: 4, md: 6 } }} />
-          <Typography variant="h2" component="h2" sx={{ mb: { xs: 4, md: 6 }, maxWidth: "16ch" }}>
+          <MeasureRule
+            variant="light"
+            label="Fig. 02 — Method"
+            caption="Made to measure"
+            sx={{ mb: { xs: 4, md: 6 } }}
+          />
+          <Typography
+            variant="h2"
+            component="h2"
+            sx={{ mb: { xs: 4, md: 6 }, maxWidth: "16ch" }}
+          >
             Design to doorstep, in three.
           </Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: { xs: 3.5, md: 5 } }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+              gap: { xs: 3.5, md: 5 },
+            }}
+          >
             {STEPS.map((step, index) => (
               <Reveal key={step.n} delay={index * 90}>
-                <Stack spacing={1.5} sx={{ borderTop: "1px solid rgba(232,222,203,0.22)", pt: 3 }}>
-                  <Box component="span" sx={{ fontFamily: displayFamily, fontWeight: 700, fontSize: "2.8rem", lineHeight: 1, color: amber }}>
+                <Stack
+                  spacing={1.5}
+                  sx={{ borderTop: "1px solid rgba(232,222,203,0.22)", pt: 3 }}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      fontFamily: displayFamily,
+                      fontWeight: 700,
+                      fontSize: "2.8rem",
+                      lineHeight: 1,
+                      color: amber,
+                    }}
+                  >
                     {step.n}
                   </Box>
                   <Typography variant="h5" component="h3">
@@ -295,8 +763,15 @@ export function HomePage() {
       </Box>
 
       {/* New designs */}
-      <Box component="section" sx={{ pt: { xs: 7, md: 11 }, pb: { xs: 6, md: 9 } }}>
-        <SectionHead fig="Fig. 03 — New In" title="Fresh off the table." action={{ to: "/store", label: "Shop now" }} />
+      <Box
+        component="section"
+        sx={{ pt: { xs: 7, md: 11 }, pb: { xs: 6, md: 9 } }}
+      >
+        <SectionHead
+          fig="Fig. 03 — New In"
+          title="Fresh off the table."
+          action={{ to: "/store", label: "Shop now" }}
+        />
         {isPending ? (
           <GridSkeleton count={4} ratio="600 / 780" />
         ) : isError ? (
@@ -304,16 +779,43 @@ export function HomePage() {
         ) : featuredDesigns.length > 0 ? (
           <DesignGrid designs={featuredDesigns} cloudName={cloudName} />
         ) : (
-          <Typography sx={{ color: "text.secondary" }}>New designs are on the way.</Typography>
+          <Typography sx={{ color: "text.secondary" }}>
+            New designs are on the way.
+          </Typography>
         )}
       </Box>
 
       {/* Waitlist */}
-      <Box component="section" sx={{ bgcolor: ink, color: cream, mx: { xs: -2, sm: -3 }, px: { xs: 2, sm: 3 }, py: { xs: 7, md: 11 } }}>
+      <Box
+        component="section"
+        sx={{
+          bgcolor: ink,
+          color: cream,
+          mx: { xs: -2, sm: -3 },
+          px: { xs: 2, sm: 3 },
+          py: { xs: 7, md: 11 },
+        }}
+      >
         <Container maxWidth="lg" disableGutters>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: { xs: 4, md: 8 }, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: { xs: 4, md: 8 },
+              alignItems: "center",
+            }}
+          >
             <Box>
-              <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.22em", color: brass, textTransform: "uppercase" }}>
+              <Box
+                component="span"
+                sx={{
+                  fontFamily: monoFamily,
+                  fontSize: "0.6875rem",
+                  letterSpacing: "0.22em",
+                  color: brass,
+                  textTransform: "uppercase",
+                }}
+              >
                 Fig. 04 — The list
               </Box>
               <Typography variant="h2" component="h2" sx={{ mt: 2, mb: 2 }}>

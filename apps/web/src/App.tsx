@@ -1,4 +1,10 @@
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, ScrollRestoration } from "react-router";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  RouterProvider,
+  ScrollRestoration,
+} from "react-router";
 import { PageTransition } from "@/components/PageTransition";
 import { HomePage } from "@/pages/HomePage";
 import { WaitlistPage } from "@/pages/WaitlistPage";
@@ -7,6 +13,7 @@ import { CollectionPage } from "@/pages/CollectionPage";
 import { DesignPage } from "@/pages/DesignPage";
 import { AboutPage } from "@/pages/AboutPage";
 import { ContactPage } from "@/pages/ContactPage";
+import { FitGuidePage } from "@/pages/FitGuidePage";
 import { AccountPage } from "@/pages/AccountPage";
 import { OrderDetailPage } from "@/pages/OrderDetailPage";
 import { SlotsPage } from "@/pages/SlotsPage";
@@ -42,80 +49,81 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { path: "/", element: <HomePage /> },
-  { path: "/waitlist", element: <WaitlistPage /> },
-  { path: "/store", element: <StorePage /> },
-  { path: "/collections/:slug", element: <CollectionPage /> },
-  { path: "/designs/:slug", element: <DesignPage /> },
-  { path: "/slots", element: <SlotsPage /> },
-  { path: "/about", element: <AboutPage /> },
-  { path: "/contact", element: <ContactPage /> },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/auth/verify", element: <VerifyPage /> },
-  {
-    path: "/account",
-    element: (
-      <AuthGuard>
-        <AccountPage />
-      </AuthGuard>
-    ),
-  },
-  {
-    path: "/account/orders/:ref",
-    element: (
-      <AuthGuard>
-        <OrderDetailPage />
-      </AuthGuard>
-    ),
-  },
-  {
-    path: "/admin",
-    element: (
-      <AdminGuard>
-        <AdminLayout />
-      </AdminGuard>
-    ),
-    children: [
-      { index: true, element: <Navigate to="/admin/designs" replace /> },
-      { path: "designs", element: <AdminDesignsPage /> },
+      { path: "/waitlist", element: <WaitlistPage /> },
+      { path: "/store", element: <StorePage /> },
+      { path: "/collections/:slug", element: <CollectionPage /> },
+      { path: "/designs/:slug", element: <DesignPage /> },
+      { path: "/slots", element: <SlotsPage /> },
+      { path: "/fit-guide", element: <FitGuidePage /> },
+      { path: "/about", element: <AboutPage /> },
+      { path: "/contact", element: <ContactPage /> },
+      { path: "/login", element: <LoginPage /> },
+      { path: "/auth/verify", element: <VerifyPage /> },
       {
-        path: "designs/new",
+        path: "/account",
         element: (
-          <PermissionGuard permission={PERMISSIONS.catalogueWrite}>
-            <AdminDesignEditorPage />
-          </PermissionGuard>
+          <AuthGuard>
+            <AccountPage />
+          </AuthGuard>
         ),
       },
       {
-        path: "designs/:id",
+        path: "/account/orders/:ref",
         element: (
-          <PermissionGuard permission={PERMISSIONS.catalogueWrite}>
-            <AdminDesignEditorPage />
-          </PermissionGuard>
-        ),
-      },
-      { path: "collections", element: <AdminCollectionsPage /> },
-      { path: "orders", element: <AdminOrdersPage /> },
-      { path: "subscribers", element: <AdminSubscribersPage /> },
-      { path: "slots", element: <AdminSlotsPage /> },
-      { path: "analytics", element: <AdminAnalyticsPage /> },
-      {
-        path: "team",
-        element: (
-          <PermissionGuard permission={PERMISSIONS.teamRead}>
-            <AdminTeamPage />
-          </PermissionGuard>
+          <AuthGuard>
+            <OrderDetailPage />
+          </AuthGuard>
         ),
       },
       {
-        path: "settings",
+        path: "/admin",
         element: (
-          <PermissionGuard permission={PERMISSIONS.settingsWrite}>
-            <AdminSettingsPage />
-          </PermissionGuard>
+          <AdminGuard>
+            <AdminLayout />
+          </AdminGuard>
         ),
+        children: [
+          { index: true, element: <Navigate to="/admin/designs" replace /> },
+          { path: "designs", element: <AdminDesignsPage /> },
+          {
+            path: "designs/new",
+            element: (
+              <PermissionGuard permission={PERMISSIONS.catalogueWrite}>
+                <AdminDesignEditorPage />
+              </PermissionGuard>
+            ),
+          },
+          {
+            path: "designs/:id",
+            element: (
+              <PermissionGuard permission={PERMISSIONS.catalogueWrite}>
+                <AdminDesignEditorPage />
+              </PermissionGuard>
+            ),
+          },
+          { path: "collections", element: <AdminCollectionsPage /> },
+          { path: "orders", element: <AdminOrdersPage /> },
+          { path: "subscribers", element: <AdminSubscribersPage /> },
+          { path: "slots", element: <AdminSlotsPage /> },
+          { path: "analytics", element: <AdminAnalyticsPage /> },
+          {
+            path: "team",
+            element: (
+              <PermissionGuard permission={PERMISSIONS.teamRead}>
+                <AdminTeamPage />
+              </PermissionGuard>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <PermissionGuard permission={PERMISSIONS.settingsWrite}>
+                <AdminSettingsPage />
+              </PermissionGuard>
+            ),
+          },
+        ],
       },
-    ],
-  },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

@@ -20,7 +20,16 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MeasureRule } from "@/components/MeasureRule";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { usePublicSettings } from "@/features/storefront/hooks";
-import { amber, brass, cream, creamMuted, creamText, displayFamily, ink, monoFamily } from "@/theme";
+import {
+  amber,
+  brass,
+  cream,
+  creamMuted,
+  creamText,
+  displayFamily,
+  ink,
+  monoFamily,
+} from "@/theme";
 
 const WORDMARK = "Eight Two Five";
 
@@ -34,6 +43,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { tKey: "nav.store", to: "/store", also: ["/collections", "/designs"] },
+  { tKey: "nav.fit", to: "/fit-guide", also: ["/slots"] },
   { tKey: "nav.atelier", to: "/about", also: [] },
   { tKey: "nav.contact", to: "/contact", also: [] },
 ];
@@ -88,19 +98,41 @@ export function UtilityBar() {
   const whatsapp = whatsappDisplay.replace(/\D/g, "");
 
   return (
-    <Box sx={{ bgcolor: ink, color: creamMuted, borderBottom: "1px solid rgba(232,222,203,0.1)" }}>
+    <Box
+      sx={{
+        bgcolor: ink,
+        color: creamMuted,
+        borderBottom: "1px solid rgba(232,222,203,0.1)",
+      }}
+    >
       <Container maxWidth="lg">
         <Stack
           direction="row"
-          sx={{ minHeight: 38, alignItems: "center", justifyContent: "space-between", gap: 1 }}
+          sx={{
+            minHeight: 38,
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
         >
-          <Stack direction="row" spacing={{ xs: 1.5, sm: 3 }} sx={{ alignItems: "center", minWidth: 0 }}>
+          <Stack
+            direction="row"
+            spacing={{ xs: 1.5, sm: 3 }}
+            sx={{ alignItems: "center", minWidth: 0 }}
+          >
             {whatsappDisplay && (
-              <UtilityLink href={`https://wa.me/${whatsapp}`} icon={<WhatsAppIcon sx={{ fontSize: 15 }} />}>
+              <UtilityLink
+                href={`https://wa.me/${whatsapp}`}
+                icon={<WhatsAppIcon sx={{ fontSize: 15 }} />}
+              >
                 {whatsappDisplay}
               </UtilityLink>
             )}
-            <UtilityLink href={`mailto:${CONTACT_EMAIL}`} icon={<MailOutlined sx={{ fontSize: 15 }} />} hideOnXs>
+            <UtilityLink
+              href={`mailto:${CONTACT_EMAIL}`}
+              icon={<MailOutlined sx={{ fontSize: 15 }} />}
+              hideOnXs
+            >
               {CONTACT_EMAIL}
             </UtilityLink>
           </Stack>
@@ -130,7 +162,14 @@ export function UtilityBar() {
                 <WhatsAppIcon sx={{ fontSize: 17 }} />
               </IconButton>
             )}
-            <Box sx={{ width: "1px", height: 16, bgcolor: "rgba(232,222,203,0.2)", mx: 0.5 }} />
+            <Box
+              sx={{
+                width: "1px",
+                height: 16,
+                bgcolor: "rgba(232,222,203,0.2)",
+                mx: 0.5,
+              }}
+            />
             <LanguageSwitcher color={creamText} />
           </Stack>
         </Stack>
@@ -199,21 +238,54 @@ function Wordmark() {
   );
 }
 
-function MobileNav({ open, onClose, pathname }: { open: boolean; onClose: () => void; pathname: string }) {
+function MobileNav({
+  open,
+  onClose,
+  pathname,
+}: {
+  open: boolean;
+  onClose: () => void;
+  pathname: string;
+}) {
   const { t } = useTranslation();
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      slotProps={{ paper: { sx: { width: { xs: "84vw", sm: 380 }, bgcolor: ink, backgroundImage: "none", color: cream } } }}
+      slotProps={{
+        paper: {
+          sx: {
+            width: { xs: "84vw", sm: 380 },
+            bgcolor: ink,
+            backgroundImage: "none",
+            color: cream,
+          },
+        },
+      }}
     >
       <Stack sx={{ height: "100%", p: 3 }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 5 }}>
-          <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.2em", color: brass, textTransform: "uppercase" }}>
+        <Stack
+          direction="row"
+          sx={{ justifyContent: "space-between", alignItems: "center", mb: 5 }}
+        >
+          <Box
+            component="span"
+            sx={{
+              fontFamily: monoFamily,
+              fontSize: "0.6875rem",
+              letterSpacing: "0.2em",
+              color: brass,
+              textTransform: "uppercase",
+            }}
+          >
             {t("nav.menu")}
           </Box>
-          <IconButton onClick={onClose} aria-label={t("nav.menu")} sx={{ color: cream }}>
+          <IconButton
+            onClick={onClose}
+            aria-label={t("nav.menu")}
+            sx={{ color: cream }}
+          >
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -241,7 +313,14 @@ function MobileNav({ open, onClose, pathname }: { open: boolean; onClose: () => 
                   gap: 1.5,
                 }}
               >
-                <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.75rem", color: brass }}>
+                <Box
+                  component="span"
+                  sx={{
+                    fontFamily: monoFamily,
+                    fontSize: "0.75rem",
+                    color: brass,
+                  }}
+                >
                   0{index + 1}
                 </Box>
                 {t(item.tKey)}
@@ -257,7 +336,12 @@ function MobileNav({ open, onClose, pathname }: { open: boolean; onClose: () => 
           onClick={onClose}
           underline="none"
           variant="overline"
-          sx={{ color: creamText, display: "inline-flex", alignItems: "center", gap: 1 }}
+          sx={{
+            color: creamText,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 1,
+          }}
         >
           <PersonIcon sx={{ fontSize: 18 }} /> {t("nav.account")}
         </Link>
@@ -305,7 +389,11 @@ function StorefrontHeader() {
               sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
             >
               {NAV_ITEMS.map((item) => (
-                <NavLink key={item.to} item={item} active={isNavActive(item, pathname)} />
+                <NavLink
+                  key={item.to}
+                  item={item}
+                  active={isNavActive(item, pathname)}
+                />
               ))}
             </Stack>
             <IconButton
@@ -343,7 +431,12 @@ function StorefrontHeader() {
                 +852
               </Box>
               <ThemeToggle color={cream} />
-              <IconButton component={RouterLink} to="/account" aria-label={t("nav.account")} sx={{ color: cream }}>
+              <IconButton
+                component={RouterLink}
+                to="/account"
+                aria-label={t("nav.account")}
+                sx={{ color: cream }}
+              >
                 <PersonIcon sx={{ fontSize: 21 }} />
               </IconButton>
             </Stack>
@@ -351,17 +444,32 @@ function StorefrontHeader() {
         </Box>
       </Container>
 
-      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} pathname={pathname} />
+      <MobileNav
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        pathname={pathname}
+      />
     </Box>
   );
 }
 
-const BENEFIT_KEYS = ["benefits.measurements", "benefits.payment", "benefits.limited", "benefits.fulfilment"] as const;
+const BENEFIT_KEYS = [
+  "benefits.measurements",
+  "benefits.payment",
+  "benefits.limited",
+  "benefits.fulfilment",
+] as const;
 
 export function BenefitsRow() {
   const { t } = useTranslation();
   return (
-    <Box sx={{ borderTop: "1px solid", borderColor: "divider", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        borderTop: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.default",
+      }}
+    >
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -382,7 +490,11 @@ export function BenefitsRow() {
                 borderColor: { md: "divider" },
               }}
             >
-              <Typography variant="overline" component="p" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="overline"
+                component="p"
+                sx={{ color: "text.secondary" }}
+              >
                 {t(key)}
               </Typography>
             </Box>
@@ -393,10 +505,25 @@ export function BenefitsRow() {
   );
 }
 
-function FooterColumn({ heading, children }: { heading: string; children: ReactNode }) {
+function FooterColumn({
+  heading,
+  children,
+}: {
+  heading: string;
+  children: ReactNode;
+}) {
   return (
     <Stack spacing={1.75}>
-      <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.18em", color: brass, textTransform: "uppercase" }}>
+      <Box
+        component="span"
+        sx={{
+          fontFamily: monoFamily,
+          fontSize: "0.6875rem",
+          letterSpacing: "0.18em",
+          color: brass,
+          textTransform: "uppercase",
+        }}
+      >
         {heading}
       </Box>
       {children}
@@ -404,7 +531,15 @@ function FooterColumn({ heading, children }: { heading: string; children: ReactN
   );
 }
 
-function FooterLink({ to, href, children }: { to?: string; href?: string; children: ReactNode }) {
+function FooterLink({
+  to,
+  href,
+  children,
+}: {
+  to?: string;
+  href?: string;
+  children: ReactNode;
+}) {
   const { pathname } = useLocation();
   const active = to ? pathname === to || pathname.startsWith(`${to}/`) : false;
   const sx = {
@@ -441,27 +576,51 @@ export function SiteFooter() {
   const location = settings.data?.visitLocation || "Accra, Ghana";
 
   return (
-    <Box component="footer" sx={{ bgcolor: ink, color: cream, pt: { xs: 6, md: 9 }, pb: 4 }}>
+    <Box
+      component="footer"
+      sx={{ bgcolor: ink, color: cream, pt: { xs: 6, md: 9 }, pb: 4 }}
+    >
       <Container maxWidth="lg">
-        <MeasureRule variant="light" label="FIG. 05" caption={t("footer.theHouse")} sx={{ mb: { xs: 5, md: 7 } }} />
+        <MeasureRule
+          variant="light"
+          label="FIG. 05"
+          caption={t("footer.theHouse")}
+          sx={{ mb: { xs: 5, md: 7 } }}
+        />
 
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1.5fr 1fr 1fr 1fr" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "1.5fr 1fr 1fr 1fr",
+            },
             gap: { xs: 4.5, md: 4 },
             mb: { xs: 5, md: 8 },
           }}
         >
-          <Stack spacing={2.5} sx={{ gridColumn: { sm: "1 / -1", md: "auto" }, maxWidth: 380 }}>
+          <Stack
+            spacing={2.5}
+            sx={{ gridColumn: { sm: "1 / -1", md: "auto" }, maxWidth: 380 }}
+          >
             <Typography
-              sx={{ fontFamily: displayFamily, fontWeight: 700, fontSize: { xs: "2.4rem", md: "2.9rem" }, lineHeight: 0.92, letterSpacing: "-0.03em" }}
+              sx={{
+                fontFamily: displayFamily,
+                fontWeight: 700,
+                fontSize: { xs: "2.4rem", md: "2.9rem" },
+                lineHeight: 0.92,
+                letterSpacing: "-0.03em",
+              }}
             >
               Eight
               <br />
               Two Five
             </Typography>
-            <Typography variant="body2" sx={{ color: creamMuted, maxWidth: "34ch" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: creamMuted, maxWidth: "34ch" }}
+            >
               {t("footer.tagline", { location })}
             </Typography>
           </Stack>
@@ -474,14 +633,23 @@ export function SiteFooter() {
 
           <FooterColumn heading={t("footer.theHouse")}>
             <FooterLink to="/about">{t("footer.ourStory")}</FooterLink>
+            <FooterLink to="/fit-guide">{t("footer.fitGuide")}</FooterLink>
             <FooterLink to="/slots">{t("footer.bookVisit")}</FooterLink>
             <FooterLink to="/contact">{t("footer.contact")}</FooterLink>
           </FooterColumn>
 
           <FooterColumn heading={t("footer.connect")}>
-            <FooterLink href="https://instagram.com">{t("footer.instagram")}</FooterLink>
-            {whatsapp && <FooterLink href={`https://wa.me/${whatsapp}`}>{t("footer.whatsapp")}</FooterLink>}
-            <FooterLink href="mailto:hello@eighttwofive.com">{t("footer.email")}</FooterLink>
+            <FooterLink href="https://instagram.com">
+              {t("footer.instagram")}
+            </FooterLink>
+            {whatsapp && (
+              <FooterLink href={`https://wa.me/${whatsapp}`}>
+                {t("footer.whatsapp")}
+              </FooterLink>
+            )}
+            <FooterLink href="mailto:hello@eighttwofive.com">
+              {t("footer.email")}
+            </FooterLink>
           </FooterColumn>
         </Box>
 
@@ -490,16 +658,50 @@ export function SiteFooter() {
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={{ xs: 1.5, sm: 2 }}
-          sx={{ justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" } }}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+          }}
         >
-          <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.16em", color: creamMuted, textTransform: "uppercase" }}>
+          <Box
+            component="span"
+            sx={{
+              fontFamily: monoFamily,
+              fontSize: "0.6875rem",
+              letterSpacing: "0.16em",
+              color: creamMuted,
+              textTransform: "uppercase",
+            }}
+          >
             © 2026 Eight Two Five · {location}
           </Box>
-          <Stack direction="row" spacing={2.5} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-            <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.16em", color: creamMuted, textTransform: "uppercase" }}>
+          <Stack
+            direction="row"
+            spacing={2.5}
+            sx={{ alignItems: "center", flexWrap: "wrap" }}
+          >
+            <Box
+              component="span"
+              sx={{
+                fontFamily: monoFamily,
+                fontSize: "0.6875rem",
+                letterSpacing: "0.16em",
+                color: creamMuted,
+                textTransform: "uppercase",
+              }}
+            >
               {t("footer.pricesIn")}
             </Box>
-            <Box component="span" sx={{ fontFamily: monoFamily, fontSize: "0.6875rem", letterSpacing: "0.16em", color: creamMuted, textTransform: "uppercase" }}>
+            <Box
+              component="span"
+              sx={{
+                fontFamily: monoFamily,
+                fontSize: "0.6875rem",
+                letterSpacing: "0.16em",
+                color: creamMuted,
+                textTransform: "uppercase",
+              }}
+            >
               {t("footer.payments")}
             </Box>
           </Stack>
@@ -535,14 +737,33 @@ function SkipToContent() {
  * Shared shell for the public store pages. `bleedHero` renders a full-bleed
  * hero directly under the sticky header, outside the centered container.
  */
-export function StorefrontLayout({ children, bleedHero }: { children: ReactNode; bleedHero?: ReactNode }) {
+export function StorefrontLayout({
+  children,
+  bleedHero,
+}: {
+  children: ReactNode;
+  bleedHero?: ReactNode;
+}) {
   return (
-    <Box sx={{ minHeight: "100dvh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.default",
+      }}
+    >
       <SkipToContent />
       <UtilityBar />
       <StorefrontHeader />
       {bleedHero}
-      <Container id="main-content" component="main" maxWidth="lg" sx={{ flex: 1 }} tabIndex={-1}>
+      <Container
+        id="main-content"
+        component="main"
+        maxWidth="lg"
+        sx={{ flex: 1 }}
+        tabIndex={-1}
+      >
         {children}
       </Container>
       <BenefitsRow />

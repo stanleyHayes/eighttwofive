@@ -23,9 +23,10 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import CheckOutlined from "@mui/icons-material/CheckOutlined";
-import { useNavigate, useParams } from "react-router";
+import { Link as RouterLink, useNavigate, useParams } from "react-router";
 import { ErrorState } from "@/components/EmptyState";
 import { JsonLd } from "@/components/JsonLd";
+import { MeasureRule } from "@/components/MeasureRule";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import type { Design } from "@/features/catalog/api";
 import { errorMessage } from "@/features/catalog/api";
@@ -41,10 +42,11 @@ import {
   sortedPhotos,
   type PublicSettings,
 } from "@/features/storefront/api";
-import { PhotoPlaceholder } from "@/features/storefront/DesignCard";
+import { DesignGrid, PhotoPlaceholder } from "@/features/storefront/DesignCard";
 import { RetiredPanel } from "@/features/storefront/RetiredPanel";
 import {
   usePublicDesign,
+  usePublicDesigns,
   usePublicSettings,
 } from "@/features/storefront/hooks";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -364,6 +366,21 @@ function DesignDetail({
   const band = bands.find((entry) => entry.label === bandLabel) ?? bands[0];
   const chartEntries = band ? Object.entries(band.chart) : [];
   const cloudName = settings?.cloudName ?? "";
+  const relatedDesignsQuery = usePublicDesigns({
+    collectionId: design.collectionId,
+  });
+  const relatedDesigns = useMemo(
+    () =>
+      (relatedDesignsQuery.data ?? [])
+        .filter((entry) => entry.id !== design.id)
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 4),
+    [design.id, relatedDesignsQuery.data],
+  );
 
   // Structured data for search engines that render the SPA: a Product (with a
   // made-to-order price range) and a breadcrumb trail for rich results.
@@ -562,331 +579,403 @@ function DesignDetail({
   const isSubmitting = standardOrder.isPending || customRequest.isPending;
 
   return (
-    <Box
-      sx={{
-        py: { xs: 4, md: 8 },
-        mb: { xs: 6, md: 10 },
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", md: "7fr 5fr" },
-        gap: { xs: 3.5, md: 7 },
-        alignItems: "start",
-      }}
-    >
-      {structuredData.map((data, index) => (
-        <JsonLd key={index} data={data} />
-      ))}
-      <Gallery design={design} cloudName={cloudName} />
-
+    <>
       <Box
         sx={{
-          bgcolor: "background.paper",
-          border: "1px solid",
-          borderColor: "divider",
-          p: { xs: 3, sm: 4 },
+          py: { xs: 4, md: 8 },
+          mb: { xs: 6, md: 10 },
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "7fr 5fr" },
+          gap: { xs: 3.5, md: 7 },
+          alignItems: "start",
         }}
       >
-        <Typography variant="overline" component="p" sx={{ color: clayDeep }}>
-          made to measure
-        </Typography>
-        <Typography variant="h2" component="h1" sx={{ mt: 1.5 }}>
-          {design.name}
-        </Typography>
-        {design.note && (
-          <Typography sx={{ color: "text.secondary", mt: 2, maxWidth: "48ch" }}>
-            {design.note}
+        {structuredData.map((data, index) => (
+          <JsonLd key={index} data={data} />
+        ))}
+        <Gallery design={design} cloudName={cloudName} />
+
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            p: { xs: 3, sm: 4 },
+          }}
+        >
+          <Typography variant="overline" component="p" sx={{ color: clayDeep }}>
+            made to measure
           </Typography>
-        )}
-
-        {bands.length > 0 && band ? (
-          <>
+          <Typography variant="h2" component="h1" sx={{ mt: 1.5 }}>
+            {design.name}
+          </Typography>
+          {design.note && (
             <Typography
-              variant="overline"
-              component="p"
-              sx={{ color: "text.secondary", mt: 4 }}
+              sx={{ color: "text.secondary", mt: 2, maxWidth: "48ch" }}
             >
-              size band
+              {design.note}
             </Typography>
-            <ToggleButtonGroup
-              exclusive
-              value={band.label}
-              onChange={(_, next: string | null) => {
-                if (next !== null) setBandLabel(next);
-              }}
-              aria-label="size band"
-              sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}
-            >
-              {bands.map((entry) => (
-                <ToggleButton
-                  key={entry.label}
-                  value={entry.label}
-                  sx={{
-                    px: 2.5,
-                    py: 1,
-                    border: "1px solid",
-                    borderColor: noirAlpha50,
-                    color: "text.primary",
-                    "&.Mui-selected": {
-                      bgcolor: noir,
-                      color: "common.white",
-                      "&:hover": { bgcolor: noir },
-                    },
-                  }}
-                >
-                  {entry.label}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+          )}
 
-            {!isCustom && (
-              <>
-                <Typography
-                  variant="h5"
-                  component="p"
-                  sx={{
-                    mt: 3,
-                    pt: 2,
-                    borderTop: "1px solid",
-                    borderColor: "divider",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {formatPesewas(band.pricePesewas)}
-                </Typography>
-              </>
-            )}
-
-            {isCustom && (
-              <Alert severity="info" sx={{ mt: 3 }}>
-                Custom requests are quoted directly — no price shown until the
-                merchant replies.
-              </Alert>
-            )}
-
-            <Typography
-              variant="overline"
-              component="p"
-              sx={{ color: "text.secondary", mt: 4 }}
-            >
-              size chart — band {band.label}
-            </Typography>
-            {chartEntries.length > 0 ? (
-              <Table
-                size="small"
-                sx={{
-                  mt: 1,
-                  maxWidth: 360,
-                  borderTop: "1px solid",
-                  borderBottom: "1px solid",
-                  borderColor: "divider",
-                }}
+          {bands.length > 0 && band ? (
+            <>
+              <Typography
+                variant="overline"
+                component="p"
+                sx={{ color: "text.secondary", mt: 4 }}
               >
-                <TableBody>
-                  {chartEntries.map(([measure, value]) => (
-                    <TableRow key={measure}>
-                      <TableCell
-                        sx={{
-                          color: "text.secondary",
-                          textTransform: "capitalize",
-                          pl: 0,
-                        }}
-                      >
-                        {measure}
-                      </TableCell>
-                      <TableCell align="right" sx={{ pr: 0 }}>
-                        {value}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
+                size band
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={band.label}
+                onChange={(_, next: string | null) => {
+                  if (next !== null) setBandLabel(next);
+                }}
+                aria-label="size band"
+                sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}
+              >
+                {bands.map((entry) => (
+                  <ToggleButton
+                    key={entry.label}
+                    value={entry.label}
+                    sx={{
+                      px: 2.5,
+                      py: 1,
+                      border: "1px solid",
+                      borderColor: noirAlpha50,
+                      color: "text.primary",
+                      "&.Mui-selected": {
+                        bgcolor: noir,
+                        color: "common.white",
+                        "&:hover": { bgcolor: noir },
+                      },
+                    }}
+                  >
+                    {entry.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+
+              {!isCustom && (
+                <>
+                  <Typography
+                    variant="h5"
+                    component="p"
+                    sx={{
+                      mt: 3,
+                      pt: 2,
+                      borderTop: "1px solid",
+                      borderColor: "divider",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {formatPesewas(band.pricePesewas)}
+                  </Typography>
+                </>
+              )}
+
+              {isCustom && (
+                <Alert severity="info" sx={{ mt: 3 }}>
+                  Custom requests are quoted directly — no price shown until the
+                  merchant replies.
+                </Alert>
+              )}
+
+              <Typography
+                variant="overline"
+                component="p"
+                sx={{ color: "text.secondary", mt: 4 }}
+              >
+                size chart — band {band.label}
+              </Typography>
+              {chartEntries.length > 0 ? (
+                <Table
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    maxWidth: 360,
+                    borderTop: "1px solid",
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <TableBody>
+                    {chartEntries.map(([measure, value]) => (
+                      <TableRow key={measure}>
+                        <TableCell
+                          sx={{
+                            color: "text.secondary",
+                            textTransform: "capitalize",
+                            pl: 0,
+                          }}
+                        >
+                          {measure}
+                        </TableCell>
+                        <TableCell align="right" sx={{ pr: 0 }}>
+                          {value}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ color: "text.secondary", mt: 1 }}
+                >
+                  The chart for this band is being finalised — every piece is
+                  still cut to your measurements.
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 4 }}>
+              Pricing for this design is being finalised.
+            </Typography>
+          )}
+
+          <Stack
+            spacing={2.5}
+            sx={{
+              mt: 4,
+              pt: 4,
+              borderTop: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={customSizeOpen}
+                  onChange={(event) => {
+                    setCustomSizeOpen(event.target.checked);
+                    if (!event.target.checked) setSizeMode("self");
+                  }}
+                />
+              }
+              label="My size isn't listed"
+            />
+
+            <Collapse in={customSizeOpen}>
+              <FormControl component="fieldset" fullWidth>
+                <RadioGroup
+                  value={sizeMode}
+                  onChange={(event) =>
+                    setSizeMode(event.target.value as typeof sizeMode)
+                  }
+                >
+                  <Stack spacing={1}>
+                    <FormControlLabel
+                      value="self"
+                      control={<Radio />}
+                      label="Measure yourself"
+                    />
+                    <Collapse in={sizeMode === "self"}>
+                      <Box sx={{ pl: 4 }}>
+                        <MeasurementForm
+                          values={measurements}
+                          onChange={setMeasurements}
+                        />
+                      </Box>
+                    </Collapse>
+
+                    <FormControlLabel
+                      value="home_visit"
+                      control={<Radio />}
+                      label="Book a home visit (GHS 500 deposit)"
+                    />
+                    <Collapse in={sizeMode === "home_visit"}>
+                      <Box sx={{ pl: 4 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary" }}
+                        >
+                          Choose an open slot and pay a deposit that counts
+                          toward your garment.
+                        </Typography>
+                      </Box>
+                    </Collapse>
+
+                    <FormControlLabel
+                      value="workplace"
+                      control={<Radio />}
+                      label="Come to the workplace"
+                    />
+                    <Collapse in={sizeMode === "workplace"}>
+                      <Box sx={{ pl: 4 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary" }}
+                        >
+                          Visit the Eight Two Five workspace — no booking or
+                          deposit needed.
+                        </Typography>
+                      </Box>
+                    </Collapse>
+                  </Stack>
+                </RadioGroup>
+              </FormControl>
+            </Collapse>
+
+            <Divider />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={designChangeOpen}
+                  onChange={(event) => {
+                    setDesignChangeOpen(event.target.checked);
+                    if (!event.target.checked) setDesignChange("");
+                  }}
+                />
+              }
+              label="Request a design change"
+            />
+
+            <Collapse in={designChangeOpen}>
+              <TextField
+                label="Describe the change you want"
+                value={designChange}
+                onChange={(event) => setDesignChange(event.target.value)}
+                multiline
+                rows={3}
+                fullWidth
+                placeholder="e.g. sleeveless, longer length"
+              />
+            </Collapse>
+
+            <Divider />
+
+            <Box>
+              <Typography
+                variant="overline"
+                component="p"
+                sx={{ color: "text.secondary", mb: 1 }}
+              >
+                your details
+              </Typography>
+              <CustomerFields
+                name={customerName}
+                email={customerEmail}
+                phone={customerPhone}
+                onNameChange={setCustomerName}
+                onEmailChange={setCustomerEmail}
+                onPhoneChange={setCustomerPhone}
+              />
+            </Box>
+
+            <Box>
+              <Typography
+                variant="overline"
+                component="p"
+                sx={{ color: "text.secondary", mb: 1 }}
+              >
+                delivery
+              </Typography>
+              <DeliverySelector
+                mode={deliveryMode}
+                area={deliveryArea}
+                rates={settings?.deliveryRates ?? []}
+                onModeChange={setDeliveryMode}
+                onAreaChange={setDeliveryArea}
+              />
+            </Box>
+
+            {formError && <Alert severity="error">{formError}</Alert>}
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+              <Button
+                variant="contained"
+                loading={isSubmitting}
+                onClick={
+                  isHomeVisit
+                    ? handleHomeVisit
+                    : isCustom
+                      ? handleCustomRequest
+                      : handleStandardOrder
+                }
+                sx={{ flex: { sm: 1 } }}
+              >
+                {submitLabel}
+              </Button>
+              <Box sx={{ flex: { sm: "0 0 auto" } }}>
+                <CopyLinkButton />
+              </Box>
+            </Stack>
+
+            <FormHelperText sx={{ color: stone, mt: 0 }}>
+              {isCustom
+                ? "You will receive a quote by email and in your account before any payment."
+                : "Payment confirms your order and books it into production."}
+            </FormHelperText>
+          </Stack>
+        </Box>
+      </Box>
+
+      {(relatedDesignsQuery.isPending || relatedDesigns.length > 0) && (
+        <Box component="section" sx={{ mb: { xs: 8, md: 12 } }}>
+          <MeasureRule
+            label="Fig. — Same collection"
+            sx={{ mb: { xs: 3, md: 4 } }}
+          />
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: { sm: "flex-end" },
+              mb: 3,
+            }}
+          >
+            <Box>
+              <Typography variant="h2" component="h2">
+                More from this run.
+              </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: "text.secondary", mt: 1 }}
+                sx={{ color: "text.secondary", mt: 1, maxWidth: "48ch" }}
               >
-                The chart for this band is being finalised — every piece is
-                still cut to your measurements.
+                Same fabric story, different cut. Every piece is made only when
+                ordered.
               </Typography>
-            )}
-          </>
-        ) : (
-          <Typography variant="body2" sx={{ color: "text.secondary", mt: 4 }}>
-            Pricing for this design is being finalised.
-          </Typography>
-        )}
-
-        <Stack
-          spacing={2.5}
-          sx={{ mt: 4, pt: 4, borderTop: "1px solid", borderColor: "divider" }}
-        >
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={customSizeOpen}
-                onChange={(event) => {
-                  setCustomSizeOpen(event.target.checked);
-                  if (!event.target.checked) setSizeMode("self");
-                }}
-              />
-            }
-            label="My size isn't listed"
-          />
-
-          <Collapse in={customSizeOpen}>
-            <FormControl component="fieldset" fullWidth>
-              <RadioGroup
-                value={sizeMode}
-                onChange={(event) =>
-                  setSizeMode(event.target.value as typeof sizeMode)
-                }
-              >
-                <Stack spacing={1}>
-                  <FormControlLabel
-                    value="self"
-                    control={<Radio />}
-                    label="Measure yourself"
-                  />
-                  <Collapse in={sizeMode === "self"}>
-                    <Box sx={{ pl: 4 }}>
-                      <MeasurementForm
-                        values={measurements}
-                        onChange={setMeasurements}
-                      />
-                    </Box>
-                  </Collapse>
-
-                  <FormControlLabel
-                    value="home_visit"
-                    control={<Radio />}
-                    label="Book a home visit (GHS 500 deposit)"
-                  />
-                  <Collapse in={sizeMode === "home_visit"}>
-                    <Box sx={{ pl: 4 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        Choose an open slot and pay a deposit that counts toward
-                        your garment.
-                      </Typography>
-                    </Box>
-                  </Collapse>
-
-                  <FormControlLabel
-                    value="workplace"
-                    control={<Radio />}
-                    label="Come to the workplace"
-                  />
-                  <Collapse in={sizeMode === "workplace"}>
-                    <Box sx={{ pl: 4 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        Visit the Eight Two Five workspace — no booking or
-                        deposit needed.
-                      </Typography>
-                    </Box>
-                  </Collapse>
-                </Stack>
-              </RadioGroup>
-            </FormControl>
-          </Collapse>
-
-          <Divider />
-
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={designChangeOpen}
-                onChange={(event) => {
-                  setDesignChangeOpen(event.target.checked);
-                  if (!event.target.checked) setDesignChange("");
-                }}
-              />
-            }
-            label="Request a design change"
-          />
-
-          <Collapse in={designChangeOpen}>
-            <TextField
-              label="Describe the change you want"
-              value={designChange}
-              onChange={(event) => setDesignChange(event.target.value)}
-              multiline
-              rows={3}
-              fullWidth
-              placeholder="e.g. sleeveless, longer length"
-            />
-          </Collapse>
-
-          <Divider />
-
-          <Box>
-            <Typography
-              variant="overline"
-              component="p"
-              sx={{ color: "text.secondary", mb: 1 }}
-            >
-              your details
-            </Typography>
-            <CustomerFields
-              name={customerName}
-              email={customerEmail}
-              phone={customerPhone}
-              onNameChange={setCustomerName}
-              onEmailChange={setCustomerEmail}
-              onPhoneChange={setCustomerPhone}
-            />
-          </Box>
-
-          <Box>
-            <Typography
-              variant="overline"
-              component="p"
-              sx={{ color: "text.secondary", mb: 1 }}
-            >
-              delivery
-            </Typography>
-            <DeliverySelector
-              mode={deliveryMode}
-              area={deliveryArea}
-              rates={settings?.deliveryRates ?? []}
-              onModeChange={setDeliveryMode}
-              onAreaChange={setDeliveryArea}
-            />
-          </Box>
-
-          {formError && <Alert severity="error">{formError}</Alert>}
-
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-            <Button
-              variant="contained"
-              loading={isSubmitting}
-              onClick={
-                isHomeVisit
-                  ? handleHomeVisit
-                  : isCustom
-                    ? handleCustomRequest
-                    : handleStandardOrder
-              }
-              sx={{ flex: { sm: 1 } }}
-            >
-              {submitLabel}
-            </Button>
-            <Box sx={{ flex: { sm: "0 0 auto" } }}>
-              <CopyLinkButton />
             </Box>
+            <Button
+              component={RouterLink}
+              to="/store"
+              variant="outlined"
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
+              Shop all designs
+            </Button>
           </Stack>
 
-          <FormHelperText sx={{ color: stone, mt: 0 }}>
-            {isCustom
-              ? "You will receive a quote by email and in your account before any payment."
-              : "Payment confirms your order and books it into production."}
-          </FormHelperText>
-        </Stack>
-      </Box>
-    </Box>
+          {relatedDesignsQuery.isPending ? (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "repeat(2, 1fr)",
+                  sm: "repeat(3, 1fr)",
+                  md: "repeat(4, 1fr)",
+                },
+                gap: { xs: 2, md: 3 },
+              }}
+            >
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rectangular"
+                  sx={{ aspectRatio: "600 / 780", height: "auto" }}
+                />
+              ))}
+            </Box>
+          ) : (
+            <DesignGrid designs={relatedDesigns} cloudName={cloudName} />
+          )}
+        </Box>
+      )}
+    </>
   );
 }
 

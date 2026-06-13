@@ -1,6 +1,7 @@
 {
   "nav": {
     "store": "Store",
+    "fit": "Fit guide",
     "atelier": "Atelier",
     "contact": "Contact",
     "account": "Your account",
@@ -21,6 +22,7 @@
     "yourAccount": "Your account",
     "signIn": "Sign in",
     "ourStory": "Our story",
+    "fitGuide": "Fit guide",
     "bookVisit": "Book a visit",
     "contact": "Contact",
     "instagram": "Instagram",
