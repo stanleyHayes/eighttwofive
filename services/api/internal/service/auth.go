@@ -168,6 +168,57 @@ func (a *Auth) Logout(ctx context.Context, sessionToken string) {
 	}
 }
 
+// IsSuperAdmin reports whether the email is in the bootstrap ADMIN_EMAILS
+// allow-list. Super-admins are always admin and cannot be demoted.
+func (a *Auth) IsSuperAdmin(email string) bool {
+	_, ok := a.admins[strings.ToLower(strings.TrimSpace(email))]
+
+	return ok
+}
+
+// ListUsers returns one page of users for team management.
+func (a *Auth) ListUsers(ctx context.Context, page, pageSize int) (domain.Page[domain.User], error) {
+	params := domain.NormalizePageParams(page, pageSize)
+
+	total, err := a.users.Count(ctx)
+	if err != nil {
+		return domain.Page[domain.User]{}, fmt.Errorf("count users: %w", err)
+	}
+
+	users, err := a.users.ListPaged(ctx, params)
+	if err != nil {
+		return domain.Page[domain.User]{}, fmt.Errorf("list users: %w", err)
+	}
+
+	return domain.NewPage(users, total, params), nil
+}
+
+// SetUserRole changes a user's role. Bootstrap super-admins cannot be demoted,
+// and only assignable roles are accepted.
+func (a *Auth) SetUserRole(ctx context.Context, userID string, role domain.Role) (*domain.User, error) {
+	if !role.IsAssignable() {
+		return nil, fmt.Errorf("%w: unknown role %q", domain.ErrInvalidInput, role)
+	}
+
+	user, err := a.users.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("load user: %w", err)
+	}
+
+	if a.IsSuperAdmin(user.Email) && role != domain.RoleAdmin {
+		return nil, fmt.Errorf("%w: %s is a protected super-admin and stays an admin", domain.ErrInvalidInput, user.Email)
+	}
+
+	err = a.users.UpdateRole(ctx, userID, role)
+	if err != nil {
+		return nil, fmt.Errorf("update role: %w", err)
+	}
+
+	user.Role = role
+
+	return user, nil
+}
+
 func newToken() (string, string, error) {
 	buf := make([]byte, tokenByteCount)
 

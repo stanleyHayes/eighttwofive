@@ -12,14 +12,30 @@ import (
 const sessionCookieMaxAge = 30 * 24 * time.Hour
 
 type userDTO struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Role  string `json:"role"`
+	ID           string   `json:"id"`
+	Email        string   `json:"email"`
+	Name         string   `json:"name"`
+	Role         string   `json:"role"`
+	Permissions  []string `json:"permissions"`
+	IsSuperAdmin bool     `json:"isSuperAdmin"`
 }
 
-func toUserDTO(u *domain.User) userDTO {
-	return userDTO{ID: u.ID, Email: u.Email, Name: u.Name, Role: string(u.Role)}
+func (h *Handlers) toUserDTO(u *domain.User) userDTO {
+	perms := u.Role.Permissions()
+
+	permStrings := make([]string, 0, len(perms))
+	for _, perm := range perms {
+		permStrings = append(permStrings, string(perm))
+	}
+
+	return userDTO{
+		ID:           u.ID,
+		Email:        u.Email,
+		Name:         u.Name,
+		Role:         string(u.Role),
+		Permissions:  permStrings,
+		IsSuperAdmin: h.auth.IsSuperAdmin(u.Email),
+	}
 }
 
 type requestLinkRequest struct {
@@ -79,7 +95,7 @@ func (h *Handlers) VerifyLogin(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
 	default:
 		h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
-		respondJSON(w, http.StatusOK, map[string]userDTO{"user": toUserDTO(user)})
+		respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})
 	}
 }
 
@@ -92,7 +108,7 @@ func (h *Handlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]userDTO{"user": toUserDTO(user)})
+	respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})
 }
 
 // Logout handles POST /api/v1/auth/logout.

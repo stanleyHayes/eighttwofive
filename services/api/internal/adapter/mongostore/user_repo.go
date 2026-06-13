@@ -81,6 +81,64 @@ func (r *UserRepository) Upsert(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
+// Count returns the total number of users.
+func (r *UserRepository) Count(ctx context.Context) (int64, error) {
+	total, err := r.col.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return 0, fmt.Errorf("count users: %w", err)
+	}
+
+	return total, nil
+}
+
+// ListPaged returns one page of users, newest first.
+func (r *UserRepository) ListPaged(ctx context.Context, params domain.PageParams) ([]domain.User, error) {
+	opts := options.Find().
+		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+		SetSkip(params.Skip()).
+		SetLimit(params.Limit())
+
+	cursor, err := r.col.Find(ctx, bson.D{}, opts)
+	if err != nil {
+		return nil, fmt.Errorf("list users: %w", err)
+	}
+
+	defer func() { _ = cursor.Close(ctx) }()
+
+	var docs []userDoc
+
+	err = cursor.All(ctx, &docs)
+	if err != nil {
+		return nil, fmt.Errorf("decode users: %w", err)
+	}
+
+	users := make([]domain.User, 0, len(docs))
+	for i := range docs {
+		users = append(users, *docs[i].toDomain())
+	}
+
+	return users, nil
+}
+
+// UpdateRole sets a user's role unconditionally.
+func (r *UserRepository) UpdateRole(ctx context.Context, id string, role domain.Role) error {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.ErrNotFound
+	}
+
+	result, err := r.col.UpdateOne(ctx, bson.M{"_id": objectID}, bson.M{"$set": bson.M{"role": string(role)}})
+	if err != nil {
+		return fmt.Errorf("update user role: %w", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
+}
+
 // GetByID loads a user by its hex ObjectID.
 func (r *UserRepository) GetByID(ctx context.Context, id string) (*domain.User, error) {
 	objectID, err := bson.ObjectIDFromHex(id)

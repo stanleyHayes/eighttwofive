@@ -7,19 +7,24 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { logout } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useMe } from "@/features/auth/useMe";
+import { PERMISSIONS, type Permission } from "@/features/auth/permissions";
 import { amber, brass, monoFamily } from "@/theme";
 
-const NAV_ITEMS = [
-  { label: "Designs", to: "/admin/designs" },
-  { label: "Collections", to: "/admin/collections" },
-  { label: "Orders", to: "/admin/orders" },
-  { label: "Slots", to: "/admin/slots" },
-  { label: "Subscribers", to: "/admin/subscribers" },
-  { label: "Analytics", to: "/admin/analytics" },
-  { label: "Settings", to: "/admin/settings" },
+const NAV_ITEMS: { label: string; to: string; permission: Permission }[] = [
+  { label: "Designs", to: "/admin/designs", permission: PERMISSIONS.catalogueRead },
+  { label: "Collections", to: "/admin/collections", permission: PERMISSIONS.catalogueRead },
+  { label: "Orders", to: "/admin/orders", permission: PERMISSIONS.ordersRead },
+  { label: "Slots", to: "/admin/slots", permission: PERMISSIONS.slotsRead },
+  { label: "Subscribers", to: "/admin/subscribers", permission: PERMISSIONS.subscribersRead },
+  { label: "Analytics", to: "/admin/analytics", permission: PERMISSIONS.analyticsRead },
+  { label: "Team", to: "/admin/team", permission: PERMISSIONS.teamRead },
+  { label: "Settings", to: "/admin/settings", permission: PERMISSIONS.settingsWrite },
 ];
 
 export function AdminLayout() {
+  const me = useMe();
+  const navItems = NAV_ITEMS.filter((item) => me.data?.permissions.includes(item.permission));
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const signOut = useMutation({
@@ -71,7 +76,7 @@ export function AdminLayout() {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Box
               key={item.to}
               component={NavLink}

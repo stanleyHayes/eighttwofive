@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+
+	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 )
 
 const (
@@ -80,49 +82,61 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 }
 
 func adminRoutes(h *Handlers) func(chi.Router) {
+	// Per-permission guards keep each route's required capability explicit.
+	read := func(p domain.Permission) func(http.Handler) http.Handler { return h.RequirePermission(p) }
+
 	return func(r chi.Router) {
-		r.Use(h.RequireAuth, h.RequireAdmin)
-		r.Get("/waitlist", h.ListWaitlist)
-		r.Put("/settings", h.UpdateSettings)
-		r.Post("/uploads/sign", h.SignUpload)
-		r.Get("/analytics", h.AdminGetAnalytics)
-		r.Get("/orders", h.AdminListOrders)
-		r.Get("/orders/{ref}", h.AdminGetOrder)
-		r.Put("/orders/{ref}/quote", h.AdminUpdateQuote)
-		r.Post("/orders/{ref}/payment-link", h.AdminSendPaymentLink)
-		r.Post("/orders/{ref}/mark-paid", h.AdminMarkPaid)
-		r.Post("/orders/{ref}/status", h.AdminUpdateOrderStatus)
+		// Any admin-area role (viewer/staff/admin) may enter; each route then
+		// requires its specific capability.
+		r.Use(h.RequireAuth, h.RequireAdminArea)
+
+		r.With(read(domain.PermSubscribersRead)).Get("/waitlist", h.ListWaitlist)
+		r.With(read(domain.PermSettingsWrite)).Put("/settings", h.UpdateSettings)
+		r.With(read(domain.PermCatalogueWrite)).Post("/uploads/sign", h.SignUpload)
+		r.With(read(domain.PermAnalyticsRead)).Get("/analytics", h.AdminGetAnalytics)
+
+		r.With(read(domain.PermOrdersRead)).Get("/orders", h.AdminListOrders)
+		r.With(read(domain.PermOrdersRead)).Get("/orders/{ref}", h.AdminGetOrder)
+		r.With(read(domain.PermOrdersWrite)).Put("/orders/{ref}/quote", h.AdminUpdateQuote)
+		r.With(read(domain.PermOrdersWrite)).Post("/orders/{ref}/payment-link", h.AdminSendPaymentLink)
+		r.With(read(domain.PermOrdersWrite)).Post("/orders/{ref}/mark-paid", h.AdminMarkPaid)
+		r.With(read(domain.PermOrdersWrite)).Post("/orders/{ref}/status", h.AdminUpdateOrderStatus)
+
+		r.Route("/users", func(r chi.Router) {
+			r.With(read(domain.PermTeamRead)).Get("/", h.AdminListUsers)
+			r.With(read(domain.PermTeamWrite)).Put("/{id}/role", h.AdminSetUserRole)
+		})
 
 		r.Route("/slots", func(r chi.Router) {
-			r.Get("/", h.AdminListSlots)
-			r.Post("/", h.AdminCreateSlot)
-			r.Post("/{id}/close", h.AdminCloseSlot)
-			r.Post("/{id}/reopen", h.AdminReopenSlot)
+			r.With(read(domain.PermSlotsRead)).Get("/", h.AdminListSlots)
+			r.With(read(domain.PermSlotsWrite)).Post("/", h.AdminCreateSlot)
+			r.With(read(domain.PermSlotsWrite)).Post("/{id}/close", h.AdminCloseSlot)
+			r.With(read(domain.PermSlotsWrite)).Post("/{id}/reopen", h.AdminReopenSlot)
 		})
 
 		r.Route("/visits", func(r chi.Router) {
-			r.Get("/", h.AdminListVisits)
-			r.Post("/{id}/reschedule", h.AdminRescheduleVisit)
-			r.Post("/{id}/cancel", h.AdminCancelVisit)
+			r.With(read(domain.PermSlotsRead)).Get("/", h.AdminListVisits)
+			r.With(read(domain.PermSlotsWrite)).Post("/{id}/reschedule", h.AdminRescheduleVisit)
+			r.With(read(domain.PermSlotsWrite)).Post("/{id}/cancel", h.AdminCancelVisit)
 		})
 
 		r.Route("/collections", func(r chi.Router) {
-			r.Get("/", h.AdminListCollections)
-			r.Post("/", h.AdminCreateCollection)
-			r.Put("/{id}", h.AdminUpdateCollection)
-			r.Post("/{id}/retire", h.AdminRetireCollection)
-			r.Post("/{id}/restore", h.AdminRestoreCollection)
-			r.Delete("/{id}", h.AdminDeleteCollection)
+			r.With(read(domain.PermCatalogueRead)).Get("/", h.AdminListCollections)
+			r.With(read(domain.PermCatalogueWrite)).Post("/", h.AdminCreateCollection)
+			r.With(read(domain.PermCatalogueWrite)).Put("/{id}", h.AdminUpdateCollection)
+			r.With(read(domain.PermCatalogueWrite)).Post("/{id}/retire", h.AdminRetireCollection)
+			r.With(read(domain.PermCatalogueWrite)).Post("/{id}/restore", h.AdminRestoreCollection)
+			r.With(read(domain.PermCatalogueWrite)).Delete("/{id}", h.AdminDeleteCollection)
 		})
 
 		r.Route("/designs", func(r chi.Router) {
-			r.Get("/", h.AdminListDesigns)
-			r.Get("/{id}", h.AdminGetDesign)
-			r.Post("/", h.AdminCreateDesign)
-			r.Post("/retire", h.AdminRetireDesigns)
-			r.Post("/restore", h.AdminRestoreDesigns)
-			r.Put("/{id}", h.AdminUpdateDesign)
-			r.Delete("/{id}", h.AdminDeleteDesign)
+			r.With(read(domain.PermCatalogueRead)).Get("/", h.AdminListDesigns)
+			r.With(read(domain.PermCatalogueRead)).Get("/{id}", h.AdminGetDesign)
+			r.With(read(domain.PermCatalogueWrite)).Post("/", h.AdminCreateDesign)
+			r.With(read(domain.PermCatalogueWrite)).Post("/retire", h.AdminRetireDesigns)
+			r.With(read(domain.PermCatalogueWrite)).Post("/restore", h.AdminRestoreDesigns)
+			r.With(read(domain.PermCatalogueWrite)).Put("/{id}", h.AdminUpdateDesign)
+			r.With(read(domain.PermCatalogueWrite)).Delete("/{id}", h.AdminDeleteDesign)
 		})
 	}
 }

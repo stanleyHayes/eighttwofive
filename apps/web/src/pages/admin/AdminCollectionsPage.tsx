@@ -29,6 +29,7 @@ import {
 import { CollectionFormDialog } from "@/features/catalog/CollectionFormDialog";
 import { ConfirmDeleteDialog } from "@/features/catalog/ConfirmDeleteDialog";
 import { StatusChip } from "@/features/catalog/StatusChip";
+import { useCan } from "@/features/auth/permissions";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -41,6 +42,7 @@ function formatDate(iso: string): string {
 type DialogState = { mode: "create" } | { mode: "edit"; collection: Collection } | null;
 
 export function AdminCollectionsPage() {
+  const canWrite = useCan("catalogue:write");
   const [page, setPage] = useState(1);
   const collections = useCollectionsPaged({ page, pageSize: DEFAULT_PAGE_SIZE });
   const retire = useRetireCollection();
@@ -78,11 +80,13 @@ export function AdminCollectionsPage() {
         description="Each collection is a limited, themed run of around ten designs. Create, edit, retire, or delete them here."
       />
 
-      <Box sx={{ mb: 4, mt: 3 }}>
-        <Button variant="contained" onClick={() => setDialog({ mode: "create" })}>
-          New collection
-        </Button>
-      </Box>
+      {canWrite && (
+        <Box sx={{ mb: 4, mt: 3 }}>
+          <Button variant="contained" onClick={() => setDialog({ mode: "create" })}>
+            New collection
+          </Button>
+        </Box>
+      )}
 
       {actionError && (
         <Alert severity="error" onClose={() => setActionError(null)} sx={{ mb: 3 }}>

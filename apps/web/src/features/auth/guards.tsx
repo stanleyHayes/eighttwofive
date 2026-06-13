@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import { Navigate } from "react-router";
 import { useMe } from "./useMe";
+import type { Permission } from "./permissions";
 
 /**
  * Minimal full-height placeholder during the brief session check — a quiet
@@ -43,6 +44,27 @@ export function AdminGuard({ children }: { children: ReactNode }) {
 
   if (me.isPending) return <CheckingSession />;
   if (!me.data) return <Navigate to="/login" replace />;
-  if (me.data.role !== "admin") return <Navigate to="/" replace />;
+  // Any admin-area role (viewer / staff / admin) may enter; customers can't.
+  if (me.data.role === "customer") return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+/**
+ * Guards a route behind a specific permission. Use inside AdminGuard — a
+ * signed-in admin-area user lacking the capability is bounced to the dashboard
+ * home (a section they can always reach).
+ */
+export function PermissionGuard({
+  permission,
+  children,
+}: {
+  permission: Permission;
+  children: ReactNode;
+}) {
+  const me = useMe();
+
+  if (me.isPending) return <CheckingSession />;
+  if (!me.data) return <Navigate to="/login" replace />;
+  if (!me.data.permissions.includes(permission)) return <Navigate to="/admin" replace />;
   return <>{children}</>;
 }

@@ -36,6 +36,8 @@ const customer: User = {
   email: "ama@example.com",
   name: "Ama",
   role: "customer",
+  permissions: [],
+  isSuperAdmin: false,
 };
 
 describe("AuthGuard", () => {

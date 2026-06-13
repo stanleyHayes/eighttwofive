@@ -173,7 +173,7 @@ func (h *Handlers) BookSlot(w http.ResponseWriter, r *http.Request) {
 		Visit:      toVisitDTO(*result.Visit),
 		Order:      toOrderDTO(result.Order),
 		PaymentURL: result.PaymentURL,
-		User:       toUserDTO(result.User),
+		User:       h.toUserDTO(result.User),
 	})
 }
 

@@ -148,3 +148,35 @@ func (h *Handlers) RequireAdmin(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// RequireAdminArea rejects users who may not enter the admin dashboard at all
+// (i.e. customers). Must run after RequireAuth.
+func (h *Handlers) RequireAdminArea(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, ok := userFromContext(r.Context())
+		if !ok || !user.Role.IsAdminArea() {
+			respondError(w, http.StatusForbidden, "forbidden", "admin access required")
+
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RequirePermission rejects users whose role lacks the given capability. Must
+// run after RequireAuth.
+func (h *Handlers) RequirePermission(permission domain.Permission) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := userFromContext(r.Context())
+			if !ok || !user.Role.Has(permission) {
+				respondError(w, http.StatusForbidden, "forbidden", "you don't have access to this")
+
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}

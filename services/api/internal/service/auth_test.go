@@ -54,6 +54,66 @@ func (f *fakeUsers) GetByID(_ context.Context, id string) (*domain.User, error) 
 	return nil, domain.ErrNotFound
 }
 
+func TestSetUserRole(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	users := newFakeUsers()
+	auth := newAuth(users, newFakeTokens(), &linkSender{}, "boss@example.com")
+
+	staffer := &domain.User{Email: "staffer@example.com", Name: "Staffer", Role: domain.RoleCustomer}
+	require.NoError(t, users.Upsert(ctx, staffer))
+
+	updated, err := auth.SetUserRole(ctx, staffer.ID, domain.RoleStaff)
+	require.NoError(t, err)
+	assert.Equal(t, domain.RoleStaff, updated.Role)
+
+	reloaded, err := users.GetByID(ctx, staffer.ID)
+	require.NoError(t, err)
+	assert.Equal(t, domain.RoleStaff, reloaded.Role)
+
+	boss := &domain.User{Email: "boss@example.com", Name: "Boss", Role: domain.RoleAdmin}
+	require.NoError(t, users.Upsert(ctx, boss))
+
+	_, err = auth.SetUserRole(ctx, boss.ID, domain.RoleCustomer)
+	require.ErrorIs(t, err, domain.ErrInvalidInput, "bootstrap super-admin must not be demotable")
+
+	_, err = auth.SetUserRole(ctx, staffer.ID, domain.Role("wizard"))
+	require.ErrorIs(t, err, domain.ErrInvalidInput, "unknown role rejected")
+}
+
+func (f *fakeUsers) Count(_ context.Context) (int64, error) {
+	return int64(len(f.byEmail)), nil
+}
+
+func (f *fakeUsers) ListPaged(_ context.Context, params domain.PageParams) ([]domain.User, error) {
+	all := make([]domain.User, 0, len(f.byEmail))
+	for _, u := range f.byEmail {
+		all = append(all, *u)
+	}
+
+	skip := int(params.Skip())
+	if skip >= len(all) {
+		return []domain.User{}, nil
+	}
+
+	end := min(skip+int(params.Limit()), len(all))
+
+	return all[skip:end], nil
+}
+
+func (f *fakeUsers) UpdateRole(_ context.Context, id string, role domain.Role) error {
+	for _, u := range f.byEmail {
+		if u.ID == id {
+			u.Role = role
+
+			return nil
+		}
+	}
+
+	return domain.ErrNotFound
+}
+
 type fakeTokenRecord struct {
 	userID    string
 	expiresAt time.Time

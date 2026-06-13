@@ -117,6 +117,38 @@ func (m *memUsers) GetByID(_ context.Context, id string) (*domain.User, error) {
 	return nil, domain.ErrNotFound
 }
 
+func (m *memUsers) Count(_ context.Context) (int64, error) {
+	return int64(len(m.byEmail)), nil
+}
+
+func (m *memUsers) ListPaged(_ context.Context, params domain.PageParams) ([]domain.User, error) {
+	all := make([]domain.User, 0, len(m.byEmail))
+	for _, u := range m.byEmail {
+		all = append(all, *u)
+	}
+
+	skip := int(params.Skip())
+	if skip >= len(all) {
+		return []domain.User{}, nil
+	}
+
+	end := min(skip+int(params.Limit()), len(all))
+
+	return all[skip:end], nil
+}
+
+func (m *memUsers) UpdateRole(_ context.Context, id string, role domain.Role) error {
+	for _, u := range m.byEmail {
+		if u.ID == id {
+			u.Role = role
+
+			return nil
+		}
+	}
+
+	return domain.ErrNotFound
+}
+
 type tokenRecord struct {
 	userID    string
 	expiresAt time.Time

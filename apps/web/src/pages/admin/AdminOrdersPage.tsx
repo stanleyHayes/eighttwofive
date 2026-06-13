@@ -39,6 +39,7 @@ import {
   useUpdateQuote,
   whatsappLink,
 } from "@/features/orders/hooks";
+import { useCan } from "@/features/auth/permissions";
 import { hideUntilMd, tableMinWidth } from "@/components/tableResponsive";
 
 function formatDate(iso: string): string {
@@ -115,6 +116,7 @@ interface OrderDetailPanelProps {
 }
 
 function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
+  const canWrite = useCan("orders:write");
   const updateQuote = useUpdateQuote(order.ref);
   const sendLink = useSendPaymentLink(order.ref);
   const markPaid = useMarkPaidManually(order.ref);
@@ -285,7 +287,7 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
 
         <Divider />
 
-        {canEditQuote && (
+        {canWrite && canEditQuote && (
           <Stack component="form" spacing={2} onSubmit={handleSaveQuote}>
             <Typography variant="h5" component="h3">
               Quote
@@ -321,7 +323,7 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
           </Stack>
         )}
 
-        {canEditQuote && <Divider />}
+        {canWrite && canEditQuote && <Divider />}
 
         <Stack spacing={2}>
           <Typography variant="h5" component="h3">
@@ -330,84 +332,92 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
           <Typography>
             <strong>Total:</strong> {formatPesewas(order.totalPesewas)}
           </Typography>
-          <Box>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleSendPaymentLink}
-              loading={sendLink.isPending}
-              disabled={!isCustomRequest || order.status === "payment_link_sent"}
-              sx={compactActionSx}
-            >
-              Send payment link
-            </Button>
-          </Box>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            sx={{ alignItems: { sm: "center" } }}
-          >
-            <TextField
-              label="Manual payment note"
-              value={manualNote}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => setManualNote(event.target.value)}
-              placeholder="e.g. Cash on pickup"
-              size="small"
-              sx={{ flex: 1, minWidth: { sm: 200 } }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleMarkPaid}
-              loading={markPaid.isPending}
-              sx={compactActionSx}
-            >
-              Mark paid manually
-            </Button>
-          </Stack>
+          {canWrite && (
+            <>
+              <Box>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleSendPaymentLink}
+                  loading={sendLink.isPending}
+                  disabled={!isCustomRequest || order.status === "payment_link_sent"}
+                  sx={compactActionSx}
+                >
+                  Send payment link
+                </Button>
+              </Box>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.5}
+                sx={{ alignItems: { sm: "center" } }}
+              >
+                <TextField
+                  label="Manual payment note"
+                  value={manualNote}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => setManualNote(event.target.value)}
+                  placeholder="e.g. Cash on pickup"
+                  size="small"
+                  sx={{ flex: 1, minWidth: { sm: 200 } }}
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleMarkPaid}
+                  loading={markPaid.isPending}
+                  sx={compactActionSx}
+                >
+                  Mark paid manually
+                </Button>
+              </Stack>
+            </>
+          )}
         </Stack>
 
-        <Divider />
+        {canWrite && (
+          <>
+            <Divider />
 
-        <Stack spacing={2}>
-          <Typography variant="h5" component="h3">
-            Status
-          </Typography>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            sx={{ alignItems: { sm: "center" } }}
-          >
-            <TextField
-              select
-              label="New status"
-              value={selectedStatus}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setSelectedStatus(event.target.value as OrderStatus)
-              }
-              slotProps={{
-                select: { native: true },
-              }}
-              size="small"
-              sx={{ flex: 1, minWidth: { sm: 200 } }}
-            >
-              {TRANSITIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status.replace(/_/g, " ")}
-                </option>
-              ))}
-            </TextField>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleStatusChange}
-              loading={updateStatus.isPending}
-              sx={compactActionSx}
-            >
-              Update status
-            </Button>
-          </Stack>
-        </Stack>
+            <Stack spacing={2}>
+              <Typography variant="h5" component="h3">
+                Status
+              </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.5}
+                sx={{ alignItems: { sm: "center" } }}
+              >
+                <TextField
+                  select
+                  label="New status"
+                  value={selectedStatus}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    setSelectedStatus(event.target.value as OrderStatus)
+                  }
+                  slotProps={{
+                    select: { native: true },
+                  }}
+                  size="small"
+                  sx={{ flex: 1, minWidth: { sm: 200 } }}
+                >
+                  {TRANSITIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {status.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </TextField>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleStatusChange}
+                  loading={updateStatus.isPending}
+                  sx={compactActionSx}
+                >
+                  Update status
+                </Button>
+              </Stack>
+            </Stack>
+          </>
+        )}
 
         {actionError && <Alert severity="error">{actionError}</Alert>}
         {actionSuccess && <Alert severity="success">{actionSuccess}</Alert>}

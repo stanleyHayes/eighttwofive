@@ -68,11 +68,17 @@ export function getHealth(): Promise<Health> {
   return request<Health>("/api/v1/healthz");
 }
 
+export type UserRole = "customer" | "viewer" | "staff" | "admin";
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: "customer" | "admin";
+  role: UserRole;
+  /** Capability strings (e.g. "orders:write") granted by the role. */
+  permissions: string[];
+  /** True for bootstrap super-admins (ADMIN_EMAILS) — role can't be changed. */
+  isSuperAdmin: boolean;
 }
 
 export interface RequestLoginLinkInput {

@@ -38,6 +38,7 @@ import {
   formatSlotTime,
 } from "@/features/slots/hooks";
 import { errorMessage, type Slot, type Visit } from "@/features/slots/api";
+import { useCan } from "@/features/auth/permissions";
 
 function fromLocalInputValue(value: string): string {
   return new Date(value).toISOString();
@@ -223,6 +224,7 @@ function RescheduleDialog({ visit, open, slots, onClose }: RescheduleDialogProps
 }
 
 export function AdminSlotsPage() {
+  const canWrite = useCan("slots:write");
   const { data: slots, isLoading: slotsLoading, error: slotsError } = useAdminSlots();
   const { data: visits, isLoading: visitsLoading, error: visitsError } = useAdminVisits();
   const close = useCloseSlot();
@@ -272,9 +274,11 @@ export function AdminSlotsPage() {
             <Typography variant="h5" component="h2">
               Slots
             </Typography>
-            <Button variant="contained" onClick={() => setDialogOpen(true)}>
-              Add slot
-            </Button>
+            {canWrite && (
+              <Button variant="contained" onClick={() => setDialogOpen(true)}>
+                Add slot
+              </Button>
+            )}
           </Stack>
 
           <TableContainer sx={{ overflowX: "auto" }}>
@@ -315,7 +319,7 @@ export function AdminSlotsPage() {
                         icon={<EventOutlined />}
                         title="No slots yet"
                         body="Open your first home-visit window and clients can book a fitting."
-                        action={{ label: "Add a slot", onClick: () => setDialogOpen(true) }}
+                        action={canWrite ? { label: "Add a slot", onClick: () => setDialogOpen(true) } : undefined}
                       />
                     </TableCell>
                   </TableRow>
