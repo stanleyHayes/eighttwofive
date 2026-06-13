@@ -96,6 +96,19 @@ const TRANSITIONS: OrderStatus[] = [
   "cancelled",
 ];
 
+// The theme gives buttons a tall (paddingBlock: 16) "atelier" height; inside the
+// dense action rows we override that so each button matches the 40px small field
+// beside it. height + box-sizing keeps the total at 40px regardless of label.
+const compactActionSx = {
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  width: { xs: "100%", sm: "auto" },
+  minHeight: 0,
+  height: 40,
+  py: 0,
+  px: 2.5,
+} as const;
+
 interface OrderDetailPanelProps {
   order: Order;
   onClose: () => void;
@@ -320,10 +333,11 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
           <Box>
             <Button
               variant="outlined"
+              size="small"
               onClick={handleSendPaymentLink}
               loading={sendLink.isPending}
               disabled={!isCustomRequest || order.status === "payment_link_sent"}
-              sx={{ whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}
+              sx={compactActionSx}
             >
               Send payment link
             </Button>
@@ -343,9 +357,10 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
             />
             <Button
               variant="contained"
+              size="small"
               onClick={handleMarkPaid}
               loading={markPaid.isPending}
-              sx={{ flexShrink: 0, whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}
+              sx={compactActionSx}
             >
               Mark paid manually
             </Button>
@@ -384,9 +399,10 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
             </TextField>
             <Button
               variant="outlined"
+              size="small"
               onClick={handleStatusChange}
               loading={updateStatus.isPending}
-              sx={{ flexShrink: 0, whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" } }}
+              sx={compactActionSx}
             >
               Update status
             </Button>
