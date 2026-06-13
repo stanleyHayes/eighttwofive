@@ -7,6 +7,7 @@ import MailOutlined from "@mui/icons-material/MailOutlined";
 import { PageBanner } from "@/components/PageBanner";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import { usePublicSettings } from "@/features/storefront/hooks";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 function waHref(whatsappNumber: string): string {
   return `https://wa.me/${whatsappNumber.replace(/\D/g, "")}`;
@@ -24,6 +25,10 @@ function ContactRow({ label, children }: { label: string; children: ReactNode })
 }
 
 export function ContactPage() {
+  useDocumentTitle(
+    "Contact",
+    "Talk to the Eight Two Five atelier — WhatsApp, email, or book a visit to be measured in person in Accra.",
+  );
   const settings = usePublicSettings();
   const whatsapp = settings.data?.whatsappNumber ?? "";
   const visitLocation = settings.data?.visitLocation ?? "";

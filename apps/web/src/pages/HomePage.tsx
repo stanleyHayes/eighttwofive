@@ -16,6 +16,7 @@ import { errorMessage } from "@/features/catalog/api";
 import { DesignGrid } from "@/features/storefront/DesignCard";
 import { CARD_TRANSFORM, photoUrl, sortedPhotos } from "@/features/storefront/api";
 import { usePublicCollections, usePublicDesigns, usePublicSettings } from "@/features/storefront/hooks";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { WaitlistForm } from "@/features/waitlist/WaitlistForm";
 import { amber, brass, cream, creamMuted, creamText, displayFamily, GRAIN_URL, ink, inkSoft, monoFamily } from "@/theme";
 
@@ -221,6 +222,10 @@ function ErrorPanel({ error }: { error: unknown }) {
 // --- Page -------------------------------------------------------------------
 
 export function HomePage() {
+  useDocumentTitle(
+    undefined,
+    "Made-to-measure womenswear, cut to you in Accra. Browse limited, themed collections and have each piece made to your measurements.",
+  );
   const settings = usePublicSettings();
   const collections = usePublicCollections();
   const designs = usePublicDesigns({});

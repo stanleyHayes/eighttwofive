@@ -23,6 +23,7 @@ import { PageBanner } from "@/components/PageBanner";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import { useOpenSlots, useBookSlot, formatSlotTime } from "@/features/slots/hooks";
 import { errorMessage, type Slot } from "@/features/slots/api";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 interface BookingFormProps {
   slot: Slot;
@@ -113,6 +114,10 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
 }
 
 export function SlotsPage() {
+  useDocumentTitle(
+    "Book a visit",
+    "Book a home or atelier fitting with Eight Two Five to be measured in person before your piece is cut.",
+  );
   const [searchParams] = useSearchParams();
   const designId = searchParams.get("designId");
   const { data: slots, isLoading, error, refetch } = useOpenSlots();

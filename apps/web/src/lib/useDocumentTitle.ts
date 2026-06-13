@@ -1,24 +1,48 @@
 import { useEffect } from "react";
 
 const SUFFIX = "Eight Two Five";
+/** Production origin used for canonical/OG URLs regardless of where the SPA runs. */
+const SITE_ORIGIN = "https://eighttwofive.vercel.app";
+
+function upsertMeta(attr: "name" | "property", key: string, content: string) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function upsertCanonical(href: string) {
+  let el = document.head.querySelector('link[rel="canonical"]');
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", "canonical");
+    document.head.appendChild(el);
+  }
+  el.setAttribute("href", href);
+}
 
 /**
- * Sets the document title (and optionally the meta description) for the current
- * route — lightweight client-side SEO for the SPA. Restores nothing on unmount;
- * the next route sets its own.
+ * Sets the document title and the route's SEO meta (description, canonical, and
+ * Open Graph title/url/description) for the current page. Search engines that
+ * render the SPA pick these up per route; non-JS social crawlers get their tags
+ * from the edge middleware instead.
  */
 export function useDocumentTitle(title?: string, description?: string) {
   useEffect(() => {
-    document.title = title ? `${title} · ${SUFFIX}` : SUFFIX;
+    const full = title ? `${title} · ${SUFFIX}` : SUFFIX;
+    document.title = full;
+
+    const canonical = SITE_ORIGIN + window.location.pathname;
+    upsertCanonical(canonical);
+    upsertMeta("property", "og:title", full);
+    upsertMeta("property", "og:url", canonical);
 
     if (description) {
-      let meta = document.querySelector('meta[name="description"]');
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.setAttribute("name", "description");
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute("content", description);
+      upsertMeta("name", "description", description);
+      upsertMeta("property", "og:description", description);
     }
   }, [title, description]);
 }

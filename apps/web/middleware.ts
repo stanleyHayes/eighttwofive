@@ -3,18 +3,19 @@ import {
   OG_TRANSFORM,
   buildOgHtml,
   firstDesignPhotoPublicId,
-  isCrawler,
+  isSocialCrawler,
   photoUrl,
   sortedPhotos,
   type OgData,
 } from "./src/lib/og";
 
 /**
- * Run this middleware only on shareable storefront paths. Other routes continue
- * straight to the Vite SPA via vercel.json rewrites.
+ * Run this middleware on the dynamic sitemap and on shareable storefront paths.
+ * Other routes continue straight to the Vite SPA via vercel.json rewrites.
  */
 export const config = {
   matcher: [
+    "/sitemap.xml",
     "/collections/:slug",
     "/collections/:slug/",
     "/designs/:slug",
@@ -24,6 +25,9 @@ export const config = {
 
 const DEFAULT_TITLE = "Eight Two Five";
 const DEFAULT_DESCRIPTION = "Made-to-measure womenswear from Accra.";
+/** Canonical public origin used in sitemap URLs. */
+const SITE_ORIGIN = "https://eighttwofive.vercel.app";
+const STATIC_PATHS = ["/", "/store", "/about", "/contact", "/slots"];
 
 interface SettingsEnvelope {
   data: { cloudName: string };
@@ -70,13 +74,55 @@ function imageUrl(cloudName: string, publicId?: string): string | undefined {
   return photoUrl(cloudName, publicId, OG_TRANSFORM);
 }
 
+/** Build an XML sitemap of the static routes plus every live collection and design. */
+async function sitemapResponse(requestUrl: URL): Promise<Response> {
+  const base = apiBase(requestUrl);
+  const urls = new Set(STATIC_PATHS.map((path) => SITE_ORIGIN + path));
+
+  try {
+    const [collectionsRes, designsRes] = await Promise.all([
+      fetch(`${base}/api/v1/collections`),
+      fetch(`${base}/api/v1/designs`),
+    ]);
+
+    if (collectionsRes.ok) {
+      const body = (await collectionsRes.json()) as { data?: Array<{ slug: string }> };
+      for (const item of body.data ?? []) urls.add(`${SITE_ORIGIN}/collections/${item.slug}`);
+    }
+
+    if (designsRes.ok) {
+      const body = (await designsRes.json()) as { data?: Array<{ slug: string }> };
+      for (const item of body.data ?? []) urls.add(`${SITE_ORIGIN}/designs/${item.slug}`);
+    }
+  } catch {
+    // Network/API failure — fall back to the static routes already in the set.
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[...urls].map((loc) => `  <url><loc>${loc}</loc></url>`).join("\n")}
+</urlset>`;
+
+  return new Response(xml, {
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
+}
+
 export default async function middleware(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/sitemap.xml") {
+    return sitemapResponse(url);
+  }
+
   const userAgent = request.headers.get("user-agent") ?? "";
-  if (!isCrawler(userAgent)) {
+  if (!isSocialCrawler(userAgent)) {
     return next();
   }
 
-  const url = new URL(request.url);
   const match = /^\/(collections|designs)\/([^/]+)\/?$/.exec(url.pathname);
   if (!match) {
     return next();

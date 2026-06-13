@@ -5,6 +5,7 @@ import {
   escapeHtml,
   firstDesignPhotoPublicId,
   isCrawler,
+  isSocialCrawler,
   photoUrl,
   sortedPhotos,
 } from "./og";
@@ -27,6 +28,34 @@ describe("isCrawler", () => {
   it("returns false for a normal browser user agent", () => {
     expect(
       isCrawler(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("isSocialCrawler", () => {
+  it.each([
+    "facebookexternalhit/1.1",
+    "WhatsApp/2.21.4.22 A",
+    "Twitterbot/1.0",
+    "LinkedInBot/1.0",
+    "Discordbot/2.0",
+    "Instagram 219.0.0.12.117 Android",
+  ])("detects social crawler %s", (ua) => {
+    expect(isSocialCrawler(ua)).toBe(true);
+  });
+
+  it.each([
+    "Mozilla/5.0 (compatible; Googlebot/2.1)",
+    "Mozilla/5.0 (compatible; bingbot/2.0)",
+  ])("excludes JS-rendering search engine %s (they get the real SPA)", (ua) => {
+    expect(isSocialCrawler(ua)).toBe(false);
+  });
+
+  it("returns false for a normal browser user agent", () => {
+    expect(
+      isSocialCrawler(
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
       ),
     ).toBe(false);

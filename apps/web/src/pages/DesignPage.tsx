@@ -25,6 +25,7 @@ import Typography from "@mui/material/Typography";
 import CheckOutlined from "@mui/icons-material/CheckOutlined";
 import { useNavigate, useParams } from "react-router";
 import { ErrorState } from "@/components/EmptyState";
+import { JsonLd } from "@/components/JsonLd";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import type { Design } from "@/features/catalog/api";
 import { errorMessage } from "@/features/catalog/api";
@@ -47,6 +48,9 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { formatGhanaPhone, isValidGhanaPhone, normalizeGhanaPhone } from "@/lib/phone";
 import { ApiError } from "@/lib/api";
 import { clayDeep, noir, noirAlpha50, sandDeep, stone } from "@/theme";
+
+/** Canonical public origin, used for structured-data URLs. */
+const SITE_ORIGIN = "https://eighttwofive.vercel.app";
 
 type MeasurementKey = "bust" | "waist" | "hips" | "length";
 
@@ -324,6 +328,45 @@ function DesignDetail({
   const chartEntries = band ? Object.entries(band.chart) : [];
   const cloudName = settings?.cloudName ?? "";
 
+  // Structured data for search engines that render the SPA: a Product (with a
+  // made-to-order price range) and a breadcrumb trail for rich results.
+  const structuredData = useMemo(() => {
+    const prices = design.sizeBands.map((entry) => entry.pricePesewas).filter((price) => price > 0);
+    const images = cloudName
+      ? sortedPhotos(design).map((photo) => photoUrl(cloudName, photo.publicId, DETAIL_TRANSFORM))
+      : [];
+
+    const product: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: design.name,
+      description: design.note || `${design.name} — made-to-measure by Eight Two Five.`,
+      brand: { "@type": "Brand", name: "Eight Two Five" },
+    };
+    if (images.length > 0) product.image = images;
+    if (prices.length > 0) {
+      product.offers = {
+        "@type": "AggregateOffer",
+        priceCurrency: "GHS",
+        lowPrice: Math.min(...prices) / 100,
+        highPrice: Math.max(...prices) / 100,
+        availability: "https://schema.org/MadeToOrder",
+      };
+    }
+
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
+        { "@type": "ListItem", position: 2, name: "Store", item: `${SITE_ORIGIN}/store` },
+        { "@type": "ListItem", position: 3, name: design.name, item: `${SITE_ORIGIN}/designs/${design.slug}` },
+      ],
+    };
+
+    return [product, breadcrumb];
+  }, [design, cloudName]);
+
   const [customSizeOpen, setCustomSizeOpen] = useState(false);
   const [sizeMode, setSizeMode] = useState<"self" | "home_visit" | "workplace">("self");
   const [measurements, setMeasurements] = useState<Record<MeasurementKey, string>>(defaultMeasurements);
@@ -465,6 +508,9 @@ function DesignDetail({
         gap: { xs: 4, md: 8 },
       }}
     >
+      {structuredData.map((data, index) => (
+        <JsonLd key={index} data={data} />
+      ))}
       <Gallery design={design} cloudName={cloudName} />
 
       <Box>

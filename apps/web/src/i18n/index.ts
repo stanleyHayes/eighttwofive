@@ -27,4 +27,12 @@ void i18n.use(initReactI18next).init({
   react: { useSuspense: false },
 });
 
+// Keep <html lang> in sync with the active language for accessibility and SEO.
+if (typeof document !== "undefined") {
+  document.documentElement.lang = i18n.language;
+  i18n.on("languageChanged", (lng) => {
+    document.documentElement.lang = lng;
+  });
+}
+
 export default i18n;

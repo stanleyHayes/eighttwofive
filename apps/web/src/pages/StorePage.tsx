@@ -23,6 +23,7 @@ import {
   usePublicDesigns,
   usePublicSettings,
 } from "@/features/storefront/hooks";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { sand, sandDeep } from "@/theme";
 
 function CardGridSkeleton({ count }: { count: number }) {
@@ -42,6 +43,10 @@ function CardGridSkeleton({ count }: { count: number }) {
 }
 
 export function StorePage() {
+  useDocumentTitle(
+    "The store",
+    "Browse Eight Two Five's limited, themed collections and made-to-measure designs, cut to order in Accra.",
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [term, setTerm] = useState(() => searchParams.get("q") ?? "");
   const q = useDebouncedValue(term.trim(), 300);

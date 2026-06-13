@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /login
+Disallow: /auth/
+
+Sitemap: https://eighttwofive.vercel.app/sitemap.xml

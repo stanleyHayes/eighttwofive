@@ -23,10 +23,32 @@ const CRAWLER_AGENTS = [
   "instagram",
 ];
 
-/** Identify social-media / messaging crawlers that need server-rendered meta tags. */
+/** Identify social-media / messaging / search crawlers (kept broad for callers/tests). */
 export function isCrawler(userAgent: string): boolean {
   const ua = userAgent.toLowerCase();
   return CRAWLER_AGENTS.some((bot) => ua.includes(bot));
+}
+
+// Non-JS social/messaging crawlers that need the server-rendered OG shell.
+// Search engines (Googlebot, Bingbot) render JavaScript, so they are
+// deliberately excluded — they should receive the real SPA and index each
+// route's own content rather than the shell's redirect to "/".
+const SOCIAL_CRAWLER_AGENTS = [
+  "facebookexternalhit",
+  "whatsapp",
+  "twitterbot",
+  "linkedinbot",
+  "slackbot",
+  "discordbot",
+  "instagram",
+  "pinterest",
+  "telegrambot",
+];
+
+/** True for non-JS social crawlers that need the pre-rendered OG meta shell. */
+export function isSocialCrawler(userAgent: string): boolean {
+  const ua = userAgent.toLowerCase();
+  return SOCIAL_CRAWLER_AGENTS.some((bot) => ua.includes(bot));
 }
 
 /** Minimal HTML escaping for values injected into meta tag attributes. */
