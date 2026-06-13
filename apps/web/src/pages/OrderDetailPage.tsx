@@ -4,13 +4,13 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink, useParams } from "react-router";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { EmptyState, ErrorState } from "@/components/EmptyState";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
@@ -23,12 +23,19 @@ import {
   type Order,
 } from "@/features/orders/api";
 import { useOrder } from "@/features/orders/hooks";
-import { DETAIL_TRANSFORM, photoUrl, type PublicSettings } from "@/features/storefront/api";
+import {
+  DETAIL_TRANSFORM,
+  photoUrl,
+  type PublicSettings,
+} from "@/features/storefront/api";
 import { usePublicSettings } from "@/features/storefront/hooks";
 import { ApiError } from "@/lib/api";
 import { clayDeep, sandDeep, stone } from "@/theme";
 
-function errorMessage(error: unknown, fallback = "Could not load this order. Try again in a moment."): string {
+function errorMessage(
+  error: unknown,
+  fallback = "Could not load this order. Try again in a moment.",
+): string {
   return error instanceof ApiError ? error.message : fallback;
 }
 
@@ -46,7 +53,8 @@ function DeliveryLine({ order }: { order: Order }) {
   if (ratePesewas == null) {
     return (
       <Typography sx={{ color: "text.secondary" }}>
-        Dispatch to {area || "your area"} — delivery arranged directly with Eight Two Five.
+        Dispatch to {area || "your area"} — delivery arranged directly with
+        Eight Two Five.
       </Typography>
     );
   }
@@ -60,7 +68,10 @@ function DeliveryLine({ order }: { order: Order }) {
 
 function VisitCard({ whatsappNumber }: { whatsappNumber?: string }) {
   return (
-    <Card variant="outlined" sx={{ bgcolor: "background.paper", borderColor: "divider" }}>
+    <Card
+      variant="outlined"
+      sx={{ bgcolor: "background.paper", borderColor: "divider" }}
+    >
       <CardContent>
         <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
           Booked visit
@@ -82,7 +93,9 @@ function VisitCard({ whatsappNumber }: { whatsappNumber?: string }) {
 }
 
 function isCustomerFacingStatus(status: Order["status"]): boolean {
-  return status === "booked" || status === "in_production" || status === "ready";
+  return (
+    status === "booked" || status === "in_production" || status === "ready"
+  );
 }
 
 function StatusAlert({ order }: { order: Order }) {
@@ -113,13 +126,25 @@ function StatusAlert({ order }: { order: Order }) {
   );
 }
 
-function OrderContent({ order, settings }: { order: Order; settings?: PublicSettings }) {
+function OrderContent({
+  order,
+  settings,
+}: {
+  order: Order;
+  settings?: PublicSettings;
+}) {
   const imageUrl =
     settings?.cloudName && order.designSnapshot.photoPublicId
-      ? photoUrl(settings.cloudName, order.designSnapshot.photoPublicId, DETAIL_TRANSFORM)
+      ? photoUrl(
+          settings.cloudName,
+          order.designSnapshot.photoPublicId,
+          DETAIL_TRANSFORM,
+        )
       : null;
   const stage = customerStageLabel(order.status);
-  const timeframe = order.quote.timeline ? `Estimated: ${order.quote.timeline}` : null;
+  const timeframe = order.quote.timeline
+    ? `Estimated: ${order.quote.timeline}`
+    : null;
   const price = effectivePricePesewas(order);
 
   return (
@@ -134,13 +159,19 @@ function OrderContent({ order, settings }: { order: Order; settings?: PublicSett
           {stage}
         </Typography>
         {timeframe && (
-          <Typography variant="subtitle1" sx={{ color: "text.secondary", mt: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ color: "text.secondary", mt: 1 }}
+          >
             {timeframe}
           </Typography>
         )}
       </Box>
 
-      <Card variant="outlined">
+      <Card
+        variant="outlined"
+        sx={{ bgcolor: "background.paper", borderColor: "divider" }}
+      >
         <Stack direction={{ xs: "column", md: "row" }}>
           {imageUrl ? (
             <Box
@@ -155,6 +186,8 @@ function OrderContent({ order, settings }: { order: Order; settings?: PublicSett
                 objectFit: "cover",
                 display: "block",
                 bgcolor: sandDeep,
+                borderRight: { md: "1px solid" },
+                borderColor: { md: "divider" },
                 flexShrink: 0,
               }}
             />
@@ -168,6 +201,8 @@ function OrderContent({ order, settings }: { order: Order; settings?: PublicSett
                 alignItems: "center",
                 justifyContent: "center",
                 p: 3,
+                borderRight: { md: "1px solid" },
+                borderColor: { md: "divider" },
                 flexShrink: 0,
               }}
             >
@@ -176,27 +211,49 @@ function OrderContent({ order, settings }: { order: Order; settings?: PublicSett
               </Typography>
             </Box>
           )}
-          <CardContent sx={{ flex: 1 }}>
+          <CardContent sx={{ flex: 1, p: { xs: 3, md: 4 } }}>
             <Stack spacing={2}>
               <Typography variant="h5" component="h2">
                 {order.designSnapshot.name}
               </Typography>
               {price > 0 && (
-                <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ color: "text.secondary" }}
+                >
                   {formatPesewas(price)}
                 </Typography>
               )}
               <Divider />
-              <DetailItem label="Size" value={order.customisation.bandLabel || order.customisation.sizeMode} />
-              <DetailItem label="Delivery" value={<DeliveryLine order={order} />} />
-              <DetailItem label="Payment" value={paymentStatus(order)} />
-              <DetailItem label="Phone" value={order.customerPhone} />
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+                  gap: { xs: 2.25, sm: 3 },
+                }}
+              >
+                <DetailItem
+                  label="Size"
+                  value={
+                    order.customisation.bandLabel ||
+                    order.customisation.sizeMode
+                  }
+                />
+                <DetailItem label="Payment" value={paymentStatus(order)} />
+                <DetailItem label="Phone" value={order.customerPhone} />
+                <DetailItem
+                  label="Delivery"
+                  value={<DeliveryLine order={order} />}
+                />
+              </Box>
             </Stack>
           </CardContent>
         </Stack>
       </Card>
 
-      {hasVisit(order) && <VisitCard whatsappNumber={settings?.whatsappNumber} />}
+      {hasVisit(order) && (
+        <VisitCard whatsappNumber={settings?.whatsappNumber} />
+      )}
     </Stack>
   );
 }
@@ -204,7 +261,11 @@ function OrderContent({ order, settings }: { order: Order; settings?: PublicSett
 function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <Box>
-      <Typography variant="overline" component="span" sx={{ color: stone, display: "block" }}>
+      <Typography
+        variant="overline"
+        component="span"
+        sx={{ color: stone, display: "block" }}
+      >
         {label}
       </Typography>
       {typeof value === "string" ? (
@@ -226,35 +287,50 @@ export function OrderDetailPage() {
 
   return (
     <StorefrontLayout>
-      <Container component="main" maxWidth="lg">
-        <Box sx={{ py: { xs: 8, md: 13 }, maxWidth: 720 }}>
-          <Link component={RouterLink} to="/account" underline="hover" sx={{ color: stone, display: "inline-block", mb: 3 }}>
-            ← Back to account
-          </Link>
+      <Box sx={{ py: { xs: 8, md: 13 }, maxWidth: 920 }}>
+        <Link
+          component={RouterLink}
+          to="/account"
+          underline="none"
+          variant="overline"
+          sx={{
+            color: stone,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.75,
+            mb: 3,
+            "&:hover": { color: "text.primary" },
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 15 }} />
+          Back to account
+        </Link>
 
-          {order.isLoading || settings.isLoading ? (
-            <Stack spacing={4}>
-              <Box>
-                <Skeleton variant="text" width={120} />
-                <Skeleton variant="text" width={240} height={56} sx={{ mt: 1 }} />
-                <Skeleton variant="text" width={180} sx={{ mt: 1 }} />
-              </Box>
-              <Skeleton variant="rectangular" height={320} />
-            </Stack>
-          ) : notFound ? (
-            <EmptyState
-              label="Order not found"
-              title="We couldn't find that order."
-              body="The reference may be mistyped, or the order belongs to a different account. Your orders are listed on your account page."
-              action={{ label: "Back to account", to: "/account" }}
-            />
-          ) : order.error ? (
-            <ErrorState message={errorMessage(order.error)} onRetry={() => order.refetch()} />
-          ) : order.data ? (
-            <OrderContent order={order.data} settings={settings.data} />
-          ) : null}
-        </Box>
-      </Container>
+        {order.isLoading || settings.isLoading ? (
+          <Stack spacing={4}>
+            <Box>
+              <Skeleton variant="text" width={120} />
+              <Skeleton variant="text" width={240} height={56} sx={{ mt: 1 }} />
+              <Skeleton variant="text" width={180} sx={{ mt: 1 }} />
+            </Box>
+            <Skeleton variant="rectangular" height={320} />
+          </Stack>
+        ) : notFound ? (
+          <EmptyState
+            label="Order not found"
+            title="We couldn't find that order."
+            body="The reference may be mistyped, or the order belongs to a different account. Your orders are listed on your account page."
+            action={{ label: "Back to account", to: "/account" }}
+          />
+        ) : order.error ? (
+          <ErrorState
+            message={errorMessage(order.error)}
+            onRetry={() => order.refetch()}
+          />
+        ) : order.data ? (
+          <OrderContent order={order.data} settings={settings.data} />
+        ) : null}
+      </Box>
     </StorefrontLayout>
   );
 }

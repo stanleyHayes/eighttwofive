@@ -4,10 +4,19 @@ import CardContent from "@mui/material/CardContent";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import { Link as RouterLink } from "react-router";
 import { formatPesewas } from "@/features/catalog/money";
 import { CARD_TRANSFORM, photoUrl } from "@/features/storefront/api";
-import { sandDeep } from "@/theme";
+import {
+  amber,
+  brass,
+  cream,
+  GRAIN_URL,
+  ink,
+  monoFamily,
+  sandDeep,
+} from "@/theme";
 import type { Order } from "./api";
 import { customerStageLabel } from "./api";
 
@@ -28,7 +37,20 @@ export function OrderSummaryCard({ order, cloudName }: OrderSummaryCardProps) {
       : null;
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" } }}>
+    <Card
+      variant="outlined"
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
+        bgcolor: "background.paper",
+        borderColor: "divider",
+        transition: "border-color 180ms ease, transform 180ms ease",
+        "@media (prefers-reduced-motion: no-preference)": {
+          "&:hover": { transform: "translateY(-2px)" },
+        },
+        "&:hover": { borderColor: amber },
+      }}
+    >
       {imageUrl ? (
         <Box
           component="img"
@@ -42,6 +64,8 @@ export function OrderSummaryCard({ order, cloudName }: OrderSummaryCardProps) {
             objectFit: "cover",
             display: "block",
             bgcolor: sandDeep,
+            borderRight: { sm: "1px solid" },
+            borderColor: { sm: "divider" },
             flexShrink: 0,
           }}
         />
@@ -50,25 +74,51 @@ export function OrderSummaryCard({ order, cloudName }: OrderSummaryCardProps) {
           sx={{
             width: { xs: "100%", sm: 160 },
             height: { xs: 200, sm: 160 },
-            bgcolor: sandDeep,
+            bgcolor: ink,
+            color: cream,
+            backgroundImage: GRAIN_URL,
+            backgroundBlendMode: "overlay",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             p: 2,
+            borderRight: { sm: "1px solid" },
+            borderColor: { sm: "divider" },
             flexShrink: 0,
           }}
         >
-          <Typography variant="body2" sx={{ textAlign: "center" }}>
+          <Typography
+            variant="body2"
+            sx={{ textAlign: "center", maxWidth: "14ch" }}
+          >
             {order.designSnapshot.name}
           </Typography>
         </Box>
       )}
-      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-        <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+      <CardContent
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.25,
+          p: { xs: 2.5, sm: 3 },
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
+        >
+          <Typography
+            variant="overline"
+            sx={{ color: brass, fontVariantNumeric: "tabular-nums" }}
+          >
             {order.ref}
           </Typography>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}
+          >
             {date}
           </Typography>
         </Stack>
@@ -76,21 +126,48 @@ export function OrderSummaryCard({ order, cloudName }: OrderSummaryCardProps) {
           {order.designSnapshot.name}
         </Typography>
         {order.designSnapshot.pricePesewas > 0 && (
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}
+          >
             {formatPesewas(order.designSnapshot.pricePesewas)}
           </Typography>
         )}
-        <Stack direction="row" spacing={1} sx={{ mt: "auto", pt: 1, alignItems: "center" }}>
-          <Typography
-            variant="overline"
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{ mt: "auto", pt: 1.5, alignItems: "center" }}
+        >
+          <Box
             component="span"
-            sx={{ color: "primary.main", fontWeight: 600, letterSpacing: "0.08em" }}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              px: 1,
+              py: 0.5,
+              color: "text.primary",
+              fontFamily: monoFamily,
+              fontSize: "0.6875rem",
+              textTransform: "uppercase",
+            }}
           >
             {customerStageLabel(order.status)}
-          </Typography>
+          </Box>
           <Box sx={{ flex: 1 }} />
-          <Link component={RouterLink} to={`/account/orders/${order.ref}`} underline="hover">
-            View order
+          <Link
+            component={RouterLink}
+            to={`/account/orders/${order.ref}`}
+            underline="none"
+            variant="overline"
+            sx={{
+              color: "text.primary",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.75,
+              "&:hover": { color: amber },
+            }}
+          >
+            View order <ArrowOutwardIcon sx={{ fontSize: 15 }} />
           </Link>
         </Stack>
       </CardContent>
