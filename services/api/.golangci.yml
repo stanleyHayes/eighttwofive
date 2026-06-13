@@ -1,0 +1,86 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: all
+  # The wsl linter was renamed to wsl_v5 in golangci-lint v2. Disable the
+  # deprecated alias and enable the replacement explicitly.
+  disable:
+    - wsl
+  enable:
+    - wsl_v5
+  settings:
+    # The design repository legitimately exposes both non-paged (storefront) and
+    # paged (admin) reads alongside its CRUD surface, taking it just past the
+    # default of 10 interface methods.
+    interfacebloat:
+      max: 12
+    # depguard denies everything unless rules exist; give it real deny rules.
+    depguard:
+      rules:
+        main:
+          files:
+            - $all
+          deny:
+            - pkg: io/ioutil
+              desc: deprecated — use io and os
+            - pkg: github.com/pkg/errors
+              desc: use stdlib errors with %w wrapping
+            - pkg: go.mongodb.org/mongo-driver$
+              desc: use the v2 driver (go.mongodb.org/mongo-driver/v2)
+    # Exhaustiveness is valuable for our own structs; third-party option/config
+    # structs (http.Server, cors.Options, SendEmailRequest, ...) are designed
+    # to be partially initialized.
+    exhaustruct:
+      exclude:
+        - 'net/http\..*'
+        - 'log/slog\.HandlerOptions$'
+        - '^github\.com/.*'
+        - '^go\.mongodb\.org/.*'
+    varnamelen:
+      ignore-names:
+        - w
+        - r
+        - h
+        - s
+        - u
+        - c
+        - d
+        - at
+        - in
+        - tc
+        - db
+        - id
+        - to
+        - by
+        - p
+        - o
+    wrapcheck:
+      ignore-interface-regexps:
+        - ^github.com/hayfordstanley/eightfivetwo/services/api/internal/domain
+  exclusions:
+    rules:
+      # Seed fixtures are data tables; literal prices there are not magic numbers.
+      - path: cmd/e25/
+        linters:
+          - mnd
+      # Test code legitimately uses partial literals, fixed test data, and
+      # long single-purpose functions.
+      - path: _test\.go
+        linters:
+          - exhaustruct
+          - funlen
+          - mnd
+          - gosec
+          - err113
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/hayfordstanley/eightfivetwo

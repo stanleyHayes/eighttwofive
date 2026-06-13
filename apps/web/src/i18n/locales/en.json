@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "store": "Store",
+    "atelier": "Atelier",
+    "contact": "Contact",
+    "account": "Your account",
+    "menu": "Menu"
+  },
+  "benefits": {
+    "measurements": "Made to your measurements",
+    "payment": "Mobile money & cards",
+    "limited": "Limited collections",
+    "fulfilment": "Dispatch or pickup"
+  },
+  "footer": {
+    "tagline": "Made-to-measure womenswear, cut one piece at a time in {{location}}.",
+    "shop": "Shop",
+    "theHouse": "The House",
+    "connect": "Connect",
+    "theStore": "The store",
+    "yourAccount": "Your account",
+    "signIn": "Sign in",
+    "ourStory": "Our story",
+    "bookVisit": "Book a visit",
+    "contact": "Contact",
+    "instagram": "Instagram",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "pricesIn": "Prices in GH₵",
+    "payments": "Mobile money · Cards"
+  }
+}

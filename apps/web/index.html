@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Eight Two Five — made-to-measure womenswear, cut to you in Accra. Browse limited, themed collections, choose your measurements, and have each piece made to order."
+    />
+    <meta name="keywords" content="made-to-measure, womenswear, Accra, Ghana, tailoring, bespoke, fashion, atelier" />
+    <meta name="author" content="Eight Two Five" />
+    <meta name="theme-color" content="#16120d" />
+    <link rel="canonical" href="https://eighttwofive.com/" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Eight Two Five" />
+    <meta property="og:title" content="Eight Two Five — Made-to-measure womenswear, cut in Accra" />
+    <meta
+      property="og:description"
+      content="Limited, themed collections cut one garment at a time. Choose a design, get measured your way, and have it made to your shape."
+    />
+    <meta property="og:url" content="https://eighttwofive.com/" />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/dvoqbonr2/image/upload/w_1200,h_630,c_fill,g_auto/eightfivetwo/hero-atelier"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Eight Two Five — Made-to-measure womenswear, cut in Accra" />
+    <meta
+      name="twitter:description"
+      content="Limited, themed collections cut one garment at a time, made to your measurements."
+    />
+    <meta
+      name="twitter:image"
+      content="https://res.cloudinary.com/dvoqbonr2/image/upload/w_1200,h_630,c_fill,g_auto/eightfivetwo/hero-atelier"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      html {
+        background-color: #f4efe6;
+      }
+      /* Splash: shown until the app mounts, then fades out. */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #16120d;
+        transition: opacity 420ms ease, visibility 420ms ease;
+      }
+      #splash.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #splash svg {
+        width: 72px;
+        height: 72px;
+        animation: splashPulse 1.4s ease-in-out infinite;
+      }
+      @keyframes splashPulse {
+        0%, 100% { opacity: 0.55; transform: translateY(0); }
+        50% { opacity: 1; transform: translateY(-3px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #splash svg { animation: none; opacity: 1; }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Spline+Sans+Mono:wght@400;500;600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Spline+Sans+Mono:wght@400;500;600&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Spline+Sans+Mono:wght@400;500;600&display=swap"
+      />
+    </noscript>
+    <title>Eight Two Five</title>
+  </head>
+  <body>
+    <div id="splash" role="status" aria-label="Loading Eight Two Five">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="18" width="7" height="30" fill="#e0a44a" />
+        <rect x="28.5" y="26" width="7" height="22" fill="#e0a44a" />
+        <rect x="42" y="22" width="7" height="26" fill="#e0a44a" />
+        <rect x="12" y="49" width="40" height="2.4" fill="#cf9a3f" />
+      </svg>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

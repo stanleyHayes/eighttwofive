@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "store": "Boutique",
+    "atelier": "Atelier",
+    "contact": "Contact",
+    "account": "Votre compte",
+    "menu": "Menu"
+  },
+  "benefits": {
+    "measurements": "À vos mesures",
+    "payment": "Mobile money & cartes",
+    "limited": "Collections limitées",
+    "fulfilment": "Livraison ou retrait"
+  },
+  "footer": {
+    "tagline": "Vêtements féminins sur mesure, taillés une pièce à la fois à {{location}}.",
+    "shop": "Boutique",
+    "theHouse": "La Maison",
+    "connect": "Nous suivre",
+    "theStore": "La boutique",
+    "yourAccount": "Votre compte",
+    "signIn": "Se connecter",
+    "ourStory": "Notre histoire",
+    "bookVisit": "Réserver une visite",
+    "contact": "Contact",
+    "instagram": "Instagram",
+    "whatsapp": "WhatsApp",
+    "email": "E-mail",
+    "pricesIn": "Prix en GH₵",
+    "payments": "Mobile money · Cartes"
+  }
+}

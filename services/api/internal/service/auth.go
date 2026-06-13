@@ -1,0 +1,188 @@
+package service
+
+import (
+	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
+	"log/slog"
+	"net/mail"
+	"strings"
+	"time"
+
+	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
+)
+
+const (
+	loginTokenTTL  = 15 * time.Minute
+	sessionTTL     = 30 * 24 * time.Hour
+	tokenByteCount = 32
+)
+
+// Auth implements passwordless sign-in: an emailed one-time link exchanges
+// for a long-lived session. Accounts are "light by design" (scope §4.8) —
+// upserted on first contact, so order flows can call RequestLink directly.
+type Auth struct {
+	users  domain.UserRepository
+	tokens domain.TokenRepository
+	email  domain.EmailSender
+	logger *slog.Logger
+	webURL string
+	admins map[string]struct{}
+	now    func() time.Time
+}
+
+// NewAuth wires the auth service. Emails in adminEmails sign in as admins.
+func NewAuth(
+	users domain.UserRepository,
+	tokens domain.TokenRepository,
+	email domain.EmailSender,
+	logger *slog.Logger,
+	webURL string,
+	adminEmails []string,
+) *Auth {
+	admins := make(map[string]struct{}, len(adminEmails))
+	for _, adminEmail := range adminEmails {
+		admins[strings.ToLower(strings.TrimSpace(adminEmail))] = struct{}{}
+	}
+
+	return &Auth{
+		users:  users,
+		tokens: tokens,
+		email:  email,
+		logger: logger,
+		webURL: strings.TrimRight(webURL, "/"),
+		admins: admins,
+		now:    time.Now,
+	}
+}
+
+// RequestLink upserts the user and emails a single-use sign-in link.
+func (a *Auth) RequestLink(ctx context.Context, emailAddr, name string) error {
+	emailAddr = strings.ToLower(strings.TrimSpace(emailAddr))
+	name = strings.TrimSpace(name)
+
+	if name == "" {
+		return fmt.Errorf("%w: name is required", domain.ErrInvalidInput)
+	}
+
+	_, err := mail.ParseAddress(emailAddr)
+	if err != nil {
+		return fmt.Errorf("%w: invalid email address", domain.ErrInvalidInput)
+	}
+
+	role := domain.RoleCustomer
+	if _, isAdmin := a.admins[emailAddr]; isAdmin {
+		role = domain.RoleAdmin
+	}
+
+	user := &domain.User{ID: "", Email: emailAddr, Name: name, Role: role, CreatedAt: a.now().UTC()}
+
+	err = a.users.Upsert(ctx, user)
+	if err != nil {
+		return fmt.Errorf("upsert user: %w", err)
+	}
+
+	token, tokenHash, err := newToken()
+	if err != nil {
+		return err
+	}
+
+	err = a.tokens.StoreLoginToken(ctx, tokenHash, user.ID, a.now().Add(loginTokenTTL))
+	if err != nil {
+		return fmt.Errorf("store login token: %w", err)
+	}
+
+	err = a.email.SendLoginLink(ctx, user.Email, a.webURL+"/auth/verify?token="+token)
+	if err != nil {
+		return fmt.Errorf("send login link: %w", err)
+	}
+
+	return nil
+}
+
+// Verify exchanges a one-time login token for a session token and the user.
+func (a *Auth) Verify(ctx context.Context, token string) (string, *domain.User, error) {
+	userID, err := a.tokens.ConsumeLoginToken(ctx, hashToken(token))
+	if err != nil {
+		return "", nil, fmt.Errorf("consume login token: %w", err)
+	}
+
+	user, err := a.users.GetByID(ctx, userID)
+	if err != nil {
+		return "", nil, fmt.Errorf("load user: %w", err)
+	}
+
+	sessionToken, sessionHash, err := newToken()
+	if err != nil {
+		return "", nil, err
+	}
+
+	err = a.tokens.CreateSession(ctx, sessionHash, user.ID, a.now().Add(sessionTTL))
+	if err != nil {
+		return "", nil, fmt.Errorf("create session: %w", err)
+	}
+
+	return sessionToken, user, nil
+}
+
+// UserFromSession resolves a session token to its user.
+func (a *Auth) UserFromSession(ctx context.Context, sessionToken string) (*domain.User, error) {
+	userID, err := a.tokens.GetSession(ctx, hashToken(sessionToken))
+	if err != nil {
+		return nil, fmt.Errorf("get session: %w", err)
+	}
+
+	user, err := a.users.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("load user: %w", err)
+	}
+
+	return user, nil
+}
+
+// CreateSession creates a new session for an existing user and returns the
+// raw session token. It is used by flows that upsert a user before the
+// passwordless link step (e.g. checkout).
+func (a *Auth) CreateSession(ctx context.Context, userID string) (string, error) {
+	sessionToken, sessionHash, err := newToken()
+	if err != nil {
+		return "", err
+	}
+
+	err = a.tokens.CreateSession(ctx, sessionHash, userID, a.now().Add(sessionTTL))
+	if err != nil {
+		return "", fmt.Errorf("create session: %w", err)
+	}
+
+	return sessionToken, nil
+}
+
+// Logout revokes the session. Unknown tokens are not an error.
+func (a *Auth) Logout(ctx context.Context, sessionToken string) {
+	err := a.tokens.DeleteSession(ctx, hashToken(sessionToken))
+	if err != nil {
+		a.logger.WarnContext(ctx, "delete session", "error", err)
+	}
+}
+
+func newToken() (string, string, error) {
+	buf := make([]byte, tokenByteCount)
+
+	_, err := rand.Read(buf)
+	if err != nil {
+		return "", "", fmt.Errorf("generate token: %w", err)
+	}
+
+	token := base64.RawURLEncoding.EncodeToString(buf)
+
+	return token, hashToken(token), nil
+}
+
+func hashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+
+	return hex.EncodeToString(sum[:])
+}

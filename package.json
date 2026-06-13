@@ -1,0 +1,22 @@
+{
+  "name": "eightfivetwo",
+  "private": true,
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "api:dev": "cd services/api && go run ./cmd/server",
+    "api:test": "cd services/api && go test ./...",
+    "api:lint": "cd services/api && golangci-lint run"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18"
+  }
+}
