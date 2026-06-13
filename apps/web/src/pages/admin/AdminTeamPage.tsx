@@ -24,7 +24,7 @@ import type { User, UserRole } from "@/lib/api";
 const ROLES: { value: UserRole; label: string }[] = [
   { value: "customer", label: "Customer — storefront only" },
   { value: "viewer", label: "Viewer — read-only admin" },
-  { value: "staff", label: "Staff — orders & visits" },
+  { value: "staff", label: "Staff — orders, visits & catalogue" },
   { value: "admin", label: "Admin — full access" },
 ];
 
@@ -78,7 +78,7 @@ export function AdminTeamPage() {
         icon={<GroupOutlined />}
         breadcrumbs={[{ label: "Admin", to: "/admin" }, { label: "Team" }]}
         title="Team & access"
-        description="Assign roles to control who can do what. Admins manage everything; staff handle orders and visits; viewers see the dashboard read-only."
+        description="Assign roles to control who can do what. Admins manage everything; staff handle orders, visits, and the catalogue; viewers see the dashboard read-only."
       />
 
       <Box sx={{ mt: 3, mb: 4 }}>

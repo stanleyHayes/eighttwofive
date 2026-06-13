@@ -61,7 +61,8 @@ func (r Role) Permissions() []Permission {
 	case RoleStaff:
 		return []Permission{
 			PermAnalyticsRead, PermOrdersRead, PermOrdersWrite,
-			PermSlotsRead, PermSlotsWrite, PermSubscribersRead, PermCatalogueRead,
+			PermSlotsRead, PermSlotsWrite, PermSubscribersRead,
+			PermCatalogueRead, PermCatalogueWrite,
 		}
 	case RoleViewer:
 		return []Permission{
