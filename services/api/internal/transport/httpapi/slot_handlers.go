@@ -117,7 +117,7 @@ func (h *Handlers) ListOpenSlots(w http.ResponseWriter, r *http.Request) {
 
 	slots, err := h.slots.ListSlots(r.Context(), filter)
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -155,7 +155,7 @@ func (h *Handlers) BookSlot(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -175,7 +175,7 @@ func (h *Handlers) BookSlot(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminListSlots(w http.ResponseWriter, r *http.Request) {
 	slots, err := h.slots.ListSlots(r.Context(), domain.SlotFilter{})
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -192,7 +192,7 @@ func (h *Handlers) AdminCreateSlot(w http.ResponseWriter, r *http.Request) {
 
 	slot, err := h.slots.CreateSlot(r.Context(), req.Start, req.End)
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -204,7 +204,7 @@ func (h *Handlers) AdminCreateSlot(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminCloseSlot(w http.ResponseWriter, r *http.Request) {
 	err := h.slots.CloseSlot(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -216,7 +216,7 @@ func (h *Handlers) AdminCloseSlot(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminReopenSlot(w http.ResponseWriter, r *http.Request) {
 	err := h.slots.ReopenSlot(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -228,7 +228,7 @@ func (h *Handlers) AdminReopenSlot(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminListVisits(w http.ResponseWriter, r *http.Request) {
 	visits, err := h.visits.ListVisits(r.Context(), domain.VisitFilter{})
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -245,7 +245,7 @@ func (h *Handlers) AdminRescheduleVisit(w http.ResponseWriter, r *http.Request) 
 
 	visit, err := h.visits.RescheduleVisit(r.Context(), chi.URLParam(r, "id"), req.NewSlotID)
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -257,7 +257,7 @@ func (h *Handlers) AdminRescheduleVisit(w http.ResponseWriter, r *http.Request) 
 func (h *Handlers) AdminCancelVisit(w http.ResponseWriter, r *http.Request) {
 	visit, err := h.visits.CancelVisit(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondSlotError(w, err)
+		respondSlotError(w, r, err)
 
 		return
 	}
@@ -265,7 +265,7 @@ func (h *Handlers) AdminCancelVisit(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, toVisitDTO(*visit))
 }
 
-func respondSlotError(w http.ResponseWriter, err error) {
+func respondSlotError(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.Is(err, domain.ErrInvalidInput):
 		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
@@ -278,6 +278,6 @@ func respondSlotError(w http.ResponseWriter, err error) {
 	case errors.Is(err, domain.ErrVisitAlreadyCancelled):
 		respondError(w, http.StatusConflict, "already_cancelled", "visit already cancelled")
 	default:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	}
 }

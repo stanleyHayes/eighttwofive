@@ -198,7 +198,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -247,7 +247,7 @@ func (h *Handlers) CreateCustomRequest(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -276,7 +276,7 @@ func (h *Handlers) GetOrder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -301,7 +301,7 @@ func (h *Handlers) ListCustomerOrders(w http.ResponseWriter, r *http.Request) {
 
 	orders, err := h.orders.ListCustomerOrders(r.Context(), user.ID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -342,7 +342,7 @@ func (h *Handlers) HandlePaymentWebhook(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -357,7 +357,7 @@ func (h *Handlers) AdminListOrders(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.orders.ListAdminOrdersPaged(r.Context(), page, pageSize)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -382,7 +382,7 @@ func (h *Handlers) AdminGetOrder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -419,7 +419,7 @@ func (h *Handlers) AdminUpdateQuote(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, domain.ErrConflict):
 			respondError(w, http.StatusConflict, "conflict", "the order changed underneath you, try again")
 		default:
-			respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			respondInternal(w, r, err)
 		}
 
 		return
@@ -446,7 +446,7 @@ func (h *Handlers) AdminSendPaymentLink(w http.ResponseWriter, r *http.Request) 
 		case errors.Is(err, domain.ErrConflict):
 			respondError(w, http.StatusConflict, "conflict", "the order changed underneath you, try again")
 		default:
-			respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			respondInternal(w, r, err)
 		}
 
 		return
@@ -485,7 +485,7 @@ func (h *Handlers) AdminMarkPaid(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, domain.ErrConflict):
 			respondError(w, http.StatusConflict, "conflict", "the order changed underneath you, try again")
 		default:
-			respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			respondInternal(w, r, err)
 		}
 
 		return
@@ -537,7 +537,7 @@ func (h *Handlers) AdminUpdateOrderStatus(w http.ResponseWriter, r *http.Request
 		case errors.Is(err, domain.ErrConflict):
 			respondError(w, http.StatusConflict, "conflict", "the order changed underneath you, try again")
 		default:
-			respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			respondInternal(w, r, err)
 		}
 
 		return

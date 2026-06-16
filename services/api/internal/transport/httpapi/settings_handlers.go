@@ -61,7 +61,7 @@ func fromSettingsDTO(dto settingsDTO) *domain.Settings {
 func (h *Handlers) GetSettings(w http.ResponseWriter, r *http.Request) {
 	settings, err := h.settings.Get(r.Context())
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -93,7 +93,7 @@ func (h *Handlers) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, domain.ErrInvalidInput):
 		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	default:
 		respondJSON(w, http.StatusOK, req)
 	}

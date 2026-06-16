@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 type errorBody struct {
@@ -36,4 +38,20 @@ func respondError(w http.ResponseWriter, status int, code, message string) {
 	if err != nil {
 		slog.Error("encode error response", "error", err)
 	}
+}
+
+// respondInternal logs the underlying cause of a 500 — with the request id, so
+// it can be matched to the client's failed request — and returns the generic
+// error message, keeping internals out of the response body. Every unexpected
+// server-side failure should funnel through here instead of a bare respondError
+// so no 500 goes unrecorded.
+func respondInternal(w http.ResponseWriter, r *http.Request, err error) {
+	slog.ErrorContext(r.Context(), "request failed",
+		"error", err,
+		"method", r.Method,
+		"path", r.URL.Path,
+		"request_id", chimw.GetReqID(r.Context()),
+	)
+
+	respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
 }

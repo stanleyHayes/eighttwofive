@@ -172,7 +172,7 @@ func copyCountMap(src map[string]int64) map[string]int64 {
 func (h *Handlers) AdminGetAnalytics(w http.ResponseWriter, r *http.Request) {
 	analytics, err := h.analytics.GetStoreAnalytics(r.Context())
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}

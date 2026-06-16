@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,6 +14,16 @@ import (
 )
 
 const maxBodyBytes = 1 << 20 // 1 MiB
+
+// healthCheckTimeout bounds the dependency ping behind /healthz so a wedged
+// database makes the check fail fast instead of hanging the probe.
+const healthCheckTimeout = 2 * time.Second
+
+// HealthPinger verifies that a critical dependency (the database) is reachable.
+// It is optional: when nil, /healthz reports liveness only.
+type HealthPinger interface {
+	Ping(ctx context.Context) error
+}
 
 // pagedDTO is the envelope data shape for every paginated admin listing.
 type pagedDTO[T any] struct {
@@ -59,6 +70,7 @@ type Handlers struct {
 	signer        domain.UploadSigner // nil when uploads are not configured
 	cloudName     string
 	secureCookies bool
+	health        HealthPinger // nil when no readiness dependency is wired
 }
 
 // NewHandlers wires HTTP handlers to application services.
@@ -74,6 +86,7 @@ func NewHandlers(
 	signer domain.UploadSigner,
 	cloudName string,
 	secureCookies bool,
+	health HealthPinger,
 ) *Handlers {
 	return &Handlers{
 		waitlist:      waitlist,
@@ -87,6 +100,7 @@ func NewHandlers(
 		signer:        signer,
 		cloudName:     cloudName,
 		secureCookies: secureCookies,
+		health:        health,
 	}
 }
 
@@ -101,8 +115,21 @@ func toSubscriberDTO(s domain.Subscriber) subscriberDTO {
 	return subscriberDTO{ID: s.ID, Email: s.Email, Name: s.Name, CreatedAt: s.CreatedAt}
 }
 
-// Health reports liveness.
-func (h *Handlers) Health(w http.ResponseWriter, _ *http.Request) {
+// Health reports readiness: it pings the database (when one is wired) so the
+// platform routes traffic away from an instance that has lost its store.
+func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
+	if h.health != nil {
+		ctx, cancel := context.WithTimeout(r.Context(), healthCheckTimeout)
+		defer cancel()
+
+		err := h.health.Ping(ctx)
+		if err != nil {
+			respondError(w, http.StatusServiceUnavailable, "unavailable", "database unreachable")
+
+			return
+		}
+	}
+
 	respondJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
@@ -132,7 +159,7 @@ func (h *Handlers) JoinWaitlist(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, domain.ErrDuplicateEmail):
 		respondError(w, http.StatusConflict, "conflict", "this email is already on the waitlist")
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	default:
 		respondJSON(w, http.StatusCreated, toSubscriberDTO(*sub))
 	}
@@ -144,7 +171,7 @@ func (h *Handlers) ListWaitlist(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.waitlist.ListPaged(r.Context(), page, pageSize)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -194,7 +221,7 @@ func (h *Handlers) SignUpload(w http.ResponseWriter, r *http.Request) {
 
 	sig, err := h.signer.SignUpload(folder)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "could not sign upload")
+		respondInternal(w, r, err)
 
 		return
 	}

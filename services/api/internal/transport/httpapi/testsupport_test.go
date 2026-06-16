@@ -910,7 +910,7 @@ func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
 	)
 	handlers := httpapi.NewHandlers(
 		waitlist, auth, settings, catalog, orderService, analyticsService,
-		slotService, visitService, nil, "test-cloud", false,
+		slotService, visitService, nil, "test-cloud", false, nil,
 	)
 	srv := httptest.NewServer(httpapi.NewRouter(handlers, logger, []string{"*"}))
 	t.Cleanup(srv.Close)
@@ -959,6 +959,7 @@ func newHandlersWithSigner(env *testEnv, signer domain.UploadSigner) *httpapi.Ha
 		signer,
 		"test-cloud",
 		false,
+		nil,
 	)
 }
 

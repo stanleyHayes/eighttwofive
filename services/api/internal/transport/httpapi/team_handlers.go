@@ -15,7 +15,7 @@ func (h *Handlers) AdminListUsers(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.auth.ListUsers(r.Context(), page, pageSize)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 
 		return
 	}
@@ -52,7 +52,7 @@ func (h *Handlers) AdminSetUserRole(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, domain.ErrNotFound):
 			respondError(w, http.StatusNotFound, "not_found", "user not found")
 		default:
-			respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			respondInternal(w, r, err)
 		}
 
 		return

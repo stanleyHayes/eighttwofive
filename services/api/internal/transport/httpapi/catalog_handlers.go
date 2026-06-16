@@ -138,7 +138,7 @@ func decodeBody(w http.ResponseWriter, r *http.Request, dst any) bool {
 	return true
 }
 
-func respondCatalogError(w http.ResponseWriter, err error) {
+func respondCatalogError(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.Is(err, domain.ErrInvalidInput):
 		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
@@ -147,7 +147,7 @@ func respondCatalogError(w http.ResponseWriter, err error) {
 	case errors.Is(err, domain.ErrDuplicateSlug):
 		respondError(w, http.StatusConflict, "conflict", "an item with a very similar name already exists")
 	default:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	}
 }
 
@@ -157,7 +157,7 @@ func respondCatalogError(w http.ResponseWriter, err error) {
 func (h *Handlers) ListCollections(w http.ResponseWriter, r *http.Request) {
 	collections, err := h.catalog.ListCollections(r.Context(), false)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -179,7 +179,7 @@ type collectionWithDesignsDTO struct {
 func (h *Handlers) GetCollection(w http.ResponseWriter, r *http.Request) {
 	collection, designs, err := h.catalog.GetCollectionBySlug(r.Context(), chi.URLParam(r, "slug"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -198,7 +198,7 @@ func (h *Handlers) ListDesigns(w http.ResponseWriter, r *http.Request) {
 		IncludeRetired: false,
 	})
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -210,7 +210,7 @@ func (h *Handlers) ListDesigns(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) GetDesign(w http.ResponseWriter, r *http.Request) {
 	design, err := h.catalog.GetLiveDesignBySlug(r.Context(), chi.URLParam(r, "slug"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -241,7 +241,7 @@ func (h *Handlers) AdminListCollections(w http.ResponseWriter, r *http.Request) 
 
 	result, err := h.catalog.ListCollectionsPaged(r.Context(), true, page, pageSize)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -263,7 +263,7 @@ func (h *Handlers) AdminCreateCollection(w http.ResponseWriter, r *http.Request)
 
 	collection, err := h.catalog.CreateCollection(r.Context(), req.Name, req.Note)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -280,7 +280,7 @@ func (h *Handlers) AdminUpdateCollection(w http.ResponseWriter, r *http.Request)
 
 	collection, err := h.catalog.UpdateCollection(r.Context(), chi.URLParam(r, "id"), req.Name, req.Note)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -305,7 +305,7 @@ func (h *Handlers) collectionStatusChange(
 ) {
 	err := change(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -318,7 +318,7 @@ func (h *Handlers) collectionStatusChange(
 func (h *Handlers) AdminDeleteCollection(w http.ResponseWriter, r *http.Request) {
 	err := h.catalog.DeleteCollection(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -338,7 +338,7 @@ func (h *Handlers) AdminListDesigns(w http.ResponseWriter, r *http.Request) {
 		IncludeRetired: true,
 	}, page, pageSize)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -355,7 +355,7 @@ func (h *Handlers) AdminListDesigns(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminGetDesign(w http.ResponseWriter, r *http.Request) {
 	design, err := h.catalog.GetDesignByID(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -372,7 +372,7 @@ func (h *Handlers) AdminCreateDesign(w http.ResponseWriter, r *http.Request) {
 
 	design, err := h.catalog.CreateDesign(r.Context(), req.toInput())
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -389,7 +389,7 @@ func (h *Handlers) AdminUpdateDesign(w http.ResponseWriter, r *http.Request) {
 
 	design, err := h.catalog.UpdateDesign(r.Context(), chi.URLParam(r, "id"), req.toInput())
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -423,7 +423,7 @@ func (h *Handlers) designStatusChange(
 
 	err := change(r.Context(), req.IDs)
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}
@@ -435,7 +435,7 @@ func (h *Handlers) designStatusChange(
 func (h *Handlers) AdminDeleteDesign(w http.ResponseWriter, r *http.Request) {
 	err := h.catalog.DeleteDesign(r.Context(), chi.URLParam(r, "id"))
 	if err != nil {
-		respondCatalogError(w, err)
+		respondCatalogError(w, r, err)
 
 		return
 	}

@@ -62,7 +62,7 @@ func (h *Handlers) RequestLoginLink(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, domain.ErrInvalidInput):
 		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	default:
 		respondJSON(w, http.StatusAccepted, map[string]string{"status": "sent"})
 	}
@@ -92,7 +92,7 @@ func (h *Handlers) VerifyLogin(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, domain.ErrTokenInvalid):
 		respondError(w, http.StatusUnauthorized, "invalid_token", "this sign-in link is invalid or has expired")
 	case err != nil:
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+		respondInternal(w, r, err)
 	default:
 		h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
 		respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})

@@ -93,7 +93,7 @@ func buildRouter(
 	// Driving adapter (HTTP).
 	handlers := httpapi.NewHandlers(
 		waitlist, auth, store, catalog, orderService, analyticsService, slotService, visitService,
-		signer, cfg.CloudinaryCloudName, cfg.IsProduction(),
+		signer, cfg.CloudinaryCloudName, cfg.IsProduction(), mongostore.NewHealthChecker(client),
 	)
 
 	return httpapi.NewRouter(handlers, logger, cfg.CORSAllowedOrigins), visitService, nil

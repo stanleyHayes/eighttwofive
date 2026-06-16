@@ -38,3 +38,24 @@ func Connect(ctx context.Context, uri string) (*mongo.Client, error) {
 
 	return client, nil
 }
+
+// HealthChecker reports whether MongoDB is reachable, backing the /healthz
+// readiness probe.
+type HealthChecker struct {
+	client *mongo.Client
+}
+
+// NewHealthChecker returns a readiness checker bound to the Mongo client.
+func NewHealthChecker(client *mongo.Client) *HealthChecker {
+	return &HealthChecker{client: client}
+}
+
+// Ping verifies connectivity to MongoDB within the caller's deadline.
+func (h *HealthChecker) Ping(ctx context.Context) error {
+	err := h.client.Ping(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("ping mongo: %w", err)
+	}
+
+	return nil
+}
