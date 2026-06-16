@@ -25,13 +25,10 @@ export default defineConfig({
     css: false,
     testTimeout: 15000,
     pool: "forks",
-    // @ts-expect-error Vitest 4 runtime accepts poolOptions, but the shipped
-    // d.ts only exposes `pool: string`. Single-fork mode keeps MUI tests stable.
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // Run test files sequentially in a single worker. Vitest 4 removed
+    // poolOptions.forks.singleFork; fileParallelism:false is the top-level
+    // replacement (it pins maxWorkers to 1) and keeps the MUI suites stable.
+    fileParallelism: false,
     server: {
       deps: {
         // MUI ships ESM that Node's resolver rejects (directory imports);

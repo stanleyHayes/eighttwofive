@@ -356,6 +356,43 @@ func TestHandlePaymentWebhook_InvalidSignature(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
 }
 
+func TestHandlePaymentWebhook_MissingSignature(t *testing.T) {
+	t.Parallel()
+
+	// A body with no X-Paystack-Signature header is rejected before any
+	// verification, so an unsigned caller can never reach the order logic.
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodPost,
+		newTestServer(t).URL+"/api/v1/payments/webhook", strings.NewReader(`{}`))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+
+	defer func() { _ = res.Body.Close() }()
+
+	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+}
+
+func TestHandlePaymentWebhook_InvalidJSON(t *testing.T) {
+	t.Parallel()
+
+	// Malformed JSON is rejected as a bad request even with a signature header,
+	// before it reaches signature verification or the order service.
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodPost,
+		newTestServer(t).URL+"/api/v1/payments/webhook", strings.NewReader(`{not json`))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Paystack-Signature", "whatever")
+
+	res, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+
+	defer func() { _ = res.Body.Close() }()
+
+	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+}
+
 func TestAdminListOrders(t *testing.T) {
 	t.Parallel()
 

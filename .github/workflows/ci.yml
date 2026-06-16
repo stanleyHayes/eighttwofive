@@ -23,6 +23,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec turbo run lint typecheck test build
 
+  api-unit:
+    name: API — fast unit lane (-short, no Docker)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: services/api/go.sum
+      - name: Unit tests (testcontainer suites skipped via -short)
+        run: go test -short -race ./...
+
   api:
     name: API — lint, test, build
     runs-on: ubuntu-latest

@@ -1,0 +1,14 @@
+# Keep the build context lean and never ship local artifacts or secrets into
+# image layers. The build only needs go.mod/go.sum, cmd/, and internal/.
+bin/
+e25
+server
+*.md
+Makefile
+
+# Local environment / secrets — must never enter the image.
+.env
+.env.*
+*.pem
+*.key
+credentials.txt

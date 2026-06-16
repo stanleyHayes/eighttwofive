@@ -18,6 +18,12 @@ import (
 func setupDatabase(t *testing.T) *mongo.Database {
 	t.Helper()
 
+	// These tests need a real MongoDB container. The -short unit lane skips
+	// them so it can run fast without a Docker daemon.
+	if testing.Short() {
+		t.Skip("skipping testcontainer-backed test in -short mode")
+	}
+
 	ctx := context.Background()
 
 	ctr, err := mongodb.Run(ctx, "mongo:8.0")
