@@ -201,7 +201,9 @@ func (r *DesignRepository) List(ctx context.Context, filter domain.DesignFilter)
 		return nil, err
 	}
 
-	return r.find(ctx, query, options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}))
+	return r.find(ctx, query, options.Find().
+		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+		SetLimit(maxListResults))
 }
 
 // Count returns the number of designs matching the filter.

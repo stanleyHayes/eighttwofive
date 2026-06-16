@@ -313,7 +313,9 @@ func (r *VisitRepository) createIndexes(ctx context.Context) error {
 }
 
 func (r *VisitRepository) find(ctx context.Context, query bson.M) ([]domain.Visit, error) {
-	cur, err := r.col.Find(ctx, query, options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}))
+	cur, err := r.col.Find(ctx, query, options.Find().
+		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+		SetLimit(maxListResults))
 	if err != nil {
 		return nil, fmt.Errorf("find visits: %w", err)
 	}

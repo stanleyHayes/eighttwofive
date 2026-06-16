@@ -398,6 +398,10 @@ func (r *OrderRepository) list(
 	opts := options.Find().SetSort(sort)
 	if page != nil {
 		opts.SetSkip(page.Skip()).SetLimit(page.Limit())
+	} else {
+		// Unpaginated callers still get a server-side ceiling so a large
+		// orders collection can't be pulled into memory all at once.
+		opts.SetLimit(maxListResults)
 	}
 
 	cur, err := r.col.Find(ctx, query, opts)

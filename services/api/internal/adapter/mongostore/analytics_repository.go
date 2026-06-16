@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 )
@@ -52,16 +53,6 @@ func (r *AnalyticsRepository) EnsureIndexes(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// paidStatuses are the order states that count as booked revenue.
-func paidStatuses() map[string]bool {
-	return map[string]bool{
-		string(domain.OrderStatusBooked):       true,
-		string(domain.OrderStatusInProduction): true,
-		string(domain.OrderStatusReady):        true,
-		string(domain.OrderStatusFulfilled):    true,
-	}
 }
 
 // GetStoreAnalytics assembles the full dashboard snapshot.
@@ -151,60 +142,181 @@ type orderAggregate struct {
 	recent           []domain.RecentOrder
 }
 
+// aggregateOrders derives the order metrics without scanning the whole
+// collection: status/type distributions and booked totals come from grouping
+// pipelines, the recent feed from a sorted+limited read, and the time series
+// and comparison from a query bounded to booked orders in the trailing window
+// (the only ones that can fall inside it).
 func (r *AnalyticsRepository) aggregateOrders(ctx context.Context) (orderAggregate, error) {
-	docs, err := r.loadOrders(ctx)
+	now := time.Now().UTC()
+
+	ordersByStatus, err := r.countOrdersBy(ctx, "status", zeroStatusCounts())
 	if err != nil {
 		return orderAggregate{}, err
 	}
 
-	now := time.Now().UTC()
-	agg := orderAggregate{
-		ordersByStatus:   zeroStatusCounts(),
-		ordersByType:     zeroTypeCounts(),
-		revenue:          0,
-		bookedOrderCount: 0,
-		comparison:       domain.PeriodComparison{},
-		series:           newRevenueSeries(now),
-		recent:           recentOrders(docs),
-	}
-	paid := paidStatuses()
-
-	for i := range docs {
-		doc := docs[i]
-		agg.ordersByStatus[doc.Status]++
-		agg.ordersByType[doc.Type]++
-
-		if !paid[doc.Status] {
-			continue
-		}
-
-		total := doc.toDomain().TotalPesewas()
-		agg.revenue += total
-		agg.bookedOrderCount++
-
-		addToSeries(agg.series, now, doc.CreatedAt, total)
-		addToComparison(&agg.comparison, now, doc.CreatedAt, total)
+	ordersByType, err := r.countOrdersBy(ctx, "type", zeroTypeCounts())
+	if err != nil {
+		return orderAggregate{}, err
 	}
 
-	finaliseComparison(&agg.comparison)
+	revenue, bookedCount, err := r.bookedTotals(ctx)
+	if err != nil {
+		return orderAggregate{}, err
+	}
 
-	return agg, nil
+	recent, err := r.recentOrders(ctx)
+	if err != nil {
+		return orderAggregate{}, err
+	}
+
+	series, comparison, err := r.revenueWindows(ctx, now)
+	if err != nil {
+		return orderAggregate{}, err
+	}
+
+	return orderAggregate{
+		ordersByStatus:   ordersByStatus,
+		ordersByType:     ordersByType,
+		revenue:          revenue,
+		bookedOrderCount: bookedCount,
+		comparison:       comparison,
+		series:           series,
+		recent:           recent,
+	}, nil
 }
 
-func (r *AnalyticsRepository) loadOrders(ctx context.Context) ([]orderDoc, error) {
-	cur, err := r.db.Collection("orders").Find(ctx, bson.D{})
+// countOrdersBy groups every order by a field and folds the counts onto the
+// pre-zeroed map so known keys always appear, even at zero.
+func (r *AnalyticsRepository) countOrdersBy(
+	ctx context.Context,
+	field string,
+	counts map[string]int64,
+) (map[string]int64, error) {
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$" + field},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+	}
+
+	var rows []struct {
+		ID    string `bson:"_id"`
+		Count int64  `bson:"count"`
+	}
+
+	err := r.runOrdersPipeline(ctx, pipeline, &rows)
 	if err != nil {
-		return nil, fmt.Errorf("find orders: %w", err)
+		return nil, fmt.Errorf("count orders by %s: %w", field, err)
+	}
+
+	for _, row := range rows {
+		counts[row.ID] += row.Count
+	}
+
+	return counts, nil
+}
+
+// bookedTotals sums booked revenue and counts booked orders across all time.
+func (r *AnalyticsRepository) bookedTotals(ctx context.Context) (int64, int64, error) {
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: bookedMatch()}},
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "revenue", Value: bson.D{{Key: "$sum", Value: bookedTotalExpr()}}},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+	}
+
+	var rows []struct {
+		Revenue int64 `bson:"revenue"`
+		Count   int64 `bson:"count"`
+	}
+
+	err := r.runOrdersPipeline(ctx, pipeline, &rows)
+	if err != nil {
+		return 0, 0, fmt.Errorf("aggregate booked totals: %w", err)
+	}
+
+	if len(rows) == 0 {
+		return 0, 0, nil
+	}
+
+	return rows[0].Revenue, rows[0].Count, nil
+}
+
+// recentOrders returns the newest orders (any status) via a sorted, limited
+// read instead of sorting the whole collection in memory.
+func (r *AnalyticsRepository) recentOrders(ctx context.Context) ([]domain.RecentOrder, error) {
+	opts := options.Find().
+		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+		SetLimit(recentOrderLimit)
+
+	cur, err := r.db.Collection("orders").Find(ctx, bson.D{}, opts)
+	if err != nil {
+		return nil, fmt.Errorf("find recent orders: %w", err)
 	}
 
 	var docs []orderDoc
 
 	err = cur.All(ctx, &docs)
 	if err != nil {
-		return nil, fmt.Errorf("decode orders: %w", err)
+		return nil, fmt.Errorf("decode recent orders: %w", err)
 	}
 
-	return docs, nil
+	out := make([]domain.RecentOrder, 0, len(docs))
+	for i := range docs {
+		doc := docs[i]
+		out = append(out, domain.RecentOrder{
+			Ref:          doc.Ref,
+			Type:         doc.Type,
+			Status:       doc.Status,
+			TotalPesewas: doc.toDomain().TotalPesewas(),
+			CreatedAt:    doc.CreatedAt,
+		})
+	}
+
+	return out, nil
+}
+
+// revenueWindows builds the trailing revenue series and the period comparison
+// from booked orders created within the series window — the only orders that
+// can land in either structure — so the query never scans historical orders.
+func (r *AnalyticsRepository) revenueWindows(
+	ctx context.Context,
+	now time.Time,
+) ([]domain.TimeBucket, domain.PeriodComparison, error) {
+	filter := bson.D{
+		{Key: "status", Value: bson.D{{Key: "$in", Value: bookedStatusValues()}}},
+		{Key: "createdAt", Value: bson.D{{Key: "$gte", Value: seriesWindowStart(now)}}},
+	}
+
+	cur, err := r.db.Collection("orders").Find(ctx, filter)
+	if err != nil {
+		return nil, domain.PeriodComparison{}, fmt.Errorf("find windowed orders: %w", err)
+	}
+
+	var docs []orderDoc
+
+	err = cur.All(ctx, &docs)
+	if err != nil {
+		return nil, domain.PeriodComparison{}, fmt.Errorf("decode windowed orders: %w", err)
+	}
+
+	series := newRevenueSeries(now)
+
+	var comparison domain.PeriodComparison
+
+	for i := range docs {
+		doc := docs[i]
+		total := doc.toDomain().TotalPesewas()
+		addToSeries(series, now, doc.CreatedAt, total)
+		addToComparison(&comparison, now, doc.CreatedAt, total)
+	}
+
+	finaliseComparison(&comparison)
+
+	return series, comparison, nil
 }
 
 // seriesBucketSpan is the duration covered by a single time-series bucket.
@@ -293,36 +405,6 @@ func changeBps(current, prior int64) int64 {
 	return (current - prior) * basisPointScale / prior
 }
 
-func recentOrders(docs []orderDoc) []domain.RecentOrder {
-	sorted := make([]orderDoc, len(docs))
-	copy(sorted, docs)
-	sortByCreatedAtDesc(sorted)
-
-	limit := min(len(sorted), recentOrderLimit)
-	out := make([]domain.RecentOrder, 0, limit)
-
-	for i := range limit {
-		doc := sorted[i]
-		out = append(out, domain.RecentOrder{
-			Ref:          doc.Ref,
-			Type:         doc.Type,
-			Status:       doc.Status,
-			TotalPesewas: doc.toDomain().TotalPesewas(),
-			CreatedAt:    doc.CreatedAt,
-		})
-	}
-
-	return out
-}
-
-func sortByCreatedAtDesc(docs []orderDoc) {
-	for i := 1; i < len(docs); i++ {
-		for j := i; j > 0 && docs[j].CreatedAt.After(docs[j-1].CreatedAt); j-- {
-			docs[j], docs[j-1] = docs[j-1], docs[j]
-		}
-	}
-}
-
 func zeroStatusCounts() map[string]int64 {
 	return map[string]int64{
 		string(domain.OrderStatusPendingPayment):  0,
@@ -392,7 +474,7 @@ func (r *AnalyticsRepository) topDesigns(ctx context.Context) ([]domain.DesignSt
 
 	var rows []designRankDoc
 
-	err := r.runPipeline(ctx, "orders", pipeline, &rows)
+	err := r.runOrdersPipeline(ctx, pipeline, &rows)
 	if err != nil {
 		return nil, fmt.Errorf("aggregate top designs: %w", err)
 	}
@@ -423,7 +505,7 @@ type collectionRankDoc struct {
 func (r *AnalyticsRepository) topCollections(ctx context.Context) ([]domain.CollectionStat, error) {
 	var rows []collectionRankDoc
 
-	err := r.runPipeline(ctx, "orders", topCollectionsPipeline(), &rows)
+	err := r.runOrdersPipeline(ctx, topCollectionsPipeline(), &rows)
 	if err != nil {
 		return nil, fmt.Errorf("aggregate top collections: %w", err)
 	}
@@ -469,14 +551,19 @@ func topCollectionsPipeline() mongo.Pipeline {
 	}
 }
 
-// bookedMatch limits an aggregation to orders that count as booked revenue.
-func bookedMatch() bson.D {
-	statuses := bson.A{
+// bookedStatusValues are the order states that count as booked revenue.
+func bookedStatusValues() bson.A {
+	return bson.A{
 		string(domain.OrderStatusBooked),
 		string(domain.OrderStatusInProduction),
 		string(domain.OrderStatusReady),
 		string(domain.OrderStatusFulfilled),
 	}
+}
+
+// bookedMatch limits an aggregation to orders that count as booked revenue.
+func bookedMatch() bson.D {
+	statuses := bookedStatusValues()
 
 	return bson.D{{Key: "status", Value: bson.D{{Key: "$in", Value: statuses}}}}
 }
@@ -495,20 +582,22 @@ func bookedTotalExpr() bson.D {
 	return bson.D{{Key: "$add", Value: bson.A{garment, delivery}}}
 }
 
-func (r *AnalyticsRepository) runPipeline(
+// runOrdersPipeline runs an aggregation over the orders collection — the base
+// of every analytics pipeline, including those that $lookup into designs and
+// collections — and decodes the result into out.
+func (r *AnalyticsRepository) runOrdersPipeline(
 	ctx context.Context,
-	collection string,
 	pipeline mongo.Pipeline,
 	out any,
 ) error {
-	cur, err := r.db.Collection(collection).Aggregate(ctx, pipeline)
+	cur, err := r.db.Collection("orders").Aggregate(ctx, pipeline)
 	if err != nil {
-		return fmt.Errorf("aggregate %s: %w", collection, err)
+		return fmt.Errorf("aggregate orders: %w", err)
 	}
 
 	err = cur.All(ctx, out)
 	if err != nil {
-		return fmt.Errorf("decode %s aggregate: %w", collection, err)
+		return fmt.Errorf("decode orders aggregate: %w", err)
 	}
 
 	return nil

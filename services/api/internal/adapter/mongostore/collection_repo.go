@@ -124,7 +124,9 @@ func (r *CollectionRepository) GetBySlug(ctx context.Context, slug string) (*dom
 // List returns collections, newest first; retired only when asked.
 func (r *CollectionRepository) List(ctx context.Context, includeRetired bool) ([]domain.Collection, error) {
 	return r.find(ctx, collectionQuery(includeRetired),
-		options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}))
+		options.Find().
+			SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+			SetLimit(maxListResults))
 }
 
 // Count returns the number of collections matching includeRetired.

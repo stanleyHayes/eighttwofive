@@ -119,7 +119,9 @@ func (r *SlotRepository) List(ctx context.Context, filter domain.SlotFilter) ([]
 		query["end"] = bson.M{"$lte": filter.Before}
 	}
 
-	cur, err := r.col.Find(ctx, query, options.Find().SetSort(bson.D{{Key: "start", Value: 1}}))
+	cur, err := r.col.Find(ctx, query, options.Find().
+		SetSort(bson.D{{Key: "start", Value: 1}}).
+		SetLimit(maxListResults))
 	if err != nil {
 		return nil, fmt.Errorf("find slots: %w", err)
 	}

@@ -13,6 +13,10 @@ import (
 const (
 	operationTimeout = 10 * time.Second
 	pingTimeout      = 5 * time.Second
+	// maxListResults caps every non-paginated List read so a pathologically
+	// large collection can never exhaust server memory in a single query.
+	// Endpoints that need more rows page explicitly; this is only a safety net.
+	maxListResults = 1000
 )
 
 // Connect establishes and verifies a MongoDB connection.
