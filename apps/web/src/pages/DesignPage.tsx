@@ -460,6 +460,7 @@ function DesignDetail({
   const [deliveryArea, setDeliveryArea] = useState("");
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
 
   const standardOrder = useCreateStandardOrder();
   const customRequest = useCreateCustomRequest();
@@ -553,7 +554,10 @@ function DesignDetail({
       },
       {
         onSuccess: (result) => {
-          navigate(`/account/orders/${result.order.ref}`);
+          // Checkout is anonymous (no session); confirm inline and tell the
+          // customer to use the emailed link rather than bouncing to the
+          // auth-gated account page.
+          setSubmittedRef(result.order.ref);
         },
         onError: (err) => setFormError(errorMessage(err)),
       },
@@ -884,10 +888,19 @@ function DesignDetail({
 
             {formError && <Alert severity="error">{formError}</Alert>}
 
+            {submittedRef && (
+              <Alert severity="success">
+                Request received — reference <strong>{submittedRef}</strong>. We&apos;ve emailed a
+                sign-in link to {customerEmail.trim()} so you can track it; the atelier will follow
+                up with a quote.
+              </Alert>
+            )}
+
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
               <Button
                 variant="contained"
                 loading={isSubmitting}
+                disabled={submittedRef !== null}
                 onClick={
                   isHomeVisit
                     ? handleHomeVisit

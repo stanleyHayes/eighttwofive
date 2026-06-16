@@ -109,8 +109,9 @@ func TestCreateOrder(t *testing.T) {
 		}
 	}
 
-	require.NotNil(t, session, "checkout must set a session cookie")
-	assert.True(t, session.HttpOnly)
+	// Anonymous checkout must NOT mint a session from a body-supplied email
+	// (account takeover / order IDOR). Customers sign in via the magic link.
+	assert.Nil(t, session, "checkout must not set a session cookie")
 }
 
 func TestCreateCustomRequest(t *testing.T) {
@@ -143,8 +144,8 @@ func TestCreateCustomRequest(t *testing.T) {
 		}
 	}
 
-	require.NotNil(t, session, "custom request must set a session cookie")
-	assert.True(t, session.HttpOnly)
+	// Anonymous checkout — no session minted from a body-supplied email.
+	assert.Nil(t, session, "custom request must not set a session cookie")
 }
 
 func TestCreateCustomRequest_InvalidInput(t *testing.T) {
@@ -214,15 +215,9 @@ func TestGetOrder_CustomerOwnsOrder(t *testing.T) {
 	}
 	require.NoError(t, json.Unmarshal([]byte(create.body), &createResp))
 
-	var session *http.Cookie
-
-	for _, c := range create.cookies {
-		if c.Name == sessionCookieName {
-			session = c
-		}
-	}
-
-	require.NotNil(t, session)
+	// Checkout is anonymous; the customer signs in via the magic link to view
+	// their order. Signing in as the same email owns the order created above.
+	session := env.signIn(t, "ama@example.com")
 
 	get := doJSON(t, http.MethodGet, base+"/orders/"+createResp.Data.Order.Ref, "", session)
 	assert.Equal(t, http.StatusOK, get.status)
@@ -278,15 +273,8 @@ func TestListCustomerOrders(t *testing.T) {
 	}`, designID), nil)
 	require.Equal(t, http.StatusCreated, create.status)
 
-	var session *http.Cookie
-
-	for _, c := range create.cookies {
-		if c.Name == sessionCookieName {
-			session = c
-		}
-	}
-
-	require.NotNil(t, session)
+	// Anonymous checkout; the customer signs in via the magic link to list orders.
+	session := env.signIn(t, "ama@example.com")
 
 	list := doJSON(t, http.MethodGet, base+"/orders", "", session)
 	assert.Equal(t, http.StatusOK, list.status)

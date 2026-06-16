@@ -160,15 +160,7 @@ func (h *Handlers) BookSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionToken, err := h.auth.CreateSession(r.Context(), result.User.ID)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
-
-		return
-	}
-
-	h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
-
+	// Anonymous booking — no session minted from a body-supplied email.
 	respondJSON(w, http.StatusCreated, bookSlotResponse{
 		Visit:      toVisitDTO(*result.Visit),
 		Order:      toOrderDTO(result.Order),

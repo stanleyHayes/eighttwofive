@@ -2,13 +2,45 @@ package httpapi
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
+	"runtime/debug"
 	"sync"
 	"time"
 
+	chimw "github.com/go-chi/chi/v5/middleware"
+
 	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 )
+
+// recoverer recovers panics, logs them through the structured logger (with the
+// request id + stack) instead of chi's colorized stderr dump, and returns 500.
+func recoverer(logger *slog.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			defer func() {
+				rec := recover()
+				if rec == nil {
+					return
+				}
+
+				logger.ErrorContext(ctx, "panic recovered",
+					"error", fmt.Sprintf("%v", rec),
+					"path", r.URL.Path,
+					"request_id", chimw.GetReqID(ctx),
+					"stack", string(debug.Stack()),
+				)
+				respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
+			}()
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
 
 const sessionCookieName = "e25_session"
 
@@ -55,6 +87,11 @@ const (
 	// unauthenticated, so this blunts email-spam abuse and login enumeration.
 	loginRateLimit  = 5
 	loginRateWindow = 10 * time.Minute
+	// checkoutRateLimit and checkoutRateWindow bound the unauthenticated order /
+	// custom-request endpoints, which each create DB documents and a Paystack
+	// transaction, to blunt abuse.
+	checkoutRateLimit  = 15
+	checkoutRateWindow = time.Minute
 	// maxRateEntries caps the limiter map; expired windows are pruned when the
 	// cap is reached so memory stays bounded under address churn.
 	maxRateEntries = 10_000

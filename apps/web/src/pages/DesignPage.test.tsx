@@ -151,7 +151,7 @@ describe("DesignPage", () => {
     expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument();
   });
 
-  it("submits a self-measure custom request and redirects to the order detail page", async () => {
+  it("submits a self-measure custom request and shows an inline confirmation", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(String(input), "http://localhost");
       const method = init?.method ?? "GET";
@@ -190,7 +190,9 @@ describe("DesignPage", () => {
       );
     });
 
-    expect(await screen.findByTestId("order-detail")).toBeInTheDocument();
+    // Checkout is anonymous (no session), so we confirm inline instead of
+    // navigating to the auth-gated order page.
+    expect(await screen.findByText(/request received/i)).toBeInTheDocument();
   });
 
   it("copies the page link and shows a success state", async () => {

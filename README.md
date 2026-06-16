@@ -81,9 +81,9 @@ CI (`.github/workflows/ci.yml`) runs both sides on every push/PR: turbo tasks fo
 
 ## Deployment
 
-**Web → Vercel.** Import the repo, set the project **Root Directory** to `apps/web` (framework auto-detects as Vite). Set `VITE_API_URL` to the Render URL. Optional: set the ignored-build-step to `npx turbo-ignore` to skip builds when `apps/web` didn't change.
+**Web → Vercel.** Import the repo, set the project **Root Directory** to `apps/web` (framework auto-detects as Vite). **Leave `VITE_API_URL` empty in production** — `vercel.json` rewrites `/api/*` to the Render service, so API calls stay same-origin and the `SameSite=Lax` session cookie is sent (a direct cross-origin `VITE_API_URL` would silently break auth). Optional: set the ignored-build-step to `npx turbo-ignore` to skip builds when `apps/web` didn't change.
 
-**API → Render.** Create a Blueprint from this repo; `render.yaml` provisions the Docker service from `services/api`. Fill the `sync: false` env vars in the dashboard — at minimum `MONGODB_URI` (MongoDB Atlas) and `CORS_ALLOWED_ORIGINS` (your Vercel domain).
+**API → Render.** Create a Blueprint from this repo; `render.yaml` provisions the Docker service from `services/api`. Fill the `sync: false` env vars in the dashboard: `MONGODB_URI` (MongoDB Atlas), `CORS_ALLOWED_ORIGINS` **and** `WEB_URL` (both your exact Vercel origin, e.g. `https://eighttwofive.vercel.app`), `ADMIN_EMAILS` (comma-separated bootstrap super-admins — required or no one can reach `/admin`), `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY` + `EMAIL_FROM`, and the `CLOUDINARY_*` keys.
 
 ### Environment variables (API)
 

@@ -4,6 +4,7 @@ package email
 import (
 	"context"
 	"fmt"
+	"html"
 
 	"github.com/resend/resend-go/v2"
 )
@@ -46,7 +47,7 @@ func (s *ResendSender) SendWelcome(ctx context.Context, to, name string) error {
 			`<p>Hi %s,</p>`+
 				`<p>You're on the list. We'll send one note when the storefront opens — nothing else.</p>`+
 				`<p>— Eight Two Five</p>`,
-			name,
+			html.EscapeString(name),
 		),
 	})
 	if err != nil {
@@ -66,7 +67,7 @@ func (s *ResendSender) SendOrderConfirmation(ctx context.Context, to, name, ref,
 			`<p>Hi %s,</p>`+
 				`<p>Your order <strong>%s</strong> is now <strong>%s</strong>.</p>`+
 				`<p>— Eight Two Five</p>`,
-			name, ref, status,
+			html.EscapeString(name), html.EscapeString(ref), html.EscapeString(status),
 		),
 	})
 	if err != nil {
@@ -90,7 +91,7 @@ func (s *ResendSender) SendOrderStatusUpdate(
 				`<p>Your order <strong>%s</strong> is now <strong>%s</strong>.</p>`+
 				`<p>Timeframe: %s</p>`+
 				`<p>— Eight Two Five</p>`,
-			name, ref, status, timeframe,
+			html.EscapeString(name), html.EscapeString(ref), html.EscapeString(status), html.EscapeString(timeframe),
 		),
 	})
 	if err != nil {

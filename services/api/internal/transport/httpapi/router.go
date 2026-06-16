@@ -23,7 +23,7 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 
 	r.Use(middleware.RequestID)
 	r.Use(requestLogger(logger))
-	r.Use(middleware.Recoverer)
+	r.Use(recoverer(logger))
 	r.Use(middleware.Timeout(requestTimeout))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   allowedOrigins,
@@ -45,8 +45,11 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 		r.Get("/designs", h.ListDesigns)
 		r.Get("/designs/{slug}", h.GetDesign)
 
-		r.Post("/orders", h.CreateOrder)
-		r.Post("/orders/request", h.CreateCustomRequest)
+		// Unauthenticated checkout creates DB documents + a Paystack transaction,
+		// so rate-limit it per client.
+		checkoutLimiter := newRateLimiter(checkoutRateLimit, checkoutRateWindow)
+		r.With(rateLimitByIP(checkoutLimiter)).Post("/orders", h.CreateOrder)
+		r.With(rateLimitByIP(checkoutLimiter)).Post("/orders/request", h.CreateCustomRequest)
 		r.Post("/payments/webhook", h.HandlePaymentWebhook)
 		r.Get("/slots", h.ListOpenSlots)
 
@@ -56,11 +59,12 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 		r.With(rateLimitByIP(bookLimiter)).Post("/slots/{id}/book", h.BookSlot)
 
 		r.Route("/auth", func(r chi.Router) {
-			// The magic-link request sends an email and is unauthenticated, so
-			// rate-limit it per client to blunt email-spam and enumeration abuse.
+			// The magic-link request and verify endpoints are unauthenticated and
+			// security-sensitive, so rate-limit both per client (email-spam,
+			// enumeration, and token brute-force).
 			loginLimiter := newRateLimiter(loginRateLimit, loginRateWindow)
 			r.With(rateLimitByIP(loginLimiter)).Post("/request-link", h.RequestLoginLink)
-			r.Post("/verify", h.VerifyLogin)
+			r.With(rateLimitByIP(loginLimiter)).Post("/verify", h.VerifyLogin)
 			r.Post("/logout", h.Logout)
 
 			r.Group(func(r chi.Router) {

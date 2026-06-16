@@ -203,14 +203,10 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionToken, err := h.auth.CreateSession(r.Context(), result.User.ID)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
-
-		return
-	}
-
-	h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
+	// Checkout is anonymous: we never mint a session from an unauthenticated,
+	// body-supplied email (that would let anyone read another customer's orders
+	// by submitting their address). Customers reach their orders via the
+	// single-use magic link emailed to them.
 	respondJSON(w, http.StatusCreated, createOrderResponse{
 		Order:      toOrderDTO(result.Order),
 		PaymentURL: result.PaymentURL,
@@ -256,14 +252,7 @@ func (h *Handlers) CreateCustomRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionToken, err := h.auth.CreateSession(r.Context(), order.CustomerID)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
-
-		return
-	}
-
-	h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
+	// Anonymous checkout — no session minted from a body-supplied email.
 	respondJSON(w, http.StatusCreated, createCustomResponse{Order: toOrderDTO(order)})
 }
 

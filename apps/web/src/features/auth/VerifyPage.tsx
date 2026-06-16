@@ -32,6 +32,9 @@ export function VerifyPage() {
   useEffect(() => {
     if (fired.current || !token) return;
     fired.current = true;
+    // Strip the single-use token from the URL/history so it isn't left in the
+    // address bar, bookmarks, or the Referer header.
+    window.history.replaceState(null, "", "/auth/verify");
     mutate(token);
   }, [token, mutate]);
 

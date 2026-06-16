@@ -87,8 +87,8 @@ func TestBookSlot(t *testing.T) {
 		}
 	}
 
-	require.NotNil(t, session, "booking must set a session cookie")
-	assert.True(t, session.HttpOnly)
+	// Anonymous booking — no session minted from a body-supplied email.
+	assert.Nil(t, session, "booking must not set a session cookie")
 }
 
 func TestBookSlot_SlotUnavailable(t *testing.T) {
