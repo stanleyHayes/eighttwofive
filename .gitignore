@@ -12,6 +12,9 @@ coverage/
 bin/
 *.test
 *.out
+# Compiled binaries built at the API module root (e.g. `go build ./cmd/e25`)
+/services/api/e25
+/services/api/server
 
 # Environment
 .env
