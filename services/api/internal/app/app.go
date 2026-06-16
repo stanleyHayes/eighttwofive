@@ -24,10 +24,11 @@ const disconnectTimeout = 5 * time.Second
 
 // App is the fully wired application.
 type App struct {
-	cfg    *config.Config
-	logger *slog.Logger
-	mongo  *mongo.Client
-	server *http.Server
+	cfg     *config.Config
+	logger  *slog.Logger
+	mongo   *mongo.Client
+	server  *http.Server
+	sweeper holdReleaser
 }
 
 // New connects infrastructure and injects every dependency. It fails fast:
@@ -38,7 +39,7 @@ func New(ctx context.Context, cfg *config.Config, logger *slog.Logger) (*App, er
 		return nil, fmt.Errorf("connect storage: %w", err)
 	}
 
-	router, err := buildRouter(ctx, cfg, client, logger)
+	router, sweeper, err := buildRouter(ctx, cfg, client, logger)
 	if err != nil {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), disconnectTimeout)
 		defer cancel()
@@ -49,10 +50,11 @@ func New(ctx context.Context, cfg *config.Config, logger *slog.Logger) (*App, er
 	}
 
 	return &App{
-		cfg:    cfg,
-		logger: logger,
-		mongo:  client,
-		server: newHTTPServer(cfg, router),
+		cfg:     cfg,
+		logger:  logger,
+		mongo:   client,
+		server:  newHTTPServer(cfg, router),
+		sweeper: sweeper,
 	}, nil
 }
 

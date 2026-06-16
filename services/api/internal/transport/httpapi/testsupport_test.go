@@ -715,6 +715,20 @@ func (m *memSlots) List(_ context.Context, filter domain.SlotFilter) ([]domain.S
 	return out, nil
 }
 
+func (m *memSlots) Overlaps(_ context.Context, start, end time.Time) (bool, error) {
+	for _, s := range m.byID {
+		if s.Status == domain.SlotStatusClosed {
+			continue
+		}
+
+		if s.Start.Before(end) && s.End.After(start) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (m *memSlots) UpdateStatusFrom(_ context.Context, id string, from, to domain.SlotStatus) error {
 	s, ok := m.byID[id]
 	if !ok {

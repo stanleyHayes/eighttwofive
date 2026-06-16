@@ -26,6 +26,15 @@ func (s *CalendarSlot) CreateSlot(ctx context.Context, start, end time.Time) (*d
 		return nil, fmt.Errorf("%w: end must be after start", domain.ErrInvalidInput)
 	}
 
+	overlaps, err := s.slots.Overlaps(ctx, start, end)
+	if err != nil {
+		return nil, fmt.Errorf("check slot overlap: %w", err)
+	}
+
+	if overlaps {
+		return nil, fmt.Errorf("%w: this window overlaps an existing slot", domain.ErrInvalidInput)
+	}
+
 	now := s.now().UTC()
 	slot := &domain.Slot{
 		Start:     start.UTC(),
@@ -35,7 +44,7 @@ func (s *CalendarSlot) CreateSlot(ctx context.Context, start, end time.Time) (*d
 		UpdatedAt: now,
 	}
 
-	err := s.slots.Create(ctx, slot)
+	err = s.slots.Create(ctx, slot)
 	if err != nil {
 		return nil, fmt.Errorf("create slot: %w", err)
 	}

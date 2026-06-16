@@ -47,6 +47,10 @@ type SlotRepository interface {
 	Create(ctx context.Context, s *Slot) error
 	GetByID(ctx context.Context, id string) (*Slot, error)
 	List(ctx context.Context, filter SlotFilter) ([]Slot, error)
+	// Overlaps reports whether any open or booked slot intersects the half-open
+	// interval [start, end). Closed slots are ignored since they are not
+	// bookable and cannot double-book the atelier.
+	Overlaps(ctx context.Context, start, end time.Time) (bool, error)
 	// UpdateStatusFrom atomically moves a slot from one status to another in a
 	// single conditional write. It returns ErrSlotUnavailable when the slot is
 	// not currently in the from status, and ErrNotFound when it does not exist,

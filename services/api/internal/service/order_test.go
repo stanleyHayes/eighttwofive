@@ -437,7 +437,7 @@ func TestCreateStandardOrder_DispatchWithRate(t *testing.T) {
 	assert.Equal(t, int64(52000), result.Order.TotalPesewas())
 }
 
-func TestCreateStandardOrder_DispatchOffRate(t *testing.T) {
+func TestCreateStandardOrder_DispatchUnservedArea(t *testing.T) {
 	t.Parallel()
 
 	orders := newFakeOrderRepo()
@@ -451,12 +451,11 @@ func TestCreateStandardOrder_DispatchOffRate(t *testing.T) {
 
 	svc := newOrderService(orders, designs, users, payments, events, sender, settings)
 
-	result, err := svc.CreateStandardOrder(t.Context(), "des-1", "8", "dispatch:Unknown Area",
+	// Dispatching to an area with no configured rate must be rejected, not
+	// silently shipped for free.
+	_, err := svc.CreateStandardOrder(t.Context(), "des-1", "8", "dispatch:Unknown Area",
 		"+233200000000", "ama@example.com", "Ama")
-	require.NoError(t, err)
-
-	assert.Nil(t, result.Order.Delivery.RatePesewas)
-	assert.Equal(t, int64(50000), result.Order.TotalPesewas())
+	require.ErrorIs(t, err, domain.ErrInvalidInput)
 }
 
 func TestCreateStandardOrder_Validation(t *testing.T) {
@@ -806,9 +805,13 @@ func TestCreateCustomRequest_DesignChange(t *testing.T) {
 	designs.byID["des-1"] = liveDesign()
 	users := newFakeUsers()
 
+	settings := &fakeSettingsRepo{settings: &domain.Settings{
+		DeliveryRates: []domain.DeliveryRate{{Area: "East Legon", RatePesewas: 2000}},
+	}}
+
 	svc := newOrderService(
 		orders, designs, users, newFakePaymentProvider(),
-		&fakePaymentEvents{}, &recordingOrderSender{}, &fakeSettingsRepo{},
+		&fakePaymentEvents{}, &recordingOrderSender{}, settings,
 	)
 
 	order, err := svc.CreateCustomRequest(

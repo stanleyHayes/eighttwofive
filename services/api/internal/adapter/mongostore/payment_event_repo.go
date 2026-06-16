@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 )
@@ -29,12 +30,15 @@ func NewPaymentEventRepository(db *mongo.Database) *PaymentEventRepository {
 	return &PaymentEventRepository{col: db.Collection("payments")}
 }
 
-// EnsureIndexes creates the audit indexes.
+// EnsureIndexes creates the audit indexes. The (providerRef, type) index is
+// unique so a webhook redelivered by the provider records its event once
+// instead of piling up duplicate audit rows. It also serves providerRef-prefix
+// lookups, so no separate providerRef index is needed.
 func (r *PaymentEventRepository) EnsureIndexes(ctx context.Context) error {
 	_, err := r.col.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys:    bson.D{{Key: "providerRef", Value: 1}},
-			Options: nil,
+			Keys:    bson.D{{Key: "providerRef", Value: 1}, {Key: "type", Value: 1}},
+			Options: options.Index().SetUnique(true),
 		},
 		{
 			Keys:    bson.D{{Key: "createdAt", Value: -1}},
@@ -59,6 +63,12 @@ func (r *PaymentEventRepository) RecordEvent(ctx context.Context, event domain.P
 	}
 
 	_, err := r.col.InsertOne(ctx, doc)
+	if mongo.IsDuplicateKeyError(err) {
+		// A redelivered webhook is already on record; recording it again is a
+		// no-op, not a failure.
+		return nil
+	}
+
 	if err != nil {
 		return fmt.Errorf("record payment event: %w", err)
 	}

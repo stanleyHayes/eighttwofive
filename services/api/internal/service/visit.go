@@ -216,6 +216,13 @@ func (s *CalendarVisit) CancelVisit(ctx context.Context, visitID string) (*domai
 	return visit, nil
 }
 
+// ReleaseExpiredHolds settles every lapsed unpaid hold. Bookings sweep
+// opportunistically, but a background ticker calls this so holds are still
+// released (and slots freed) on a quiet calendar with no new bookings.
+func (s *CalendarVisit) ReleaseExpiredHolds(ctx context.Context) {
+	s.releaseExpiredHolds(ctx)
+}
+
 // releaseExpiredHolds settles every lapsed unpaid hold: holds whose deposit
 // order was paid in the meantime become firm bookings, the rest are cancelled
 // and their slots reopened. Failures are logged and retried on the next call.
@@ -232,31 +239,69 @@ func (s *CalendarVisit) releaseExpiredHolds(ctx context.Context) {
 	}
 }
 
+// holdOutcome is the fate of a lapsed hold once its deposit has been checked.
+type holdOutcome int
+
+const (
+	holdSkip    holdOutcome = iota // leave untouched and retry on the next sweep
+	holdCancel                     // free the slot — the deposit will never land
+	holdPromote                    // the deposit arrived — make it a firm booking
+	holdExtend                     // the deposit is still settling — keep holding
+)
+
 func (s *CalendarVisit) settleExpiredHold(ctx context.Context, visit *domain.Visit) {
+	switch s.classifyExpiredHold(ctx, visit) {
+	case holdPromote:
+		s.promoteHold(ctx, visit)
+	case holdExtend:
+		s.extendHold(ctx, visit)
+	case holdCancel:
+		s.cancelHeldVisit(ctx, visit)
+	case holdSkip:
+	}
+}
+
+// classifyExpiredHold decides a lapsed hold's fate. A paid order is promoted; a
+// deposit still in flight (or unverifiable) keeps its slot — a webhook can lag
+// past the hold window, and cancelling here would orphan a paid booking and
+// resell the slot. Only a deposit the provider says will never arrive frees it.
+func (s *CalendarVisit) classifyExpiredHold(ctx context.Context, visit *domain.Visit) holdOutcome {
 	order, err := s.orders.GetByRef(ctx, visit.OrderID)
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		s.logger.WarnContext(ctx, "release holds: load order", "visit", visit.ID, "error", err)
 
-		return
+		return holdSkip
 	}
 
 	if order != nil && order.IsPaid() {
-		// The deposit arrived: promote the hold to a firm booking.
-		visit.HoldExpiresAt = nil
-		visit.UpdatedAt = s.now().UTC()
-
-		err = s.visits.Update(ctx, visit)
-		if err != nil {
-			s.logger.WarnContext(ctx, "release holds: promote visit", "visit", visit.ID, "error", err)
-		}
-
-		return
+		return holdPromote
 	}
 
+	if visit.DepositPaymentID == "" {
+		return holdCancel
+	}
+
+	status, verr := s.payments.VerifyTransaction(ctx, visit.DepositPaymentID)
+	switch {
+	case verr != nil:
+		s.logger.WarnContext(ctx, "release holds: verify deposit", "visit", visit.ID, "error", verr)
+
+		return holdExtend
+	case status == depositStatusSuccess:
+		return holdPromote
+	case !depositDefinitelyFailed(status):
+		return holdExtend
+	default:
+		return holdCancel
+	}
+}
+
+// cancelHeldVisit cancels a lapsed visit and reopens its slot for rebooking.
+func (s *CalendarVisit) cancelHeldVisit(ctx context.Context, visit *domain.Visit) {
 	visit.Status = domain.VisitStatusCancelled
 	visit.UpdatedAt = s.now().UTC()
 
-	err = s.visits.Update(ctx, visit)
+	err := s.visits.Update(ctx, visit)
 	if err != nil {
 		s.logger.WarnContext(ctx, "release holds: cancel visit", "visit", visit.ID, "error", err)
 
@@ -266,6 +311,43 @@ func (s *CalendarVisit) settleExpiredHold(ctx context.Context, visit *domain.Vis
 	err = s.slots.UpdateStatusFrom(ctx, visit.SlotID, domain.SlotStatusBooked, domain.SlotStatusOpen)
 	if err != nil {
 		s.logger.WarnContext(ctx, "release holds: reopen slot", "slot", visit.SlotID, "error", err)
+	}
+}
+
+// promoteHold turns a held visit into a firm booking by clearing its expiry.
+func (s *CalendarVisit) promoteHold(ctx context.Context, visit *domain.Visit) {
+	visit.HoldExpiresAt = nil
+	visit.UpdatedAt = s.now().UTC()
+
+	err := s.visits.Update(ctx, visit)
+	if err != nil {
+		s.logger.WarnContext(ctx, "release holds: promote visit", "visit", visit.ID, "error", err)
+	}
+}
+
+// extendHold pushes the hold expiry out so an in-flight deposit gets another
+// settlement window instead of losing its slot.
+func (s *CalendarVisit) extendHold(ctx context.Context, visit *domain.Visit) {
+	next := s.now().UTC().Add(slotHoldDuration)
+	visit.HoldExpiresAt = &next
+	visit.UpdatedAt = s.now().UTC()
+
+	err := s.visits.Update(ctx, visit)
+	if err != nil {
+		s.logger.WarnContext(ctx, "release holds: extend hold", "visit", visit.ID, "error", err)
+	}
+}
+
+const depositStatusSuccess = "success"
+
+// depositDefinitelyFailed reports whether a Paystack transaction status means
+// the deposit will never complete, so a lapsed hold can be safely released.
+func depositDefinitelyFailed(status string) bool {
+	switch status {
+	case "failed", "abandoned", "reversed", "cancelled":
+		return true
+	default:
+		return false
 	}
 }
 

@@ -910,12 +910,14 @@ func (s *Order) resolveDelivery(ctx context.Context, delivery string) (deliveryC
 			return deliveryChoice{}, err
 		}
 
-		var ratePtr *int64
-		if found {
-			ratePtr = &rate
+		// Reject dispatch to an area we have not priced. Otherwise the order
+		// would carry a nil delivery rate and we'd collect payment for the
+		// garment alone, silently shipping for free to an unserved area.
+		if !found {
+			return deliveryChoice{}, fmt.Errorf("%w: we don't deliver to %q", domain.ErrInvalidInput, area)
 		}
 
-		return deliveryChoice{mode: deliveryModeDispatch, area: area, rate: ratePtr}, nil
+		return deliveryChoice{mode: deliveryModeDispatch, area: area, rate: &rate}, nil
 	default:
 		return deliveryChoice{}, fmt.Errorf("%w: delivery mode must be pickup or dispatch:area", domain.ErrInvalidInput)
 	}

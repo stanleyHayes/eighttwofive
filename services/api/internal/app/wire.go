@@ -22,15 +22,22 @@ type indexEnsurer interface {
 	EnsureIndexes(ctx context.Context) error
 }
 
+// holdReleaser settles lapsed, unpaid slot holds. The background sweeper in
+// run.go calls it on a timer so slots are freed even on a quiet calendar.
+type holdReleaser interface {
+	ReleaseExpiredHolds(ctx context.Context)
+}
+
 // buildRouter wires repositories, adapters, services, and handlers.
 // Dependencies flow inward: adapters satisfy domain ports, services depend
-// on ports only, and the HTTP layer depends on services.
+// on ports only, and the HTTP layer depends on services. It also returns the
+// background hold sweeper so the lifecycle owner can run it on a timer.
 func buildRouter(
 	ctx context.Context,
 	cfg *config.Config,
 	client *mongo.Client,
 	logger *slog.Logger,
-) (http.Handler, error) {
+) (http.Handler, *service.CalendarVisit, error) {
 	db := client.Database(cfg.MongoDB)
 
 	// Driven adapters (persistence).
@@ -53,7 +60,7 @@ func buildRouter(
 	for _, repo := range indexRepos {
 		err := repo.EnsureIndexes(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("ensure indexes: %w", err)
+			return nil, nil, fmt.Errorf("ensure indexes: %w", err)
 		}
 	}
 
@@ -89,5 +96,5 @@ func buildRouter(
 		signer, cfg.CloudinaryCloudName, cfg.IsProduction(),
 	)
 
-	return httpapi.NewRouter(handlers, logger, cfg.CORSAllowedOrigins), nil
+	return httpapi.NewRouter(handlers, logger, cfg.CORSAllowedOrigins), visitService, nil
 }

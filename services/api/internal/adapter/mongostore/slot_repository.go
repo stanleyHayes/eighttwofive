@@ -139,6 +139,23 @@ func (r *SlotRepository) List(ctx context.Context, filter domain.SlotFilter) ([]
 	return slots, nil
 }
 
+// Overlaps reports whether an open or booked slot intersects [start, end).
+// Two intervals overlap when each starts before the other ends.
+func (r *SlotRepository) Overlaps(ctx context.Context, start, end time.Time) (bool, error) {
+	query := bson.M{
+		"status": bson.M{"$ne": string(domain.SlotStatusClosed)},
+		"start":  bson.M{"$lt": end.UTC()},
+		"end":    bson.M{"$gt": start.UTC()},
+	}
+
+	count, err := r.col.CountDocuments(ctx, query, options.Count().SetLimit(1))
+	if err != nil {
+		return false, fmt.Errorf("count overlapping slots: %w", err)
+	}
+
+	return count > 0, nil
+}
+
 // UpdateStatusFrom atomically moves a slot from one status to another. The
 // filter includes the expected current status so a concurrent writer that got
 // there first makes this call return ErrSlotUnavailable instead of stomping

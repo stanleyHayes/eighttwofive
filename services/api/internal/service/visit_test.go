@@ -401,7 +401,9 @@ func TestCalendarVisit_ExpiredUnpaidHold_ReleasesSlot(t *testing.T) {
 	first, err := svc.BookSlot(ctx, slotA.ID, "", "ama@example.com", "Ama", "+233200000000")
 	require.NoError(t, err)
 
-	// The deposit never arrives and the hold lapses.
+	// The deposit never arrives and the hold lapses. Paystack reports the
+	// transaction as abandoned, so the hold is safe to release.
+	fixtures.payments.verifyStatus = "abandoned"
 	past := time.Now().UTC().Add(-time.Minute)
 	fixtures.visits.byID[first.Visit.ID].HoldExpiresAt = &past
 
@@ -415,6 +417,38 @@ func TestCalendarVisit_ExpiredUnpaidHold_ReleasesSlot(t *testing.T) {
 	// The released slot is bookable again.
 	_, err = svc.BookSlot(ctx, slotA.ID, "", "esi@example.com", "Esi", "+233200000002")
 	require.NoError(t, err)
+}
+
+func TestCalendarVisit_ExpiredHold_DepositInFlight_KeepsSlot(t *testing.T) {
+	t.Parallel()
+
+	ctx := t.Context()
+	fixtures := newVisitTestFixtures()
+
+	svc := fixtures.service()
+
+	slotA := makeSlot(domain.SlotStatusOpen, 24*time.Hour)
+	slotB := makeSlot(domain.SlotStatusOpen, 48*time.Hour)
+
+	require.NoError(t, fixtures.slots.Create(ctx, slotA))
+	require.NoError(t, fixtures.slots.Create(ctx, slotB))
+
+	first, err := svc.BookSlot(ctx, slotA.ID, "", "ama@example.com", "Ama", "+233200000000")
+	require.NoError(t, err)
+
+	// The hold lapses, but Paystack still reports the deposit in progress — the
+	// webhook is merely lagging, so the slot must NOT be released and resold.
+	fixtures.payments.verifyStatus = "ongoing"
+	past := time.Now().UTC().Add(-time.Minute)
+	fixtures.visits.byID[first.Visit.ID].HoldExpiresAt = &past
+
+	_, err = svc.BookSlot(ctx, slotB.ID, "", "kofi@example.com", "Kofi", "+233200000001")
+	require.NoError(t, err)
+
+	kept := fixtures.visits.byID[first.Visit.ID]
+	assert.Equal(t, domain.VisitStatusBooked, kept.Status, "in-flight deposit keeps its booking")
+	assert.NotNil(t, kept.HoldExpiresAt, "the hold is extended, not cleared")
+	assert.Equal(t, domain.SlotStatusBooked, fixtures.slots.byID[slotA.ID].Status, "slot must not be resold")
 }
 
 func TestCalendarVisit_ExpiredPaidHold_BecomesFirmBooking(t *testing.T) {

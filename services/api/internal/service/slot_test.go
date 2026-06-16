@@ -55,6 +55,20 @@ func (f *fakeSlotRepo) List(_ context.Context, filter domain.SlotFilter) ([]doma
 	return out, nil
 }
 
+func (f *fakeSlotRepo) Overlaps(_ context.Context, start, end time.Time) (bool, error) {
+	for _, slot := range f.byID {
+		if slot.Status == domain.SlotStatusClosed {
+			continue
+		}
+
+		if slot.Start.Before(end) && slot.End.After(start) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (f *fakeSlotRepo) UpdateStatusFrom(_ context.Context, id string, from, to domain.SlotStatus) error {
 	slot, ok := f.byID[id]
 	if !ok {
@@ -95,6 +109,25 @@ func TestCalendarSlot_CreateSlot_EndBeforeStart(t *testing.T) {
 
 	_, err := svc.CreateSlot(ctx, now, now.Add(-time.Hour))
 	require.ErrorIs(t, err, domain.ErrInvalidInput)
+}
+
+func TestCalendarSlot_CreateSlot_RejectsOverlap(t *testing.T) {
+	t.Parallel()
+
+	ctx := t.Context()
+	svc := service.NewCalendarSlot(newFakeSlotRepo())
+	start := time.Now().UTC().Add(24 * time.Hour)
+
+	_, err := svc.CreateSlot(ctx, start, start.Add(time.Hour))
+	require.NoError(t, err)
+
+	// A second window straddling the first must be rejected.
+	_, err = svc.CreateSlot(ctx, start.Add(30*time.Minute), start.Add(90*time.Minute))
+	require.ErrorIs(t, err, domain.ErrInvalidInput)
+
+	// A back-to-back window that merely touches the boundary is fine.
+	_, err = svc.CreateSlot(ctx, start.Add(time.Hour), start.Add(2*time.Hour))
+	require.NoError(t, err)
 }
 
 func TestCalendarSlot_ListSlots(t *testing.T) {
