@@ -122,6 +122,15 @@ export function paymentStatus(order: Order): string {
   return "Unpaid";
 }
 
+/**
+ * Returns a payment whose charged amount didn't match the order total. The
+ * webhook never books these, so the admin needs to see it and reconcile the
+ * transaction in Paystack by reference.
+ */
+export function mismatchedPayment(order: Order): Payment | undefined {
+  return order.payments.find((payment) => payment.status === "mismatch");
+}
+
 export function listOrders(): Promise<Order[]> {
   return request<Order[]>("/api/v1/orders");
 }

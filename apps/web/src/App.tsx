@@ -17,7 +17,9 @@ import { FitGuidePage } from "@/pages/FitGuidePage";
 import { AccountPage } from "@/pages/AccountPage";
 import { OrderDetailPage } from "@/pages/OrderDetailPage";
 import { SlotsPage } from "@/pages/SlotsPage";
+import { PaymentCallbackPage } from "@/pages/PaymentCallbackPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { ErrorPage } from "@/pages/ErrorPage";
 import { AdminLayout } from "@/pages/admin/AdminLayout";
 import { AdminCollectionsPage } from "@/pages/admin/AdminCollectionsPage";
 import { AdminDesignsPage } from "@/pages/admin/AdminDesignsPage";
@@ -47,6 +49,7 @@ function RootLayout() {
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
+    errorElement: <ErrorPage />,
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/waitlist", element: <WaitlistPage /> },
@@ -54,6 +57,7 @@ const router = createBrowserRouter([
       { path: "/collections/:slug", element: <CollectionPage /> },
       { path: "/designs/:slug", element: <DesignPage /> },
       { path: "/slots", element: <SlotsPage /> },
+      { path: "/payments/callback", element: <PaymentCallbackPage /> },
       { path: "/fit-guide", element: <FitGuidePage /> },
       { path: "/about", element: <AboutPage /> },
       { path: "/contact", element: <ContactPage /> },

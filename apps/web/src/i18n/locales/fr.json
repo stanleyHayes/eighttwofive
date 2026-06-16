@@ -30,5 +30,441 @@
     "email": "E-mail",
     "pricesIn": "Prix en GH₵",
     "payments": "Mobile money · Cartes"
+  },
+  "layout": {
+    "wordmarkAria": "{{brand}} — accueil",
+    "primaryNavAria": "Boutique",
+    "openMenu": "Ouvrir le menu",
+    "skipToContent": "Aller au contenu",
+    "defaultLocation": "Accra, Ghana",
+    "copyright": "© 2026 {{brand}} · {{location}}"
+  },
+  "home": {
+    "meta": {
+      "description": "Prêt-à-mesure pour femme, taillé pour vous à Accra. Découvrez des collections thématiques en édition limitée et faites confectionner chaque pièce à vos mesures."
+    },
+    "hero": {
+      "eyebrow": "L'Atelier 825 · Fondé à Accra",
+      "titleLead": "Prêt-à-mesure",
+      "titleMid": "pour femme,",
+      "titleEmphasis": "taillé pour vous.",
+      "shopCta": "Découvrir la boutique",
+      "howCta": "Notre savoir-faire"
+    },
+    "currentDrop": {
+      "fig": "Fig. 00 — Collection du moment",
+      "eyebrow": "Collection en cours",
+      "noteFallback": "Une édition limitée taillée uniquement après commande. Une fois le tissu épuisé, la collection se retire.",
+      "stats": {
+        "designs": "Modèles",
+        "opening": "Bientôt",
+        "make": "Façon",
+        "makeValue": "Sur commande",
+        "run": "Édition",
+        "runValue": "Limitée"
+      },
+      "includes": "Comprend {{names}}.",
+      "includesMore": "Comprend {{names}} et bien plus.",
+      "viewCta": "Voir la collection",
+      "fitGuideCta": "Guide des tailles",
+      "fabricEyebrow": "Édition guidée par le tissu",
+      "fabricTitle": "Façonné jusqu'à la dernière étoffe."
+    },
+    "collections": {
+      "fig": "Fig. 01 — Collections",
+      "title": "Des éditions limitées, nommées.",
+      "action": "Toutes les collections",
+      "tileLabel": "/ Collection",
+      "empty": "De nouvelles collections arrivent."
+    },
+    "method": {
+      "fig": "Fig. 02 — Méthode",
+      "caption": "Fait sur mesure",
+      "title": "Du croquis à votre porte, en trois temps."
+    },
+    "steps": {
+      "choose": {
+        "title": "Choisissez un modèle",
+        "body": "Parcourez les collections en cours, chacune affichée en cedis ghanéens."
+      },
+      "measured": {
+        "title": "Mesuré à votre façon",
+        "body": "Une taille standard, vos propres mesures ou une visite à domicile."
+      },
+      "delivered": {
+        "title": "Taillé & livré",
+        "body": "Confectionné sur commande, suivi, puis expédié ou retiré."
+      }
+    },
+    "newIn": {
+      "fig": "Fig. 03 — Nouveautés",
+      "title": "Tout juste sorti de l'atelier.",
+      "action": "Acheter",
+      "empty": "De nouveaux modèles arrivent."
+    },
+    "waitlist": {
+      "fig": "Fig. 04 — La liste",
+      "title": "Soyez la première informée.",
+      "body": "Un seul message à chaque nouvelle collection. Les éditions limitées partent vite."
+    },
+    "error": {
+      "title": "La boutique reprend son souffle."
+    }
+  },
+  "store": {
+    "documentTitle": "La boutique",
+    "documentDescription": "Découvrez les collections thématiques en série limitée d'Eight Two Five et ses créations sur mesure, coupées à la commande à Accra.",
+    "designCount_one": "{{formattedCount}} création",
+    "designCount_other": "{{formattedCount}} créations",
+    "searching": "Recherche en cours",
+    "liveCatalog": "Catalogue en ligne",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbStore": "Boutique",
+    "bannerTitle": "La Boutique",
+    "bannerDescription": "Collections en ligne et séries limitées, coupées à la commande. Parcourez les collections thématiques ci-dessous ou recherchez parmi toutes les créations actuellement disponibles.",
+    "collectionsHeading": "Collections",
+    "collectionCount_one": "{{formattedCount}} collection",
+    "collectionCount_other": "{{formattedCount}} collections",
+    "collectionsEmptyLabel": "Sur la table de coupe",
+    "collectionsEmptyTitle": "La première collection est sur la table de coupe.",
+    "collectionsEmptyBody": "Les collections sont limitées et thématiques — une dizaine de créations chacune. La première n'a pas encore été dévoilée ; inscrivez-vous sur la page d'accueil et nous vous écrirons dès qu'elle paraîtra.",
+    "allDesignsHeading": "Toutes les créations",
+    "countMatching": "{{label}} correspondant à « {{query}} »",
+    "searchPlaceholder": "Rechercher des créations",
+    "searchAriaLabel": "Rechercher des créations",
+    "noMatchLabel": "Aucun résultat",
+    "noMatchTitle": "Aucun résultat pour « {{query}} ».",
+    "noMatchBody": "Essayez un mot plus court — les noms des créations sont courts — ou effacez la recherche pour voir tout ce qui est disponible.",
+    "clearSearch": "Effacer la recherche",
+    "designsEmptyLabel": "Dans la chambre noire",
+    "designsEmptyTitle": "Les créations sont en cours de prise de vue.",
+    "designsEmptyBody": "Les créations disponibles apparaîtront ici sous peu. En attendant, les collections ci-dessus annoncent ce qui arrive."
+  },
+  "collection": {
+    "retiredOverline": "collection retirée",
+    "retiredTitle": "Cette collection a été retirée",
+    "retiredBody": "Chaque collection est une série limitée — une fois le tissu épuisé, c'est terminé. Les collections en ligne restent disponibles dans la boutique.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbStore": "Boutique",
+    "emptyLabel": "Dans la chambre noire",
+    "emptyTitle": "Les créations arrivent bientôt.",
+    "emptyBody": "Cette collection est en ligne, mais ses créations sont encore en cours de prise de vue. Revenez bientôt."
+  },
+  "design": {
+    "gallery": {
+      "photoAlt": "{{name}} — photo {{current}} sur {{total}}",
+      "showPhoto": "Afficher la photo {{index}}"
+    },
+    "copyLink": {
+      "error": "Impossible de copier le lien",
+      "copied": "Lien copié",
+      "label": "Copier le lien"
+    },
+    "measurements": {
+      "bust": "Tour de poitrine",
+      "waist": "Tour de taille",
+      "hips": "Tour de hanches",
+      "length": "Longueur"
+    },
+    "measurementForm": {
+      "helper": "Indiquez vos mesures en centimètres — l'atelier confirme l'ajustement final avec vous avant la coupe."
+    },
+    "delivery": {
+      "pickup": "Retrait — gratuit, à récupérer une fois prêt",
+      "dispatch": "Livraison dans mon quartier",
+      "areaLabel": "Zone / quartier",
+      "areaPlaceholder": "Saisissez votre quartier",
+      "areaHelperRates": "Choisissez un quartier listé pour un tarif fixe, ou saisissez le vôtre — nous organiserons la livraison.",
+      "areaHelperNoRates": "Indiquez votre quartier ; la livraison sera organisée directement si aucun tarif n'est défini."
+    },
+    "customer": {
+      "name": "Nom complet",
+      "email": "E-mail",
+      "phone": "Numéro de téléphone",
+      "phoneError": "Saisissez un numéro ghanéen, par exemple 024 123 4567 ou +233 24 123 4567.",
+      "phoneHelper": "Mobile ou fixe — par exemple 024 123 4567. Nous vous joignons ici et sur WhatsApp."
+    },
+    "errors": {
+      "name": "Veuillez saisir votre nom complet.",
+      "email": "Veuillez saisir votre e-mail.",
+      "phone": "Veuillez saisir votre numéro de téléphone.",
+      "phoneInvalid": "Veuillez saisir un numéro de téléphone ghanéen valide, par exemple 024 123 4567.",
+      "deliveryArea": "Veuillez indiquer une zone de livraison.",
+      "sizeBand": "Veuillez choisir une tranche de tailles.",
+      "measurements": "Veuillez renseigner toutes les mesures : {{fields}}."
+    },
+    "submit": {
+      "homeVisit": "Réserver une visite à domicile",
+      "request": "Envoyer la demande",
+      "order": "Commander ce modèle"
+    },
+    "detail": {
+      "madeToMeasure": "sur mesure",
+      "sizeBand": "tranche de tailles",
+      "customQuoteNotice": "Les demandes personnalisées sont chiffrées directement — aucun prix n'est affiché tant que la maison n'a pas répondu.",
+      "sizeChart": "guide des tailles — tranche {{band}}",
+      "chartPending": "Le guide de cette tranche est en cours de finalisation — chaque pièce reste coupée à vos mesures.",
+      "pricingPending": "Le tarif de ce modèle est en cours de finalisation.",
+      "yourDetails": "vos coordonnées",
+      "delivery": "livraison"
+    },
+    "customSize": {
+      "toggle": "Ma taille n'est pas indiquée",
+      "self": "Prendre vos mesures vous-même",
+      "homeVisit": "Réserver une visite à domicile (acompte de GHS 500)",
+      "homeVisitHelper": "Choisissez un créneau disponible et versez un acompte déduit du prix de votre vêtement.",
+      "workplace": "Venir à l'atelier",
+      "workplaceHelper": "Rendez-vous à l'atelier Eight Two Five — sans réservation ni acompte."
+    },
+    "designChange": {
+      "toggle": "Demander une modification du modèle",
+      "label": "Décrivez la modification souhaitée",
+      "placeholder": "par exemple sans manches, longueur rallongée"
+    },
+    "confirmation": {
+      "received": "Demande reçue — référence <strong>{{ref}}</strong>. Nous avons envoyé un lien de connexion à {{email}} pour que vous puissiez la suivre ; l'atelier reviendra vers vous avec un devis."
+    },
+    "footnote": {
+      "custom": "Vous recevrez un devis par e-mail et dans votre compte avant tout paiement.",
+      "standard": "Le paiement confirme votre commande et la lance en production."
+    },
+    "related": {
+      "figure": "Fig. — Même collection",
+      "heading": "À découvrir dans cette série.",
+      "body": "Même histoire de tissu, coupe différente. Chaque pièce n'est confectionnée qu'à la commande.",
+      "shopAll": "Voir tous les modèles"
+    },
+    "meta": {
+      "description": "{{name}} — sur mesure par Eight Two Five.",
+      "fallbackName": "Un modèle"
+    },
+    "retired": {
+      "overline": "modèle retiré",
+      "title": "Ce modèle a été retiré",
+      "body": "Chaque modèle ne vit que le temps de son tissu. Celui-ci est épuisé — les modèles disponibles vous attendent dans la boutique."
+    }
+  },
+  "about": {
+    "documentTitle": "L'atelier",
+    "documentDescription": "Eight Two Five crée des vêtements féminins sur mesure en collections limitées et thématiques, taillés une pièce à la fois à Accra.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbAtelier": "Atelier",
+    "bannerTitle": "Taillé pour vous, à Accra.",
+    "bannerDescription": "Un petit atelier qui crée des vêtements féminins sur mesure en collections limitées et thématiques — rien de produit en série, rien qui reste sur un cintre.",
+    "storyOverline": "Notre histoire",
+    "storyBody": "Eight Two Five crée des vêtements féminins sur mesure en collections limitées et thématiques. Rien n'est produit en série et rien ne dort sur un cintre — chaque pièce est taillée après votre commande, à vos mesures, et retirée lorsque son tissu est épuisé.",
+    "craftAtelierTitle": "L'atelier",
+    "craftAtelierBody": "Un petit atelier à Accra où chaque vêtement est taillé une pièce à la fois. Pas de portants, pas de stock résiduel — un modèle n'existe que lorsque quelqu'un le commande.",
+    "craftFabricTitle": "Le tissu",
+    "craftFabricBody": "Chaque collection est conçue autour d'un coupon de tissu limité. Une dizaine de modèles se le partagent ; lorsque le coupon est épuisé, la collection se retire définitivement."
+  },
+  "fit": {
+    "documentTitle": "Guide des mesures",
+    "documentDescription": "Choisissez une taille standard, envoyez vos mesures ou réservez un essayage avant que votre pièce Eight Two Five ne soit taillée.",
+    "defaultLocation": "l'espace de travail Eight Two Five",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbFitGuide": "Guide des mesures",
+    "bannerTitle": "Les mesures, avant le tissu.",
+    "bannerDescription": "Choisissez une taille standard, envoyez vos mesures ou réservez un essayage. Chaque pièce est confirmée avant d'être taillée.",
+    "bannerActionLabel": "Parcourir les modèles",
+    "fig01Label": "Fig. 01 — Parcours de mesure",
+    "path1Title": "Commander une taille standard",
+    "path1Body": "Choisissez la taille la plus proche sur la page du modèle. L'atelier confirme tout de même l'ajustement final avant la coupe.",
+    "path1ActionLabel": "Parcourir les modèles",
+    "path2Title": "Envoyer vos mesures",
+    "path2Body": "Indiquez votre tour de poitrine, votre tour de taille, votre tour de hanches et la longueur souhaitée en centimètres lorsque votre taille n'est pas répertoriée.",
+    "path2ActionLabel": "Commencer en boutique",
+    "path3Title": "Réserver une visite",
+    "path3Body": "Choisissez une visite à domicile lorsque vous souhaitez confier la prise de mesures en personne avant la confection du vêtement.",
+    "path3ActionLabel": "Réserver une visite",
+    "measureYourselfOverline": "Prenez vos mesures",
+    "measureYourselfTitle": "Quatre chiffres suffisent pour commencer.",
+    "measureYourselfBody": "Utilisez un mètre ruban souple et mesurez en centimètres. L'atelier passe les chiffres en revue avec vous avant la coupe : le formulaire est donc un point de départ, non un piège.",
+    "measureBustLabel": "Tour de poitrine",
+    "measureBustBody": "Mesurez à l'endroit le plus fort, le ruban bien horizontal et détendu.",
+    "measureWaistLabel": "Tour de taille",
+    "measureWaistBody": "Mesurez la taille naturelle, généralement le point le plus étroit du buste.",
+    "measureHipsLabel": "Tour de hanches",
+    "measureHipsBody": "Mesurez la partie la plus forte des hanches, en vous tenant naturellement.",
+    "measureLengthLabel": "Longueur",
+    "measureLengthBody": "Mesurez de l'épaule ou de la taille jusqu'à l'endroit où vous souhaitez que l'ourlet tombe.",
+    "fig02Label": "Fig. 02 — Visite",
+    "fig02Caption": "mesuré en personne",
+    "visitTitle": "Vous préférez qu'on s'occupe du mètre ?",
+    "visitBody": "Réservez une visite à domicile ou organisez un essayage à {{location}}. L'acompte de la visite s'élève à {{deposit}} et se déduit du prix de votre vêtement.",
+    "visitDepositTitle": "Acompte de visite",
+    "visitDepositBody": "L'acompte réserve votre créneau et se déduit du paiement final du vêtement.",
+    "visitButtonLabel": "Réserver une visite",
+    "fig03Label": "Fig. 03 — Rythme de commande",
+    "timelineStep": "Étape {{n}}",
+    "timelineSelectLabel": "Sélection",
+    "timelineSelectBody": "Choisissez un modèle et un parcours de mesure.",
+    "timelineConfirmLabel": "Confirmation",
+    "timelineConfirmBody": "L'atelier vérifie les détails avant la coupe.",
+    "timelineCutLabel": "Coupe",
+    "timelineCutBody": "Votre pièce est confectionnée sur commande.",
+    "timelineFinishLabel": "Finition",
+    "timelineFinishBody": "Retrait ou expédition une fois prête."
+  },
+  "contact": {
+    "docTitle": "Contact",
+    "docDescription": "Contactez l'atelier Eight Two Five — par WhatsApp, par e-mail, ou réservez une visite pour être mesurée en personne à Accra.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbContact": "Contact",
+    "bannerTitle": "Parlez à l'atelier.",
+    "bannerDescription": "Une question sur un modèle, vos mesures ou une visite pour être mesurée en personne — WhatsApp est le moyen le plus rapide de nous joindre.",
+    "messageLabel": "le plus rapide",
+    "messageTitle": "Écrivez à l'atelier",
+    "messageBody": "Renseignez-vous sur la coupe, le tissu, les délais ou un modèle précis. WhatsApp est la voie la plus directe vers l'atelier.",
+    "openWhatsApp": "Ouvrir WhatsApp",
+    "fittingLabel": "essayage",
+    "fittingTitle": "Réservez une visite de prise de mesures",
+    "fittingBody": "Choisissez un créneau de visite à domicile pour une prise de mesures en personne avant la coupe du vêtement.",
+    "bookVisit": "Réserver une visite",
+    "intro": "Une question sur un modèle, vos mesures ou une visite pour être mesurée en personne — WhatsApp est le moyen le plus rapide de nous joindre.",
+    "whatsappLabel": "whatsapp",
+    "whatsappPending": "La ligne WhatsApp ouvrira avec la boutique.",
+    "visitLabel": "visite",
+    "visitPending": "Les visites de prise de mesures se font sur rendez-vous — lieu communiqué prochainement.",
+    "emailLabel": "e-mail"
+  },
+  "slots": {
+    "docTitle": "Réserver une visite",
+    "docDescription": "Réservez un essayage à domicile ou à l'atelier avec Eight Two Five pour être mesurée en personne avant la coupe de votre pièce.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbBookVisit": "Réserver une visite",
+    "bannerTitle": "Réserver une visite à domicile",
+    "bannerDescription": "Choisissez un créneau disponible ci-dessous. Un acompte de GHS 500 confirme votre réservation et se déduit du prix de votre vêtement.",
+    "errorLoad": "Impossible de charger les créneaux disponibles.",
+    "emptyLabel": "Aucun créneau disponible",
+    "emptyTitle": "Aucun créneau de visite n'est ouvert pour le moment.",
+    "emptyBody": "Les essayages s'ajoutent au fur et à mesure que le calendrier se libère. Revenez bientôt, ou commandez en ligne en ajoutant une note de mesures sur mesure.",
+    "emptyAction": "Parcourir la boutique",
+    "chooseTime": "choisir un horaire",
+    "openCount_one": "{{formatted}} créneau disponible",
+    "openCount_other": "{{formatted}} créneaux disponibles",
+    "slotLabel": "Créneau {{number}}",
+    "continue": "Continuer",
+    "dialogEyebrow": "visite à domicile",
+    "dialogTitle": "Réservez votre essayage",
+    "selectedSlot": "créneau sélectionné",
+    "fullName": "Nom complet",
+    "email": "E-mail",
+    "phoneNumber": "Numéro de téléphone",
+    "errorAllFields": "Veuillez remplir tous les champs.",
+    "errorInvalidPhone": "Saisissez un numéro de téléphone ghanéen valide, par exemple 024 123 4567.",
+    "cancel": "Annuler",
+    "payDeposit": "Payer l'acompte"
+  },
+  "waitlist": {
+    "eyebrow": "restez informée",
+    "title": "Soyez la première informée",
+    "body": "Inscrivez-vous pour découvrir les nouvelles collections et les réassorts. Aucun spam."
+  },
+  "payment": {
+    "docTitle": "Paiement reçu",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbPayment": "Paiement",
+    "bannerTitle": "Paiement reçu",
+    "bannerDescription": "Merci. Nous confirmons votre paiement à l'instant — vous recevrez un e-mail dès que votre commande sera enregistrée.",
+    "referenceLabel": "votre référence",
+    "noReference": "Si votre paiement a bien été effectué, un e-mail de confirmation est en route. Gardez un œil sur votre boîte de réception.",
+    "reassurance": "La confirmation peut prendre un instant, le temps que nous vérifiions le paiement auprès de notre prestataire. Vous n'avez rien d'autre à faire — nous vous contacterons par e-mail, et votre commande apparaîtra dans votre compte une fois enregistrée.",
+    "viewOrders": "Voir vos commandes",
+    "continueBrowsing": "Continuer vos achats"
+  },
+  "account": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbAccount": "Compte",
+    "title": "Votre compte",
+    "welcomeBack": "Ravis de vous revoir, {{name}}.",
+    "ordersOverline": "vos commandes",
+    "ordersHeading": "Garde-robe en cours",
+    "ordersBlurb": "Suivez les paiements, les essayages, les notes de livraison et l'avancement de la confection depuis un seul endroit.",
+    "orderCount_one": "{{formattedCount}} commande",
+    "orderCount_other": "{{formattedCount}} commandes",
+    "logOut": "Se déconnecter",
+    "loadError": "Impossible de charger vos commandes. Veuillez réessayer dans un instant.",
+    "emptyLabel": "Aucune commande pour le moment",
+    "emptyTitle": "Votre garde-robe est encore vide.",
+    "emptyBody": "Vos commandes apparaîtront ici dès que vous en aurez passé une. Parcourez les collections en cours pour trouver votre première pièce.",
+    "emptyAction": "Parcourir la boutique"
+  },
+  "orderDetail": {
+    "backToAccount": "Retour au compte",
+    "loadError": "Impossible de charger cette commande. Veuillez réessayer dans un instant.",
+    "deliveryPickup": "Retrait — gratuit, à récupérer dès que votre commande est prête.",
+    "deliveryArranged": "Expédition vers {{area}} — livraison organisée directement avec Eight Two Five.",
+    "deliveryDispatch": "Expédition vers {{area}} — {{rate}}",
+    "yourArea": "votre quartier",
+    "visitTitle": "Visite réservée",
+    "visitBody": "Votre créneau de visite à domicile apparaîtra ici dès l'ouverture du calendrier.",
+    "visitCall": "Appeler Eight Two Five",
+    "estimated": "Délai estimé : {{timeline}}",
+    "timeframeFallback": "Environ deux semaines, selon les réservations en cours",
+    "emailNote": "{{timeframe}}. Nous vous écrirons à chaque étape.",
+    "orderRef": "commande {{ref}}",
+    "detailSize": "Taille",
+    "detailPayment": "Paiement",
+    "detailPhone": "Téléphone",
+    "detailDelivery": "Livraison",
+    "notFoundLabel": "Commande introuvable",
+    "notFoundTitle": "Nous n'avons pas trouvé cette commande.",
+    "notFoundBody": "La référence est peut-être erronée, ou la commande appartient à un autre compte. Vos commandes sont répertoriées sur la page de votre compte."
+  },
+  "login": {
+    "nameError": "Indiquez votre nom afin que nous sachions comment vous appeler.",
+    "emailError": "Saisissez une adresse e-mail valide, par exemple ama@example.com.",
+    "asideLabel": "AUTH.",
+    "asideCaption": "salon d'essayage privé",
+    "asideHeading": "Votre salon de commandes.",
+    "asideBody": "Connectez-vous grâce à un lien, consultez vos commandes en cours et conservez chaque note d'essayage rattachée au même compte.",
+    "featureNoPassword": "Sans mot de passe",
+    "featureOrderUpdates": "Suivi des commandes",
+    "featureSecureLink": "Lien sécurisé",
+    "eyebrow": "connexion",
+    "heading": "Bon retour parmi nous",
+    "intro": "Saisissez votre adresse e-mail et nous vous enverrons un lien de connexion. Aucun mot de passe à retenir.",
+    "successLabel": "consultez votre messagerie",
+    "successBodyBefore": "Nous avons envoyé un lien de connexion à",
+    "successBodyAfter": ". Ouvrez-le sur cet appareil pour continuer.",
+    "nameLabel": "Nom",
+    "emailLabel": "E-mail",
+    "submit": "Envoyez-moi un lien",
+    "submitError": "Une erreur est survenue de notre côté. Veuillez réessayer dans un instant.",
+    "backHome": "retour à l'accueil"
+  },
+  "verify": {
+    "eyebrow": "connexion",
+    "headingFailed": "Ce lien n'a pas fonctionné",
+    "headingPending": "Connexion en cours",
+    "errorLabel": "lien expiré ou invalide",
+    "errorBodyBefore": "Les liens de connexion ne fonctionnent qu'une seule fois et expirent rapidement.",
+    "errorLink": "Demandez un nouveau lien de connexion",
+    "errorBodyAfter": ".",
+    "spinnerAria": "Vérification en cours",
+    "pendingStatus": "vérification de votre lien"
+  },
+  "notFound": {
+    "documentTitle": "Page introuvable",
+    "homeAria": "Eight Two Five — accueil",
+    "label": "Erreur 404 — Page introuvable",
+    "heading": "Fil perdu.",
+    "body": "La page que vous recherchez a été retirée, ou n'a jamais existé. Chaque fil ramène à l'accueil.",
+    "caption": "Retourner à la boutique",
+    "backHome": "Retour à l'accueil",
+    "browseStore": "Parcourir la boutique"
+  },
+  "errorPage": {
+    "label404": "Erreur 404 — Page introuvable",
+    "label": "Une erreur est survenue",
+    "heading404": "Fil perdu.",
+    "heading": "Un fil détendu.",
+    "body404": "La page que vous recherchez a été retirée, ou n'a jamais existé. Chaque fil ramène à l'accueil.",
+    "body": "Quelque chose s'est défait de notre côté. Réessayez, ou revenez à l'accueil — votre place dans la file est préservée.",
+    "homeAria": "Eight Two Five — accueil",
+    "caption": "Retour en lieu sûr",
+    "tryAgain": "Réessayer",
+    "backHome": "Retour à l'accueil"
   }
 }

@@ -10,6 +10,8 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { EmptyState, ErrorState } from "@/components/EmptyState";
@@ -32,20 +34,17 @@ import { usePublicSettings } from "@/features/storefront/hooks";
 import { ApiError } from "@/lib/api";
 import { clayDeep, sandDeep, stone } from "@/theme";
 
-function errorMessage(
-  error: unknown,
-  fallback = "Could not load this order. Try again in a moment.",
-): string {
+function errorMessage(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback;
 }
 
-function DeliveryLine({ order }: { order: Order }) {
+function DeliveryLine({ order, t }: { order: Order; t: TFunction }) {
   const { mode, area, ratePesewas } = order.delivery;
 
   if (mode === "pickup") {
     return (
       <Typography sx={{ color: "text.secondary" }}>
-        Pickup — free, collect when your order is ready.
+        {t("orderDetail.deliveryPickup")}
       </Typography>
     );
   }
@@ -53,20 +52,30 @@ function DeliveryLine({ order }: { order: Order }) {
   if (ratePesewas == null) {
     return (
       <Typography sx={{ color: "text.secondary" }}>
-        Dispatch to {area || "your area"} — delivery arranged directly with
-        Eight Two Five.
+        {t("orderDetail.deliveryArranged", {
+          area: area || t("orderDetail.yourArea"),
+        })}
       </Typography>
     );
   }
 
   return (
     <Typography sx={{ color: "text.secondary" }}>
-      Dispatch to {area} — {formatPesewas(ratePesewas)}
+      {t("orderDetail.deliveryDispatch", {
+        area,
+        rate: formatPesewas(ratePesewas),
+      })}
     </Typography>
   );
 }
 
-function VisitCard({ whatsappNumber }: { whatsappNumber?: string }) {
+function VisitCard({
+  whatsappNumber,
+  t,
+}: {
+  whatsappNumber?: string;
+  t: TFunction;
+}) {
   return (
     <Card
       variant="outlined"
@@ -74,10 +83,10 @@ function VisitCard({ whatsappNumber }: { whatsappNumber?: string }) {
     >
       <CardContent>
         <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
-          Booked visit
+          {t("orderDetail.visitTitle")}
         </Typography>
         <Typography sx={{ color: "text.secondary", mb: 2 }}>
-          Your home-visit slot will appear here once the calendar is live.
+          {t("orderDetail.visitBody")}
         </Typography>
         <Button
           variant="contained"
@@ -85,7 +94,7 @@ function VisitCard({ whatsappNumber }: { whatsappNumber?: string }) {
           disabled={!whatsappNumber}
           sx={{ width: { xs: "100%", sm: "auto" } }}
         >
-          Call Eight Two Five
+          {t("orderDetail.visitCall")}
         </Button>
       </CardContent>
     </Card>
@@ -98,15 +107,15 @@ function isCustomerFacingStatus(status: Order["status"]): boolean {
   );
 }
 
-function StatusAlert({ order }: { order: Order }) {
+function StatusAlert({ order, t }: { order: Order; t: TFunction }) {
   if (!isCustomerFacingStatus(order.status)) {
     return null;
   }
 
   const label = customerStageLabel(order.status);
   const timeframe = order.quote.timeline
-    ? `Estimated: ${order.quote.timeline}`
-    : "Roughly two weeks, depending on current bookings";
+    ? t("orderDetail.estimated", { timeline: order.quote.timeline })
+    : t("orderDetail.timeframeFallback");
 
   return (
     <Alert
@@ -119,7 +128,7 @@ function StatusAlert({ order }: { order: Order }) {
           {label}
         </Typography>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {timeframe}. We&apos;ll email you at each step.
+          {t("orderDetail.emailNote", { timeframe })}
         </Typography>
       </Stack>
     </Alert>
@@ -129,9 +138,11 @@ function StatusAlert({ order }: { order: Order }) {
 function OrderContent({
   order,
   settings,
+  t,
 }: {
   order: Order;
   settings?: PublicSettings;
+  t: TFunction;
 }) {
   const imageUrl =
     settings?.cloudName && order.designSnapshot.photoPublicId
@@ -143,17 +154,17 @@ function OrderContent({
       : null;
   const stage = customerStageLabel(order.status);
   const timeframe = order.quote.timeline
-    ? `Estimated: ${order.quote.timeline}`
+    ? t("orderDetail.estimated", { timeline: order.quote.timeline })
     : null;
   const price = effectivePricePesewas(order);
 
   return (
     <Stack spacing={4}>
-      <StatusAlert order={order} />
+      <StatusAlert order={order} t={t} />
 
       <Box>
         <Typography variant="overline" component="p" sx={{ color: clayDeep }}>
-          order {order.ref}
+          {t("orderDetail.orderRef", { ref: order.ref })}
         </Typography>
         <Typography variant="h2" component="h1" sx={{ mt: 1.5 }}>
           {stage}
@@ -233,17 +244,23 @@ function OrderContent({
                 }}
               >
                 <DetailItem
-                  label="Size"
+                  label={t("orderDetail.detailSize")}
                   value={
                     order.customisation.bandLabel ||
                     order.customisation.sizeMode
                   }
                 />
-                <DetailItem label="Payment" value={paymentStatus(order)} />
-                <DetailItem label="Phone" value={order.customerPhone} />
                 <DetailItem
-                  label="Delivery"
-                  value={<DeliveryLine order={order} />}
+                  label={t("orderDetail.detailPayment")}
+                  value={paymentStatus(order)}
+                />
+                <DetailItem
+                  label={t("orderDetail.detailPhone")}
+                  value={order.customerPhone}
+                />
+                <DetailItem
+                  label={t("orderDetail.detailDelivery")}
+                  value={<DeliveryLine order={order} t={t} />}
                 />
               </Box>
             </Stack>
@@ -252,7 +269,7 @@ function OrderContent({
       </Card>
 
       {hasVisit(order) && (
-        <VisitCard whatsappNumber={settings?.whatsappNumber} />
+        <VisitCard whatsappNumber={settings?.whatsappNumber} t={t} />
       )}
     </Stack>
   );
@@ -278,6 +295,7 @@ function DetailItem({ label, value }: { label: string; value: ReactNode }) {
 }
 
 export function OrderDetailPage() {
+  const { t } = useTranslation();
   const { ref } = useParams<{ ref: string }>();
   const order = useOrder(ref ?? "");
   const settings = usePublicSettings();
@@ -303,7 +321,7 @@ export function OrderDetailPage() {
           }}
         >
           <ArrowBackIcon sx={{ fontSize: 15 }} />
-          Back to account
+          {t("orderDetail.backToAccount")}
         </Link>
 
         {order.isLoading || settings.isLoading ? (
@@ -317,18 +335,18 @@ export function OrderDetailPage() {
           </Stack>
         ) : notFound ? (
           <EmptyState
-            label="Order not found"
-            title="We couldn't find that order."
-            body="The reference may be mistyped, or the order belongs to a different account. Your orders are listed on your account page."
-            action={{ label: "Back to account", to: "/account" }}
+            label={t("orderDetail.notFoundLabel")}
+            title={t("orderDetail.notFoundTitle")}
+            body={t("orderDetail.notFoundBody")}
+            action={{ label: t("orderDetail.backToAccount"), to: "/account" }}
           />
         ) : order.error ? (
           <ErrorState
-            message={errorMessage(order.error)}
+            message={errorMessage(order.error, t("orderDetail.loadError"))}
             onRetry={() => order.refetch()}
           />
         ) : order.data ? (
-          <OrderContent order={order.data} settings={settings.data} />
+          <OrderContent order={order.data} settings={settings.data} t={t} />
         ) : null}
       </Box>
     </StorefrontLayout>

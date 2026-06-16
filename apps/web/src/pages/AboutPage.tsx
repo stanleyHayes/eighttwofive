@@ -2,26 +2,24 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
+import { useTranslation } from "react-i18next";
 import { PageBanner } from "@/components/PageBanner";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
-const CRAFT_BLOCKS = [
-  {
-    title: "The atelier",
-    body: "A small Accra workroom where every garment is cut one at a time. No racks, no leftover stock — a design exists only when someone orders it.",
-  },
-  {
-    title: "The fabric",
-    body: "Each collection is built around a limited bolt of fabric. Around ten designs share it; when the bolt runs out, the collection retires for good.",
-  },
-];
-
 export function AboutPage() {
-  useDocumentTitle(
-    "The Atelier",
-    "Eight Two Five makes made-to-measure womenswear in limited, themed collections, cut one garment at a time in Accra.",
-  );
+  const { t } = useTranslation();
+  const craftBlocks = [
+    {
+      title: t("about.craftAtelierTitle"),
+      body: t("about.craftAtelierBody"),
+    },
+    {
+      title: t("about.craftFabricTitle"),
+      body: t("about.craftFabricBody"),
+    },
+  ];
+  useDocumentTitle(t("about.documentTitle"), t("about.documentDescription"));
 
   return (
     <StorefrontLayout>
@@ -29,21 +27,22 @@ export function AboutPage() {
         <PageBanner
           tone="ink"
           icon={<AutoAwesomeOutlined />}
-          breadcrumbs={[{ label: "Home", to: "/" }, { label: "Atelier" }]}
-          title="Cut to you, in Accra."
-          description="A small atelier making made-to-measure womenswear in limited, themed collections — nothing mass-produced, nothing left on a shelf."
+          breadcrumbs={[
+            { label: t("about.breadcrumbHome"), to: "/" },
+            { label: t("about.breadcrumbAtelier") },
+          ]}
+          title={t("about.bannerTitle")}
+          description={t("about.bannerDescription")}
         />
       </Box>
 
       {/* Story */}
       <Box component="section" sx={{ mb: { xs: 6, md: 10 }, maxWidth: 640 }}>
         <Typography variant="overline" component="p" sx={{ color: "text.secondary", mb: 1 }}>
-          Our story
+          {t("about.storyOverline")}
         </Typography>
         <Typography variant="subtitle1" sx={{ color: "text.secondary", maxWidth: "54ch" }}>
-          Eight Two Five makes made-to-measure womenswear in limited, themed collections.
-          Nothing is mass-produced and nothing sits on a shelf — every piece is cut after you
-          order it, to your measurements, and retired when its fabric runs out.
+          {t("about.storyBody")}
         </Typography>
       </Box>
 
@@ -54,7 +53,7 @@ export function AboutPage() {
         spacing={2}
         sx={{ mb: { xs: 8, md: 12 } }}
       >
-        {CRAFT_BLOCKS.map((block, index) => (
+        {craftBlocks.map((block, index) => (
           <Box
             key={block.title}
             sx={{

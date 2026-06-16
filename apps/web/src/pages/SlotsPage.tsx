@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -26,6 +27,11 @@ import {
   formatSlotTime,
 } from "@/features/slots/hooks";
 import { errorMessage, type Slot } from "@/features/slots/api";
+import {
+  formatGhanaPhone,
+  isValidGhanaPhone,
+  normalizeGhanaPhone,
+} from "@/lib/phone";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { amber, brass, monoFamily } from "@/theme";
 
@@ -36,6 +42,7 @@ interface BookingFormProps {
 }
 
 function BookingForm({ slot, designId, onClose }: BookingFormProps) {
+  const { t } = useTranslation();
   const book = useBookSlot();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -47,7 +54,12 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
     setFormError(null);
 
     if (!email.trim() || !name.trim() || !phone.trim()) {
-      setFormError("Please fill in all fields.");
+      setFormError(t("slots.errorAllFields"));
+      return;
+    }
+
+    if (!isValidGhanaPhone(phone)) {
+      setFormError(t("slots.errorInvalidPhone"));
       return;
     }
 
@@ -58,7 +70,7 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
           designId: designId ?? undefined,
           email: email.trim(),
           name: name.trim(),
-          phone: phone.trim(),
+          phone: normalizeGhanaPhone(phone),
         },
       },
       {
@@ -84,10 +96,10 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
             }}
           >
             <Typography variant="overline" component="p" sx={{ color: brass }}>
-              home visit
+              {t("slots.dialogEyebrow")}
             </Typography>
             <Typography variant="h4" component="p" sx={{ mt: 1 }}>
-              Book your fitting
+              {t("slots.dialogTitle")}
             </Typography>
           </Box>
         </DialogTitle>
@@ -106,14 +118,14 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
                 component="p"
                 sx={{ color: "text.secondary" }}
               >
-                selected slot
+                {t("slots.selectedSlot")}
               </Typography>
               <Typography sx={{ mt: 0.5 }}>
                 {formatSlotTime(slot.start, slot.end)}
               </Typography>
             </Box>
             <TextField
-              label="Full name"
+              label={t("slots.fullName")}
               value={name}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 setName(event.target.value)
@@ -122,7 +134,7 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
               required
             />
             <TextField
-              label="Email"
+              label={t("slots.email")}
               type="email"
               value={email}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
@@ -132,13 +144,15 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
               required
             />
             <TextField
-              label="Phone number"
+              label={t("slots.phoneNumber")}
               value={phone}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setPhone(event.target.value)
+                setPhone(formatGhanaPhone(event.target.value))
               }
               fullWidth
               required
+              inputMode="tel"
+              placeholder="024 123 4567"
             />
             {(formError || book.isError) && (
               <Alert severity="error">
@@ -149,10 +163,10 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
         </DialogContent>
         <DialogActions sx={{ px: { xs: 3, sm: 4 }, pb: 3.5 }}>
           <Button type="button" onClick={onClose}>
-            Cancel
+            {t("slots.cancel")}
           </Button>
           <Button type="submit" variant="contained" loading={book.isPending}>
-            Pay deposit
+            {t("slots.payDeposit")}
           </Button>
         </DialogActions>
       </form>
@@ -161,10 +175,8 @@ function BookingForm({ slot, designId, onClose }: BookingFormProps) {
 }
 
 export function SlotsPage() {
-  useDocumentTitle(
-    "Book a visit",
-    "Book a home or atelier fitting with Eight Two Five to be measured in person before your piece is cut.",
-  );
+  const { t } = useTranslation();
+  useDocumentTitle(t("slots.docTitle"), t("slots.docDescription"));
   const [searchParams] = useSearchParams();
   const designId = searchParams.get("designId");
   const { data: slots, isLoading, error, refetch } = useOpenSlots();
@@ -178,9 +190,12 @@ export function SlotsPage() {
         <PageBanner
           tone="ink"
           icon={<EventOutlined />}
-          breadcrumbs={[{ label: "Home", to: "/" }, { label: "Book a visit" }]}
-          title="Book a home visit"
-          description="Choose an open slot below. A GHS 500 deposit confirms your booking and counts toward your garment."
+          breadcrumbs={[
+            { label: t("slots.breadcrumbHome"), to: "/" },
+            { label: t("slots.breadcrumbBookVisit") },
+          ]}
+          title={t("slots.bannerTitle")}
+          description={t("slots.bannerDescription")}
         />
         <Box sx={{ mt: { xs: 4, md: 5 } }} />
 
@@ -194,17 +209,17 @@ export function SlotsPage() {
 
         {error && (
           <ErrorState
-            message={errorMessage(error, "Could not load available slots.")}
+            message={errorMessage(error, t("slots.errorLoad"))}
             onRetry={() => refetch()}
           />
         )}
 
         {!isLoading && !error && openSlots.length === 0 && (
           <EmptyState
-            label="No open slots"
-            title="No visit slots are open right now."
-            body="Fittings are added as the calendar opens up. Check back soon, or order online and add a custom size note instead."
-            action={{ label: "Browse the store", to: "/store" }}
+            label={t("slots.emptyLabel")}
+            title={t("slots.emptyTitle")}
+            body={t("slots.emptyBody")}
+            action={{ label: t("slots.emptyAction"), to: "/store" }}
           />
         )}
 
@@ -224,7 +239,7 @@ export function SlotsPage() {
                 component="legend"
                 sx={{ color: "text.secondary" }}
               >
-                choose a time
+                {t("slots.chooseTime")}
               </Typography>
               <Typography
                 variant="overline"
@@ -233,8 +248,10 @@ export function SlotsPage() {
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
-                {openSlots.length.toLocaleString("en-GH")} open{" "}
-                {openSlots.length === 1 ? "slot" : "slots"}
+                {t("slots.openCount", {
+                  count: openSlots.length,
+                  formatted: openSlots.length.toLocaleString("en-GH"),
+                })}
               </Typography>
             </Stack>
             <RadioGroup
@@ -284,7 +301,9 @@ export function SlotsPage() {
                                 fontFamily: monoFamily,
                               }}
                             >
-                              Slot {String(index + 1).padStart(2, "0")}
+                              {t("slots.slotLabel", {
+                                number: String(index + 1).padStart(2, "0"),
+                              })}
                             </Typography>
                             <Typography
                               variant="body1"
@@ -313,7 +332,7 @@ export function SlotsPage() {
               }}
               sx={{ width: { xs: "100%", sm: "auto" } }}
             >
-              Continue
+              {t("slots.continue")}
             </Button>
           </Box>
         )}

@@ -8,6 +8,7 @@ import {
   sortedPhotos,
   type OgData,
 } from "./src/lib/og";
+import { SITE_ORIGIN } from "./src/lib/site";
 
 /**
  * Run this middleware on the dynamic sitemap and on shareable storefront paths.
@@ -25,8 +26,6 @@ export const config = {
 
 const DEFAULT_TITLE = "Eight Two Five";
 const DEFAULT_DESCRIPTION = "Made-to-measure womenswear from Accra.";
-/** Canonical public origin used in sitemap URLs. */
-const SITE_ORIGIN = "https://eighttwofive.vercel.app";
 const STATIC_PATHS = ["/", "/store", "/about", "/contact", "/slots"];
 
 interface SettingsEnvelope {

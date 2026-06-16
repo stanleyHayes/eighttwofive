@@ -23,6 +23,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import CheckOutlined from "@mui/icons-material/CheckOutlined";
+import { Trans, useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate, useParams } from "react-router";
 import { ErrorState } from "@/components/EmptyState";
 import { JsonLd } from "@/components/JsonLd";
@@ -56,10 +57,8 @@ import {
   normalizeGhanaPhone,
 } from "@/lib/phone";
 import { ApiError } from "@/lib/api";
+import { SITE_ORIGIN } from "@/lib/site";
 import { amber, clayDeep, noir, noirAlpha50, sandDeep, stone } from "@/theme";
-
-/** Canonical public origin, used for structured-data URLs. */
-const SITE_ORIGIN = "https://eighttwofive.vercel.app";
 
 type MeasurementKey = "bust" | "waist" | "hips" | "length";
 
@@ -71,6 +70,7 @@ const defaultMeasurements: Record<MeasurementKey, string> = {
 };
 
 function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
+  const { t } = useTranslation();
   const photos = sortedPhotos(design);
   const [selected, setSelected] = useState(0);
   const current = photos[selected] ?? photos[0];
@@ -92,7 +92,11 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
         <Box
           component="img"
           src={photoUrl(cloudName, current.publicId, DETAIL_TRANSFORM)}
-          alt={`${design.name} — photo ${selected + 1} of ${photos.length}`}
+          alt={t("design.gallery.photoAlt", {
+            name: design.name,
+            current: selected + 1,
+            total: photos.length,
+          })}
           loading="lazy"
           decoding="async"
           sx={{ width: "100%", display: "block", bgcolor: sandDeep }}
@@ -105,7 +109,7 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
               key={photo.publicId}
               component="button"
               type="button"
-              aria-label={`Show photo ${index + 1}`}
+              aria-label={t("design.gallery.showPhoto", { index: index + 1 })}
               aria-pressed={index === selected}
               onClick={() => setSelected(index)}
               sx={{
@@ -148,6 +152,7 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
 }
 
 function CopyLinkButton() {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
 
@@ -174,17 +179,25 @@ function CopyLinkButton() {
           });
       }}
     >
-      {error ? "Could not copy link" : copied ? "Link copied" : "Copy link"}
+      {error
+        ? t("design.copyLink.error")
+        : copied
+          ? t("design.copyLink.copied")
+          : t("design.copyLink.label")}
     </Button>
   );
 }
 
-const MEASUREMENT_LABELS: Record<MeasurementKey, string> = {
-  bust: "Bust",
-  waist: "Waist",
-  hips: "Hips",
-  length: "Length",
-};
+function measurementLabels(
+  t: (key: string) => string,
+): Record<MeasurementKey, string> {
+  return {
+    bust: t("design.measurements.bust"),
+    waist: t("design.measurements.waist"),
+    hips: t("design.measurements.hips"),
+    length: t("design.measurements.length"),
+  };
+}
 
 /** Keeps only digits and a single decimal point — measurements are numbers in cm. */
 function sanitizeCm(raw: string): string {
@@ -200,11 +213,12 @@ function MeasurementForm({
   values: Record<MeasurementKey, string>;
   onChange: (values: Record<MeasurementKey, string>) => void;
 }) {
+  const { t } = useTranslation();
+  const labels = measurementLabels(t);
   return (
     <Box>
       <Typography variant="body2" sx={{ color: "text.secondary", mb: 1.5 }}>
-        Enter your measurements in centimetres — the atelier confirms the final
-        fit with you before cutting.
+        {t("design.measurementForm.helper")}
       </Typography>
       <Box
         sx={{
@@ -216,7 +230,7 @@ function MeasurementForm({
         {(Object.keys(defaultMeasurements) as MeasurementKey[]).map((key) => (
           <TextField
             key={key}
-            label={MEASUREMENT_LABELS[key]}
+            label={labels[key]}
             value={values[key] ?? ""}
             onChange={(event) =>
               onChange({ ...values, [key]: sanitizeCm(event.target.value) })
@@ -250,6 +264,7 @@ function DeliverySelector({
   onModeChange: (mode: "pickup" | "dispatch") => void;
   onAreaChange: (area: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <FormControl component="fieldset" fullWidth>
       <RadioGroup
@@ -262,12 +277,12 @@ function DeliverySelector({
           <FormControlLabel
             value="pickup"
             control={<Radio />}
-            label="Pickup — free, collect when ready"
+            label={t("design.delivery.pickup")}
           />
           <FormControlLabel
             value="dispatch"
             control={<Radio />}
-            label="Dispatch to my area"
+            label={t("design.delivery.dispatch")}
           />
           {mode === "dispatch" && (
             <Box sx={{ pl: 4 }}>
@@ -281,13 +296,13 @@ function DeliverySelector({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Area / neighbourhood"
-                    placeholder="Start typing your area"
+                    label={t("design.delivery.areaLabel")}
+                    placeholder={t("design.delivery.areaPlaceholder")}
                     fullWidth
                     helperText={
                       rates.length > 0
-                        ? "Pick a listed area for a set rate, or type your own — we'll arrange delivery."
-                        : "Enter your area; delivery will be arranged directly if no rate is set."
+                        ? t("design.delivery.areaHelperRates")
+                        : t("design.delivery.areaHelperNoRates")
                     }
                   />
                 )}
@@ -315,17 +330,18 @@ function CustomerFields({
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Stack spacing={2}>
       <TextField
-        label="Full name"
+        label={t("design.customer.name")}
         value={name}
         onChange={(event) => onNameChange(event.target.value)}
         fullWidth
         required
       />
       <TextField
-        label="Email"
+        label={t("design.customer.email")}
         type="email"
         value={email}
         onChange={(event) => onEmailChange(event.target.value)}
@@ -333,7 +349,7 @@ function CustomerFields({
         required
       />
       <TextField
-        label="Phone number"
+        label={t("design.customer.phone")}
         type="tel"
         value={phone}
         onChange={(event) =>
@@ -344,8 +360,8 @@ function CustomerFields({
         error={phone.trim() !== "" && !isValidGhanaPhone(phone)}
         helperText={
           phone.trim() !== "" && !isValidGhanaPhone(phone)
-            ? "Enter a Ghana number like 024 123 4567 or +233 24 123 4567."
-            : "Mobile or landline — e.g. 024 123 4567. We reach you here and on WhatsApp."
+            ? t("design.customer.phoneError")
+            : t("design.customer.phoneHelper")
         }
         slotProps={{ htmlInput: { inputMode: "tel" } }}
       />
@@ -360,6 +376,7 @@ function DesignDetail({
   design: Design;
   settings: PublicSettings | undefined;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const bands = design.sizeBands;
   const [bandLabel, setBandLabel] = useState(bands[0]?.label ?? "");
@@ -480,14 +497,14 @@ function DesignDetail({
   };
 
   const validateCommon = () => {
-    if (!customerName.trim()) return "Please enter your full name.";
-    if (!customerEmail.trim()) return "Please enter your email.";
-    if (!customerPhone.trim()) return "Please enter your phone number.";
+    if (!customerName.trim()) return t("design.errors.name");
+    if (!customerEmail.trim()) return t("design.errors.email");
+    if (!customerPhone.trim()) return t("design.errors.phone");
     if (!isValidGhanaPhone(customerPhone)) {
-      return "Please enter a valid Ghana phone number, e.g. 024 123 4567.";
+      return t("design.errors.phoneInvalid");
     }
     if (deliveryMode === "dispatch" && !deliveryArea.trim()) {
-      return "Please enter a delivery area.";
+      return t("design.errors.deliveryArea");
     }
     return null;
   };
@@ -500,7 +517,7 @@ function DesignDetail({
       return;
     }
     if (!band) {
-      setFormError("Please select a size band.");
+      setFormError(t("design.errors.sizeBand"));
       return;
     }
 
@@ -531,11 +548,16 @@ function DesignDetail({
     }
 
     if (requestSizeMode === "self") {
+      const labels = measurementLabels(t);
       const missing = (
         Object.keys(defaultMeasurements) as MeasurementKey[]
       ).filter((key) => !measurements[key]?.trim());
       if (missing.length > 0) {
-        setFormError(`Please fill in all measurements: ${missing.join(", ")}.`);
+        setFormError(
+          t("design.errors.measurements", {
+            fields: missing.map((key) => labels[key]).join(", "),
+          }),
+        );
         return;
       }
     }
@@ -575,10 +597,10 @@ function DesignDetail({
   };
 
   const submitLabel = isHomeVisit
-    ? "Book a home visit"
+    ? t("design.submit.homeVisit")
     : isCustom
-      ? "Send request"
-      : "Order this design";
+      ? t("design.submit.request")
+      : t("design.submit.order");
 
   const isSubmitting = standardOrder.isPending || customRequest.isPending;
 
@@ -608,7 +630,7 @@ function DesignDetail({
           }}
         >
           <Typography variant="overline" component="p" sx={{ color: clayDeep }}>
-            made to measure
+            {t("design.detail.madeToMeasure")}
           </Typography>
           <Typography variant="h2" component="h1" sx={{ mt: 1.5 }}>
             {design.name}
@@ -628,7 +650,7 @@ function DesignDetail({
                 component="p"
                 sx={{ color: "text.secondary", mt: 4 }}
               >
-                size band
+                {t("design.detail.sizeBand")}
               </Typography>
               <ToggleButtonGroup
                 exclusive
@@ -636,7 +658,7 @@ function DesignDetail({
                 onChange={(_, next: string | null) => {
                   if (next !== null) setBandLabel(next);
                 }}
-                aria-label="size band"
+                aria-label={t("design.detail.sizeBand")}
                 sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}
               >
                 {bands.map((entry) => (
@@ -681,8 +703,7 @@ function DesignDetail({
 
               {isCustom && (
                 <Alert severity="info" sx={{ mt: 3 }}>
-                  Custom requests are quoted directly — no price shown until the
-                  merchant replies.
+                  {t("design.detail.customQuoteNotice")}
                 </Alert>
               )}
 
@@ -691,7 +712,7 @@ function DesignDetail({
                 component="p"
                 sx={{ color: "text.secondary", mt: 4 }}
               >
-                size chart — band {band.label}
+                {t("design.detail.sizeChart", { band: band.label })}
               </Typography>
               {chartEntries.length > 0 ? (
                 <Table
@@ -728,14 +749,13 @@ function DesignDetail({
                   variant="body2"
                   sx={{ color: "text.secondary", mt: 1 }}
                 >
-                  The chart for this band is being finalised — every piece is
-                  still cut to your measurements.
+                  {t("design.detail.chartPending")}
                 </Typography>
               )}
             </>
           ) : (
             <Typography variant="body2" sx={{ color: "text.secondary", mt: 4 }}>
-              Pricing for this design is being finalised.
+              {t("design.detail.pricingPending")}
             </Typography>
           )}
 
@@ -758,7 +778,7 @@ function DesignDetail({
                   }}
                 />
               }
-              label="My size isn't listed"
+              label={t("design.customSize.toggle")}
             />
 
             <Collapse in={customSizeOpen}>
@@ -773,7 +793,7 @@ function DesignDetail({
                     <FormControlLabel
                       value="self"
                       control={<Radio />}
-                      label="Measure yourself"
+                      label={t("design.customSize.self")}
                     />
                     <Collapse in={sizeMode === "self"}>
                       <Box sx={{ pl: 4 }}>
@@ -787,7 +807,7 @@ function DesignDetail({
                     <FormControlLabel
                       value="home_visit"
                       control={<Radio />}
-                      label="Book a home visit (GHS 500 deposit)"
+                      label={t("design.customSize.homeVisit")}
                     />
                     <Collapse in={sizeMode === "home_visit"}>
                       <Box sx={{ pl: 4 }}>
@@ -795,8 +815,7 @@ function DesignDetail({
                           variant="body2"
                           sx={{ color: "text.secondary" }}
                         >
-                          Choose an open slot and pay a deposit that counts
-                          toward your garment.
+                          {t("design.customSize.homeVisitHelper")}
                         </Typography>
                       </Box>
                     </Collapse>
@@ -804,7 +823,7 @@ function DesignDetail({
                     <FormControlLabel
                       value="workplace"
                       control={<Radio />}
-                      label="Come to the workplace"
+                      label={t("design.customSize.workplace")}
                     />
                     <Collapse in={sizeMode === "workplace"}>
                       <Box sx={{ pl: 4 }}>
@@ -812,8 +831,7 @@ function DesignDetail({
                           variant="body2"
                           sx={{ color: "text.secondary" }}
                         >
-                          Visit the Eight Two Five workspace — no booking or
-                          deposit needed.
+                          {t("design.customSize.workplaceHelper")}
                         </Typography>
                       </Box>
                     </Collapse>
@@ -834,18 +852,18 @@ function DesignDetail({
                   }}
                 />
               }
-              label="Request a design change"
+              label={t("design.designChange.toggle")}
             />
 
             <Collapse in={designChangeOpen}>
               <TextField
-                label="Describe the change you want"
+                label={t("design.designChange.label")}
                 value={designChange}
                 onChange={(event) => setDesignChange(event.target.value)}
                 multiline
                 rows={3}
                 fullWidth
-                placeholder="e.g. sleeveless, longer length"
+                placeholder={t("design.designChange.placeholder")}
               />
             </Collapse>
 
@@ -857,7 +875,7 @@ function DesignDetail({
                 component="p"
                 sx={{ color: "text.secondary", mb: 1 }}
               >
-                your details
+                {t("design.detail.yourDetails")}
               </Typography>
               <CustomerFields
                 name={customerName}
@@ -875,7 +893,7 @@ function DesignDetail({
                 component="p"
                 sx={{ color: "text.secondary", mb: 1 }}
               >
-                delivery
+                {t("design.detail.delivery")}
               </Typography>
               <DeliverySelector
                 mode={deliveryMode}
@@ -890,9 +908,11 @@ function DesignDetail({
 
             {submittedRef && (
               <Alert severity="success">
-                Request received — reference <strong>{submittedRef}</strong>. We&apos;ve emailed a
-                sign-in link to {customerEmail.trim()} so you can track it; the atelier will follow
-                up with a quote.
+                <Trans
+                  i18nKey="design.confirmation.received"
+                  values={{ ref: submittedRef, email: customerEmail.trim() }}
+                  components={{ strong: <strong /> }}
+                />
               </Alert>
             )}
 
@@ -919,8 +939,8 @@ function DesignDetail({
 
             <FormHelperText sx={{ color: stone, mt: 0 }}>
               {isCustom
-                ? "You will receive a quote by email and in your account before any payment."
-                : "Payment confirms your order and books it into production."}
+                ? t("design.footnote.custom")
+                : t("design.footnote.standard")}
             </FormHelperText>
           </Stack>
         </Box>
@@ -929,7 +949,7 @@ function DesignDetail({
       {(relatedDesignsQuery.isPending || relatedDesigns.length > 0) && (
         <Box component="section" sx={{ mb: { xs: 8, md: 12 } }}>
           <MeasureRule
-            label="Fig. — Same collection"
+            label={t("design.related.figure")}
             sx={{ mb: { xs: 3, md: 4 } }}
           />
           <Stack
@@ -943,14 +963,13 @@ function DesignDetail({
           >
             <Box>
               <Typography variant="h2" component="h2">
-                More from this run.
+                {t("design.related.heading")}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ color: "text.secondary", mt: 1, maxWidth: "48ch" }}
               >
-                Same fabric story, different cut. Every piece is made only when
-                ordered.
+                {t("design.related.body")}
               </Typography>
             </Box>
             <Button
@@ -959,7 +978,7 @@ function DesignDetail({
               variant="outlined"
               sx={{ width: { xs: "100%", sm: "auto" } }}
             >
-              Shop all designs
+              {t("design.related.shopAll")}
             </Button>
           </Stack>
 
@@ -993,6 +1012,7 @@ function DesignDetail({
 }
 
 export function DesignPage() {
+  const { t } = useTranslation();
   const { slug = "" } = useParams();
   const settings = usePublicSettings();
   const design = usePublicDesign(slug);
@@ -1000,7 +1020,9 @@ export function DesignPage() {
   useDocumentTitle(
     design.data?.name,
     design.data?.note ||
-      `${design.data?.name ?? "A design"} — made-to-measure by Eight Two Five.`,
+      t("design.meta.description", {
+        name: design.data?.name ?? t("design.meta.fallbackName"),
+      }),
   );
 
   const notFound =
@@ -1012,9 +1034,9 @@ export function DesignPage() {
     <StorefrontLayout>
       {notFound ? (
         <RetiredPanel
-          overline="design retired"
-          title="This design has been retired"
-          body="Each design lives only as long as its fabric. This one has sold through — the live designs are waiting in the store."
+          overline={t("design.retired.overline")}
+          title={t("design.retired.title")}
+          body={t("design.retired.body")}
         />
       ) : design.isPending ? (
         <Box

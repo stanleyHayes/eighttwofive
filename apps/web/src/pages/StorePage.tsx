@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import StorefrontOutlined from "@mui/icons-material/StorefrontOutlined";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { EmptyState, ErrorState } from "@/components/EmptyState";
 import { PageBanner } from "@/components/PageBanner";
@@ -51,9 +52,10 @@ function CardGridSkeleton({ count }: { count: number }) {
 }
 
 export function StorePage() {
+  const { t } = useTranslation();
   useDocumentTitle(
-    "The store",
-    "Browse Eight Two Five's limited, themed collections and made-to-measure designs, cut to order in Accra.",
+    t("store.documentTitle"),
+    t("store.documentDescription"),
   );
   const [searchParams, setSearchParams] = useSearchParams();
   const [term, setTerm] = useState(() => searchParams.get("q") ?? "");
@@ -80,10 +82,13 @@ export function StorePage() {
 
   const cloudName = settings.data?.cloudName ?? "";
   const designCountLabel = designs.isSuccess
-    ? `${designs.data.length.toLocaleString("en-GH")} ${designs.data.length === 1 ? "design" : "designs"}`
+    ? t("store.designCount", {
+        count: designs.data.length,
+        formattedCount: designs.data.length.toLocaleString("en-GH"),
+      })
     : q
-      ? "Searching"
-      : "Live catalog";
+      ? t("store.searching")
+      : t("store.liveCatalog");
 
   const coverByCollection = useMemo(() => {
     const covers = new Map<string, string>();
@@ -101,9 +106,12 @@ export function StorePage() {
         <PageBanner
           tone="ink"
           icon={<StorefrontOutlined />}
-          breadcrumbs={[{ label: "Home", to: "/" }, { label: "Store" }]}
-          title="The Store"
-          description="Live collections and limited runs, cut to order. Browse the themed collections below, or search every design that's currently open."
+          breadcrumbs={[
+            { label: t("store.breadcrumbHome"), to: "/" },
+            { label: t("store.breadcrumbStore") },
+          ]}
+          title={t("store.bannerTitle")}
+          description={t("store.bannerDescription")}
         />
       </Box>
 
@@ -119,7 +127,7 @@ export function StorePage() {
           }}
         >
           <Typography variant="h2" component="h2">
-            Collections
+            {t("store.collectionsHeading")}
           </Typography>
           {collections.isSuccess && (
             <Typography
@@ -129,8 +137,10 @@ export function StorePage() {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {collections.data.length.toLocaleString("en-GH")}{" "}
-              {collections.data.length === 1 ? "collection" : "collections"}
+              {t("store.collectionCount", {
+                count: collections.data.length,
+                formattedCount: collections.data.length.toLocaleString("en-GH"),
+              })}
             </Typography>
           )}
         </Stack>
@@ -144,9 +154,9 @@ export function StorePage() {
         ) : collections.data.length === 0 ? (
           <EmptyState
             tone="ink"
-            label="On the cutting table"
-            title="The first collection is on the cutting table."
-            body="Collections are limited and themed — around ten designs each. The first one hasn't dropped yet; join the list on the homepage and we'll write the moment it does."
+            label={t("store.collectionsEmptyLabel")}
+            title={t("store.collectionsEmptyTitle")}
+            body={t("store.collectionsEmptyBody")}
           />
         ) : (
           <Box
@@ -187,7 +197,7 @@ export function StorePage() {
         >
           <Box>
             <Typography variant="h2" component="h2">
-              All designs
+              {t("store.allDesignsHeading")}
             </Typography>
             <Typography
               variant="overline"
@@ -197,16 +207,18 @@ export function StorePage() {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {q ? `${designCountLabel} matching "${q}"` : designCountLabel}
+              {q
+                ? t("store.countMatching", { label: designCountLabel, query: q })
+                : designCountLabel}
             </Typography>
           </Box>
           <TextField
             value={term}
             onChange={(event) => setTerm(event.target.value)}
-            placeholder="Search designs"
+            placeholder={t("store.searchPlaceholder")}
             size="small"
             slotProps={{
-              htmlInput: { "aria-label": "Search designs" },
+              htmlInput: { "aria-label": t("store.searchAriaLabel") },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -229,19 +241,19 @@ export function StorePage() {
           q ? (
             <Stack spacing={2.5} sx={{ alignItems: "flex-start" }}>
               <EmptyState
-                label="No match"
-                title={`Nothing matches “${q}”.`}
-                body="Try a shorter word — design names are short — or clear the search to see everything that's live."
+                label={t("store.noMatchLabel")}
+                title={t("store.noMatchTitle", { query: q })}
+                body={t("store.noMatchBody")}
               />
               <Button variant="outlined" onClick={() => setTerm("")}>
-                Clear search
+                {t("store.clearSearch")}
               </Button>
             </Stack>
           ) : (
             <EmptyState
-              label="In the darkroom"
-              title="Designs are being photographed."
-              body="The live designs will appear here shortly. In the meantime, the collections above show what's coming."
+              label={t("store.designsEmptyLabel")}
+              title={t("store.designsEmptyTitle")}
+              body={t("store.designsEmptyBody")}
             />
           )
         ) : (

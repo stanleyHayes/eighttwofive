@@ -213,12 +213,13 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
 }
 
 function Wordmark() {
+  const { t } = useTranslation();
   return (
     <Link
       component={RouterLink}
       to="/"
       underline="none"
-      aria-label="Eight Two Five — home"
+      aria-label={t("layout.wordmarkAria", { brand: WORDMARK })}
       sx={{
         color: cream,
         fontFamily: displayFamily,
@@ -383,7 +384,7 @@ function StorefrontHeader() {
           <Box sx={{ justifySelf: "start", minWidth: 0 }}>
             <Stack
               component="nav"
-              aria-label="Store"
+              aria-label={t("layout.primaryNavAria")}
               direction="row"
               spacing={4}
               sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
@@ -398,7 +399,7 @@ function StorefrontHeader() {
             </Stack>
             <IconButton
               onClick={() => setMenuOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("layout.openMenu")}
               edge="start"
               sx={{ display: { xs: "inline-flex", md: "none" }, color: cream }}
             >
@@ -428,7 +429,7 @@ function StorefrontHeader() {
                   letterSpacing: "0.16em",
                 }}
               >
-                +852
+                825
               </Box>
               <ThemeToggle color={cream} />
               <IconButton
@@ -573,7 +574,7 @@ export function SiteFooter() {
   const { t } = useTranslation();
   const settings = usePublicSettings();
   const whatsapp = settings.data?.whatsappNumber?.replace(/\D/g, "") ?? "";
-  const location = settings.data?.visitLocation || "Accra, Ghana";
+  const location = settings.data?.visitLocation || t("layout.defaultLocation");
 
   return (
     <Box
@@ -673,7 +674,7 @@ export function SiteFooter() {
               textTransform: "uppercase",
             }}
           >
-            © 2026 Eight Two Five · {location}
+            {t("layout.copyright", { brand: WORDMARK, location })}
           </Box>
           <Stack
             direction="row"
@@ -712,6 +713,7 @@ export function SiteFooter() {
 }
 
 function SkipToContent() {
+  const { t } = useTranslation();
   return (
     <Link
       href="#main-content"
@@ -728,7 +730,7 @@ function SkipToContent() {
         "&:focus": { top: 8, left: 8 },
       }}
     >
-      Skip to content
+      {t("layout.skipToContent")}
     </Link>
   );
 }

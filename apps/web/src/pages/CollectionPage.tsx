@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import CollectionsOutlined from "@mui/icons-material/CollectionsOutlined";
 import { EmptyState, ErrorState } from "@/components/EmptyState";
@@ -13,6 +14,7 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { ApiError } from "@/lib/api";
 
 export function CollectionPage() {
+  const { t } = useTranslation();
   const { slug = "" } = useParams();
   const settings = usePublicSettings();
   const collection = usePublicCollection(slug);
@@ -30,9 +32,9 @@ export function CollectionPage() {
     return (
       <StorefrontLayout>
         <RetiredPanel
-          overline="collection retired"
-          title="This collection has been retired"
-          body="Every collection is a limited run — when the fabric is gone, it's gone. The live collections are still open in the store."
+          overline={t("collection.retiredOverline")}
+          title={t("collection.retiredTitle")}
+          body={t("collection.retiredBody")}
         />
       </StorefrontLayout>
     );
@@ -79,8 +81,8 @@ export function CollectionPage() {
               tone="ink"
               icon={<CollectionsOutlined />}
               breadcrumbs={[
-                { label: "Home", to: "/" },
-                { label: "Store", to: "/store" },
+                { label: t("collection.breadcrumbHome"), to: "/" },
+                { label: t("collection.breadcrumbStore"), to: "/store" },
                 { label: collection.data.collection.name },
               ]}
               title={collection.data.collection.name}
@@ -91,9 +93,9 @@ export function CollectionPage() {
           <Box component="section" sx={{ mb: { xs: 8, md: 12 } }}>
             {collection.data.designs.length === 0 ? (
               <EmptyState
-                label="In the darkroom"
-                title="Designs are on their way."
-                body="This collection is live but its designs are still being photographed. Check back shortly."
+                label={t("collection.emptyLabel")}
+                title={t("collection.emptyTitle")}
+                body={t("collection.emptyBody")}
               />
             ) : (
               <DesignGrid designs={collection.data.designs} cloudName={cloudName} />

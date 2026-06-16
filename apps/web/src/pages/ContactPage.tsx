@@ -8,6 +8,7 @@ import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MailOutlined from "@mui/icons-material/MailOutlined";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Link as RouterLink } from "react-router";
+import { useTranslation } from "react-i18next";
 import { PageBanner } from "@/components/PageBanner";
 import { StorefrontLayout } from "@/components/StorefrontLayout";
 import { usePublicSettings } from "@/features/storefront/hooks";
@@ -105,9 +106,10 @@ function ActionPanel({
 }
 
 export function ContactPage() {
+  const { t } = useTranslation();
   useDocumentTitle(
-    "Contact",
-    "Talk to the Eight Two Five atelier — WhatsApp, email, or book a visit to be measured in person in Accra.",
+    t("contact.docTitle"),
+    t("contact.docDescription"),
   );
   const settings = usePublicSettings();
   const whatsapp = settings.data?.whatsappNumber ?? "";
@@ -119,9 +121,12 @@ export function ContactPage() {
         <PageBanner
           tone="ink"
           icon={<MailOutlined />}
-          breadcrumbs={[{ label: "Home", to: "/" }, { label: "Contact" }]}
-          title="Talk to the atelier."
-          description="Questions about a design, your measurements, or a visit to be measured in person — WhatsApp is the fastest way to reach us."
+          breadcrumbs={[
+            { label: t("contact.breadcrumbHome"), to: "/" },
+            { label: t("contact.breadcrumbContact") },
+          ]}
+          title={t("contact.bannerTitle")}
+          description={t("contact.bannerDescription")}
         />
       </Box>
 
@@ -135,9 +140,9 @@ export function ContactPage() {
         }}
       >
         <ActionPanel
-          label="fastest"
-          title="Message the workroom"
-          body="Ask about fit, fabric, timing, or a specific design. WhatsApp is the quickest way into the atelier."
+          label={t("contact.messageLabel")}
+          title={t("contact.messageTitle")}
+          body={t("contact.messageBody")}
           icon={<WhatsAppIcon />}
           action={
             whatsapp ? (
@@ -153,7 +158,7 @@ export function ContactPage() {
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                Open WhatsApp
+                {t("contact.openWhatsApp")}
               </Button>
             ) : (
               <Button
@@ -162,15 +167,15 @@ export function ContactPage() {
                 endIcon={<ArrowOutwardIcon />}
                 sx={{ width: { xs: "100%", sm: "auto" } }}
               >
-                Open WhatsApp
+                {t("contact.openWhatsApp")}
               </Button>
             )
           }
         />
         <ActionPanel
-          label="fitting"
-          title="Book a measured visit"
-          body="Choose a home-visit slot when you want measurements handled in person before the garment is cut."
+          label={t("contact.fittingLabel")}
+          title={t("contact.fittingTitle")}
+          body={t("contact.fittingBody")}
           icon={<MailOutlined />}
           action={
             <Button
@@ -180,7 +185,7 @@ export function ContactPage() {
               endIcon={<ArrowOutwardIcon />}
               sx={{ width: { xs: "100%", sm: "auto" } }}
             >
-              Book a visit
+              {t("contact.bookVisit")}
             </Button>
           }
         />
@@ -191,12 +196,11 @@ export function ContactPage() {
           variant="subtitle1"
           sx={{ color: "text.secondary", maxWidth: "54ch", mb: 5 }}
         >
-          Questions about a design, your measurements, or a visit to be measured
-          in person — WhatsApp is the fastest way to reach us.
+          {t("contact.intro")}
         </Typography>
 
         <Stack>
-          <ContactRow label="whatsapp">
+          <ContactRow label={t("contact.whatsappLabel")}>
             {whatsapp ? (
               <Link
                 href={waHref(whatsapp)}
@@ -215,25 +219,24 @@ export function ContactPage() {
               </Link>
             ) : (
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                The WhatsApp line opens with the storefront.
+                {t("contact.whatsappPending")}
               </Typography>
             )}
           </ContactRow>
 
-          <ContactRow label="visit">
+          <ContactRow label={t("contact.visitLabel")}>
             {visitLocation ? (
               <Typography variant="h5" component="p">
                 {visitLocation}
               </Typography>
             ) : (
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                In-person measuring visits are by appointment — location coming
-                soon.
+                {t("contact.visitPending")}
               </Typography>
             )}
           </ContactRow>
 
-          <ContactRow label="email">
+          <ContactRow label={t("contact.emailLabel")}>
             <Link
               href="mailto:hello@eighttwofive.com"
               underline="hover"

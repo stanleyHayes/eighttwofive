@@ -30,5 +30,441 @@
     "email": "Email",
     "pricesIn": "Prices in GH₵",
     "payments": "Mobile money · Cards"
+  },
+  "layout": {
+    "wordmarkAria": "{{brand}} — home",
+    "primaryNavAria": "Store",
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to content",
+    "defaultLocation": "Accra, Ghana",
+    "copyright": "© 2026 {{brand}} · {{location}}"
+  },
+  "home": {
+    "meta": {
+      "description": "Made-to-measure womenswear, cut to you in Accra. Browse limited, themed collections and have each piece made to your measurements."
+    },
+    "hero": {
+      "eyebrow": "The 825 Atelier · Est. Accra",
+      "titleLead": "Made-to-measure",
+      "titleMid": "womenswear,",
+      "titleEmphasis": "cut to you.",
+      "shopCta": "Shop the store",
+      "howCta": "How it's made"
+    },
+    "currentDrop": {
+      "fig": "Fig. 00 — Current drop",
+      "eyebrow": "Live collection",
+      "noteFallback": "A limited run cut only after an order is placed. When the fabric is gone, this collection retires.",
+      "stats": {
+        "designs": "Designs",
+        "opening": "Opening",
+        "make": "Make",
+        "makeValue": "To order",
+        "run": "Run",
+        "runValue": "Limited"
+      },
+      "includes": "Includes {{names}}.",
+      "includesMore": "Includes {{names}} and more.",
+      "viewCta": "View the drop",
+      "fitGuideCta": "Fit guide",
+      "fabricEyebrow": "Fabric-led run",
+      "fabricTitle": "Made until the cloth says stop."
+    },
+    "collections": {
+      "fig": "Fig. 01 — Collections",
+      "title": "Named, limited runs.",
+      "action": "All collections",
+      "tileLabel": "/ Collection",
+      "empty": "New collections are on the way."
+    },
+    "method": {
+      "fig": "Fig. 02 — Method",
+      "caption": "Made to measure",
+      "title": "Design to doorstep, in three."
+    },
+    "steps": {
+      "choose": {
+        "title": "Choose a design",
+        "body": "Browse the live collections, each priced in Ghana Cedis."
+      },
+      "measured": {
+        "title": "Measured your way",
+        "body": "A standard band, your own measurements, or a home visit."
+      },
+      "delivered": {
+        "title": "Cut & delivered",
+        "body": "Made to order, tracked, then dispatched or picked up."
+      }
+    },
+    "newIn": {
+      "fig": "Fig. 03 — New In",
+      "title": "Fresh off the table.",
+      "action": "Shop now",
+      "empty": "New designs are on the way."
+    },
+    "waitlist": {
+      "fig": "Fig. 04 — The list",
+      "title": "Be the first to know.",
+      "body": "One note when a new collection drops. Limited runs sell through."
+    },
+    "error": {
+      "title": "The store is catching its breath."
+    }
+  },
+  "store": {
+    "documentTitle": "The store",
+    "documentDescription": "Browse Eight Two Five's limited, themed collections and made-to-measure designs, cut to order in Accra.",
+    "designCount_one": "{{formattedCount}} design",
+    "designCount_other": "{{formattedCount}} designs",
+    "searching": "Searching",
+    "liveCatalog": "Live catalog",
+    "breadcrumbHome": "Home",
+    "breadcrumbStore": "Store",
+    "bannerTitle": "The Store",
+    "bannerDescription": "Live collections and limited runs, cut to order. Browse the themed collections below, or search every design that's currently open.",
+    "collectionsHeading": "Collections",
+    "collectionCount_one": "{{formattedCount}} collection",
+    "collectionCount_other": "{{formattedCount}} collections",
+    "collectionsEmptyLabel": "On the cutting table",
+    "collectionsEmptyTitle": "The first collection is on the cutting table.",
+    "collectionsEmptyBody": "Collections are limited and themed — around ten designs each. The first one hasn't dropped yet; join the list on the homepage and we'll write the moment it does.",
+    "allDesignsHeading": "All designs",
+    "countMatching": "{{label}} matching \"{{query}}\"",
+    "searchPlaceholder": "Search designs",
+    "searchAriaLabel": "Search designs",
+    "noMatchLabel": "No match",
+    "noMatchTitle": "Nothing matches “{{query}}”.",
+    "noMatchBody": "Try a shorter word — design names are short — or clear the search to see everything that's live.",
+    "clearSearch": "Clear search",
+    "designsEmptyLabel": "In the darkroom",
+    "designsEmptyTitle": "Designs are being photographed.",
+    "designsEmptyBody": "The live designs will appear here shortly. In the meantime, the collections above show what's coming."
+  },
+  "collection": {
+    "retiredOverline": "collection retired",
+    "retiredTitle": "This collection has been retired",
+    "retiredBody": "Every collection is a limited run — when the fabric is gone, it's gone. The live collections are still open in the store.",
+    "breadcrumbHome": "Home",
+    "breadcrumbStore": "Store",
+    "emptyLabel": "In the darkroom",
+    "emptyTitle": "Designs are on their way.",
+    "emptyBody": "This collection is live but its designs are still being photographed. Check back shortly."
+  },
+  "design": {
+    "gallery": {
+      "photoAlt": "{{name}} — photo {{current}} of {{total}}",
+      "showPhoto": "Show photo {{index}}"
+    },
+    "copyLink": {
+      "error": "Could not copy link",
+      "copied": "Link copied",
+      "label": "Copy link"
+    },
+    "measurements": {
+      "bust": "Bust",
+      "waist": "Waist",
+      "hips": "Hips",
+      "length": "Length"
+    },
+    "measurementForm": {
+      "helper": "Enter your measurements in centimetres — the atelier confirms the final fit with you before cutting."
+    },
+    "delivery": {
+      "pickup": "Pickup — free, collect when ready",
+      "dispatch": "Dispatch to my area",
+      "areaLabel": "Area / neighbourhood",
+      "areaPlaceholder": "Start typing your area",
+      "areaHelperRates": "Pick a listed area for a set rate, or type your own — we'll arrange delivery.",
+      "areaHelperNoRates": "Enter your area; delivery will be arranged directly if no rate is set."
+    },
+    "customer": {
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone number",
+      "phoneError": "Enter a Ghana number like 024 123 4567 or +233 24 123 4567.",
+      "phoneHelper": "Mobile or landline — e.g. 024 123 4567. We reach you here and on WhatsApp."
+    },
+    "errors": {
+      "name": "Please enter your full name.",
+      "email": "Please enter your email.",
+      "phone": "Please enter your phone number.",
+      "phoneInvalid": "Please enter a valid Ghana phone number, e.g. 024 123 4567.",
+      "deliveryArea": "Please enter a delivery area.",
+      "sizeBand": "Please select a size band.",
+      "measurements": "Please fill in all measurements: {{fields}}."
+    },
+    "submit": {
+      "homeVisit": "Book a home visit",
+      "request": "Send request",
+      "order": "Order this design"
+    },
+    "detail": {
+      "madeToMeasure": "made to measure",
+      "sizeBand": "size band",
+      "customQuoteNotice": "Custom requests are quoted directly — no price shown until the merchant replies.",
+      "sizeChart": "size chart — band {{band}}",
+      "chartPending": "The chart for this band is being finalised — every piece is still cut to your measurements.",
+      "pricingPending": "Pricing for this design is being finalised.",
+      "yourDetails": "your details",
+      "delivery": "delivery"
+    },
+    "customSize": {
+      "toggle": "My size isn't listed",
+      "self": "Measure yourself",
+      "homeVisit": "Book a home visit (GHS 500 deposit)",
+      "homeVisitHelper": "Choose an open slot and pay a deposit that counts toward your garment.",
+      "workplace": "Come to the workplace",
+      "workplaceHelper": "Visit the Eight Two Five workspace — no booking or deposit needed."
+    },
+    "designChange": {
+      "toggle": "Request a design change",
+      "label": "Describe the change you want",
+      "placeholder": "e.g. sleeveless, longer length"
+    },
+    "confirmation": {
+      "received": "Request received — reference <strong>{{ref}}</strong>. We've emailed a sign-in link to {{email}} so you can track it; the atelier will follow up with a quote."
+    },
+    "footnote": {
+      "custom": "You will receive a quote by email and in your account before any payment.",
+      "standard": "Payment confirms your order and books it into production."
+    },
+    "related": {
+      "figure": "Fig. — Same collection",
+      "heading": "More from this run.",
+      "body": "Same fabric story, different cut. Every piece is made only when ordered.",
+      "shopAll": "Shop all designs"
+    },
+    "meta": {
+      "description": "{{name}} — made-to-measure by Eight Two Five.",
+      "fallbackName": "A design"
+    },
+    "retired": {
+      "overline": "design retired",
+      "title": "This design has been retired",
+      "body": "Each design lives only as long as its fabric. This one has sold through — the live designs are waiting in the store."
+    }
+  },
+  "about": {
+    "documentTitle": "The Atelier",
+    "documentDescription": "Eight Two Five makes made-to-measure womenswear in limited, themed collections, cut one garment at a time in Accra.",
+    "breadcrumbHome": "Home",
+    "breadcrumbAtelier": "Atelier",
+    "bannerTitle": "Cut to you, in Accra.",
+    "bannerDescription": "A small atelier making made-to-measure womenswear in limited, themed collections — nothing mass-produced, nothing left on a shelf.",
+    "storyOverline": "Our story",
+    "storyBody": "Eight Two Five makes made-to-measure womenswear in limited, themed collections. Nothing is mass-produced and nothing sits on a shelf — every piece is cut after you order it, to your measurements, and retired when its fabric runs out.",
+    "craftAtelierTitle": "The atelier",
+    "craftAtelierBody": "A small Accra workroom where every garment is cut one at a time. No racks, no leftover stock — a design exists only when someone orders it.",
+    "craftFabricTitle": "The fabric",
+    "craftFabricBody": "Each collection is built around a limited bolt of fabric. Around ten designs share it; when the bolt runs out, the collection retires for good."
+  },
+  "fit": {
+    "documentTitle": "Fit guide",
+    "documentDescription": "Choose a size band, send measurements, or book a fitting visit before your Eight Two Five piece is cut.",
+    "defaultLocation": "the Eight Two Five workspace",
+    "breadcrumbHome": "Home",
+    "breadcrumbFitGuide": "Fit guide",
+    "bannerTitle": "Fit, before fabric.",
+    "bannerDescription": "Choose a standard band, send your measurements, or book a visit. Every piece is confirmed before it is cut.",
+    "bannerActionLabel": "Browse designs",
+    "fig01Label": "Fig. 01 — Fit paths",
+    "path1Title": "Order a size band",
+    "path1Body": "Choose the closest band on the design page. The atelier still confirms the final fit before cutting.",
+    "path1ActionLabel": "Browse designs",
+    "path2Title": "Send measurements",
+    "path2Body": "Enter your bust, waist, hips, and desired length in centimetres when your band is not listed.",
+    "path2ActionLabel": "Start in store",
+    "path3Title": "Book a visit",
+    "path3Body": "Choose a home visit when you want the measuring handled in person before the garment is made.",
+    "path3ActionLabel": "Book a visit",
+    "measureYourselfOverline": "Measure yourself",
+    "measureYourselfTitle": "Four numbers are enough to start.",
+    "measureYourselfBody": "Use a soft tape and measure in centimetres. The atelier reviews the numbers with you before cutting, so the form is a starting point, not a trap.",
+    "measureBustLabel": "Bust",
+    "measureBustBody": "Measure around the fullest part, with the tape level and relaxed.",
+    "measureWaistLabel": "Waist",
+    "measureWaistBody": "Measure the natural waist, usually the narrowest point of the torso.",
+    "measureHipsLabel": "Hips",
+    "measureHipsBody": "Measure the fullest part of the hips, standing naturally.",
+    "measureLengthLabel": "Length",
+    "measureLengthBody": "Measure from the shoulder or waist point to where you want the hem to sit.",
+    "fig02Label": "Fig. 02 — Visit",
+    "fig02Caption": "measured in person",
+    "visitTitle": "Want the tape handled for you?",
+    "visitBody": "Book a home visit, or arrange a fitting at {{location}}. The visit deposit is {{deposit}} and counts toward your garment.",
+    "visitDepositTitle": "Visit deposit",
+    "visitDepositBody": "The deposit holds your slot and is credited to the final garment payment.",
+    "visitButtonLabel": "Book a visit",
+    "fig03Label": "Fig. 03 — Order rhythm",
+    "timelineStep": "Step {{n}}",
+    "timelineSelectLabel": "Select",
+    "timelineSelectBody": "Pick a design and fit path.",
+    "timelineConfirmLabel": "Confirm",
+    "timelineConfirmBody": "The atelier checks details before cutting.",
+    "timelineCutLabel": "Cut",
+    "timelineCutBody": "Your piece is made to order.",
+    "timelineFinishLabel": "Finish",
+    "timelineFinishBody": "Pickup or dispatch when ready."
+  },
+  "contact": {
+    "docTitle": "Contact",
+    "docDescription": "Talk to the Eight Two Five atelier — WhatsApp, email, or book a visit to be measured in person in Accra.",
+    "breadcrumbHome": "Home",
+    "breadcrumbContact": "Contact",
+    "bannerTitle": "Talk to the atelier.",
+    "bannerDescription": "Questions about a design, your measurements, or a visit to be measured in person — WhatsApp is the fastest way to reach us.",
+    "messageLabel": "fastest",
+    "messageTitle": "Message the workroom",
+    "messageBody": "Ask about fit, fabric, timing, or a specific design. WhatsApp is the quickest way into the atelier.",
+    "openWhatsApp": "Open WhatsApp",
+    "fittingLabel": "fitting",
+    "fittingTitle": "Book a measured visit",
+    "fittingBody": "Choose a home-visit slot when you want measurements handled in person before the garment is cut.",
+    "bookVisit": "Book a visit",
+    "intro": "Questions about a design, your measurements, or a visit to be measured in person — WhatsApp is the fastest way to reach us.",
+    "whatsappLabel": "whatsapp",
+    "whatsappPending": "The WhatsApp line opens with the storefront.",
+    "visitLabel": "visit",
+    "visitPending": "In-person measuring visits are by appointment — location coming soon.",
+    "emailLabel": "email"
+  },
+  "slots": {
+    "docTitle": "Book a visit",
+    "docDescription": "Book a home or atelier fitting with Eight Two Five to be measured in person before your piece is cut.",
+    "breadcrumbHome": "Home",
+    "breadcrumbBookVisit": "Book a visit",
+    "bannerTitle": "Book a home visit",
+    "bannerDescription": "Choose an open slot below. A GHS 500 deposit confirms your booking and counts toward your garment.",
+    "errorLoad": "Could not load available slots.",
+    "emptyLabel": "No open slots",
+    "emptyTitle": "No visit slots are open right now.",
+    "emptyBody": "Fittings are added as the calendar opens up. Check back soon, or order online and add a custom size note instead.",
+    "emptyAction": "Browse the store",
+    "chooseTime": "choose a time",
+    "openCount_one": "{{formatted}} open slot",
+    "openCount_other": "{{formatted}} open slots",
+    "slotLabel": "Slot {{number}}",
+    "continue": "Continue",
+    "dialogEyebrow": "home visit",
+    "dialogTitle": "Book your fitting",
+    "selectedSlot": "selected slot",
+    "fullName": "Full name",
+    "email": "Email",
+    "phoneNumber": "Phone number",
+    "errorAllFields": "Please fill in all fields.",
+    "errorInvalidPhone": "Enter a valid Ghana phone number, e.g. 024 123 4567.",
+    "cancel": "Cancel",
+    "payDeposit": "Pay deposit"
+  },
+  "waitlist": {
+    "eyebrow": "stay in the loop",
+    "title": "Be the first to know",
+    "body": "Join the list for new collection drops and restocks. No spam."
+  },
+  "payment": {
+    "docTitle": "Payment received",
+    "breadcrumbHome": "Home",
+    "breadcrumbPayment": "Payment",
+    "bannerTitle": "Payment received",
+    "bannerDescription": "Thank you. We're confirming your payment now — you'll get an email as soon as your order is booked.",
+    "referenceLabel": "your reference",
+    "noReference": "If your payment went through, a confirmation email is on its way. Keep an eye on your inbox.",
+    "reassurance": "Confirmation can take a moment while we verify the payment with our provider. There's nothing more you need to do — we'll be in touch by email, and your order will appear in your account once it's booked.",
+    "viewOrders": "View your orders",
+    "continueBrowsing": "Continue browsing"
+  },
+  "account": {
+    "breadcrumbHome": "Home",
+    "breadcrumbAccount": "Account",
+    "title": "Your account",
+    "welcomeBack": "Welcome back, {{name}}.",
+    "ordersOverline": "your orders",
+    "ordersHeading": "Wardrobe in progress",
+    "ordersBlurb": "Track payments, fittings, delivery notes, and production updates from one place.",
+    "orderCount_one": "{{formattedCount}} order",
+    "orderCount_other": "{{formattedCount}} orders",
+    "logOut": "Log out",
+    "loadError": "Could not load your orders. Try again in a moment.",
+    "emptyLabel": "No orders yet",
+    "emptyTitle": "Nothing in your wardrobe yet.",
+    "emptyBody": "Orders will appear here once you place one. Browse the live collections to find your first piece.",
+    "emptyAction": "Browse the store"
+  },
+  "orderDetail": {
+    "backToAccount": "Back to account",
+    "loadError": "Could not load this order. Try again in a moment.",
+    "deliveryPickup": "Pickup — free, collect when your order is ready.",
+    "deliveryArranged": "Dispatch to {{area}} — delivery arranged directly with Eight Two Five.",
+    "deliveryDispatch": "Dispatch to {{area}} — {{rate}}",
+    "yourArea": "your area",
+    "visitTitle": "Booked visit",
+    "visitBody": "Your home-visit slot will appear here once the calendar is live.",
+    "visitCall": "Call Eight Two Five",
+    "estimated": "Estimated: {{timeline}}",
+    "timeframeFallback": "Roughly two weeks, depending on current bookings",
+    "emailNote": "{{timeframe}}. We'll email you at each step.",
+    "orderRef": "order {{ref}}",
+    "detailSize": "Size",
+    "detailPayment": "Payment",
+    "detailPhone": "Phone",
+    "detailDelivery": "Delivery",
+    "notFoundLabel": "Order not found",
+    "notFoundTitle": "We couldn't find that order.",
+    "notFoundBody": "The reference may be mistyped, or the order belongs to a different account. Your orders are listed on your account page."
+  },
+  "login": {
+    "nameError": "Enter your name so we know how to address you.",
+    "emailError": "Enter a valid email address, like ama@example.com.",
+    "asideLabel": "AUTH.",
+    "asideCaption": "private fitting room",
+    "asideHeading": "Your order room.",
+    "asideBody": "Sign in with a link, view active orders, and keep every fitting note attached to the same account.",
+    "featureNoPassword": "No password",
+    "featureOrderUpdates": "Order updates",
+    "featureSecureLink": "Secure link",
+    "eyebrow": "sign in",
+    "heading": "Welcome back",
+    "intro": "Enter your email and we'll send you a sign-in link. No passwords to remember.",
+    "successLabel": "check your email",
+    "successBodyBefore": "We sent a sign-in link to",
+    "successBodyAfter": ". Open it on this device to continue.",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "submit": "Email me a link",
+    "submitError": "Something went wrong on our end. Try again in a moment.",
+    "backHome": "back to the homepage"
+  },
+  "verify": {
+    "eyebrow": "sign in",
+    "headingFailed": "That link didn't work",
+    "headingPending": "Signing you in",
+    "errorLabel": "link expired or invalid",
+    "errorBodyBefore": "Sign-in links only work once and expire quickly.",
+    "errorLink": "Request a new sign-in link",
+    "errorBodyAfter": ".",
+    "spinnerAria": "Verifying",
+    "pendingStatus": "verifying your link"
+  },
+  "notFound": {
+    "documentTitle": "Page not found",
+    "homeAria": "Eight Two Five — home",
+    "label": "Error 404 — Page not found",
+    "heading": "Lost thread.",
+    "body": "The page you're after has been retired, or it never existed. Every thread leads back home.",
+    "caption": "Return to the store",
+    "backHome": "Back to home",
+    "browseStore": "Browse the store"
+  },
+  "errorPage": {
+    "label404": "Error 404 — Page not found",
+    "label": "Something went wrong",
+    "heading404": "Lost thread.",
+    "heading": "A loose thread.",
+    "body404": "The page you're after has been retired, or it never existed. Every thread leads back home.",
+    "body": "Something on our end came undone. Try again, or head back home — your place in the queue is safe.",
+    "homeAria": "Eight Two Five — home",
+    "caption": "Back to safety",
+    "tryAgain": "Try again",
+    "backHome": "Back to home"
   }
 }

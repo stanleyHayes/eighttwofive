@@ -23,6 +23,7 @@ import { clayDeep } from "@/theme";
 import {
   DEFAULT_PAGE_SIZE,
   errorMessage,
+  mismatchedPayment,
   type Order,
   type OrderStatus,
 } from "@/features/orders/api";
@@ -332,6 +333,15 @@ function OrderDetailPanel({ order, onClose }: OrderDetailPanelProps) {
           <Typography>
             <strong>Total:</strong> {formatPesewas(order.totalPesewas)}
           </Typography>
+          {mismatchedPayment(order) && (
+            <Alert severity="warning">
+              A payment came back with an amount that didn't match this order's
+              total, so it was <strong>not</strong> booked. Reconcile the
+              transaction in Paystack (reference{" "}
+              <strong>{mismatchedPayment(order)?.providerRef}</strong>) before
+              marking this order paid.
+            </Alert>
+          )}
           {canWrite && (
             <>
               <Box>

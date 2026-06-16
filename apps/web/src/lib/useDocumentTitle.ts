@@ -1,8 +1,7 @@
 import { useEffect } from "react";
+import { SITE_ORIGIN } from "@/lib/site";
 
 const SUFFIX = "Eight Two Five";
-/** Production origin used for canonical/OG URLs regardless of where the SPA runs. */
-const SITE_ORIGIN = "https://eighttwofive.vercel.app";
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`);

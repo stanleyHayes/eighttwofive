@@ -7,6 +7,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router";
 import { MeasureRule } from "@/components/MeasureRule";
 import { Reveal } from "@/components/Reveal";
@@ -45,27 +46,30 @@ function byCreatedAtDesc<T extends { createdAt: string }>(a: T, b: T): number {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 }
 
-const STEPS = [
-  {
-    n: "01",
-    title: "Choose a design",
-    body: "Browse the live collections, each priced in Ghana Cedis.",
-  },
-  {
-    n: "02",
-    title: "Measured your way",
-    body: "A standard band, your own measurements, or a home visit.",
-  },
-  {
-    n: "03",
-    title: "Cut & delivered",
-    body: "Made to order, tracked, then dispatched or picked up.",
-  },
-];
+function buildSteps(t: (key: string) => string) {
+  return [
+    {
+      n: "01",
+      title: t("home.steps.choose.title"),
+      body: t("home.steps.choose.body"),
+    },
+    {
+      n: "02",
+      title: t("home.steps.measured.title"),
+      body: t("home.steps.measured.body"),
+    },
+    {
+      n: "03",
+      title: t("home.steps.delivered.title"),
+      body: t("home.steps.delivered.body"),
+    },
+  ];
+}
 
 // --- Hero (full-bleed image) ------------------------------------------------
 
 function Hero({ cloudName }: { cloudName: string }) {
+  const { t } = useTranslation();
   const bg = cloudName
     ? photoUrl(cloudName, HERO_PUBLIC_ID, "f_auto,q_auto,w_2000")
     : "";
@@ -134,19 +138,19 @@ function Hero({ cloudName }: { cloudName: string }) {
                 textTransform: "uppercase",
               }}
             >
-              The 852 Atelier · Est. Accra
+              {t("home.hero.eyebrow")}
             </Box>
           </Reveal>
           <Reveal delay={90}>
             <Typography variant="h1" sx={{ mt: 2, mb: 3 }}>
-              Made-to-measure{" "}
+              {t("home.hero.titleLead")}{" "}
               <Box
                 component="br"
                 sx={{ display: { xs: "none", sm: "block" } }}
               />
-              womenswear,{" "}
+              {t("home.hero.titleMid")}{" "}
               <Box component="span" sx={{ color: amber, fontStyle: "italic" }}>
-                cut to you.
+                {t("home.hero.titleEmphasis")}
               </Box>
             </Typography>
           </Reveal>
@@ -168,7 +172,7 @@ function Hero({ cloudName }: { cloudName: string }) {
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                Shop the store
+                {t("home.hero.shopCta")}
               </Button>
               <Button
                 href="#how-its-made"
@@ -181,7 +185,7 @@ function Hero({ cloudName }: { cloudName: string }) {
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                How it's made
+                {t("home.hero.howCta")}
               </Button>
             </Stack>
           </Reveal>
@@ -249,6 +253,7 @@ function CollectionTile({
   cloudName: string;
   index: number;
 }) {
+  const { t } = useTranslation();
   return (
     <Reveal delay={index * 70}>
       <Link
@@ -331,7 +336,7 @@ function CollectionTile({
               color: brass,
             }}
           >
-            {`0${index + 1}`} / Collection
+            {`0${index + 1}`} {t("home.collections.tileLabel")}
           </Box>
           <Typography variant="h4" component="h3" sx={{ color: cream }}>
             {collection.name}
@@ -353,6 +358,7 @@ function CurrentDrop({
   cover: string | null;
   cloudName: string;
 }) {
+  const { t } = useTranslation();
   const designCount = designs.length;
   const previewNames = designs.slice(0, 3).map((design) => design.name);
 
@@ -377,12 +383,12 @@ function CurrentDrop({
         }}
       >
         <MeasureRule
-          label="Fig. 00 — Current drop"
+          label={t("home.currentDrop.fig")}
           sx={{ mb: { xs: 4, md: 5 } }}
         />
         <Box sx={{ flex: 1 }}>
           <Typography variant="overline" component="p" sx={{ color: brass }}>
-            Live collection
+            {t("home.currentDrop.eyebrow")}
           </Typography>
           <Typography
             variant="h2"
@@ -395,8 +401,7 @@ function CurrentDrop({
             variant="subtitle1"
             sx={{ mt: 2.5, maxWidth: "48ch", color: "text.secondary" }}
           >
-            {collection.note ||
-              "A limited run cut only after an order is placed. When the fabric is gone, this collection retires."}
+            {collection.note || t("home.currentDrop.noteFallback")}
           </Typography>
 
           <Box
@@ -412,14 +417,20 @@ function CurrentDrop({
           >
             {[
               {
-                label: "Designs",
+                label: t("home.currentDrop.stats.designs"),
                 value:
                   designCount > 0
                     ? designCount.toLocaleString("en-GH")
-                    : "Opening",
+                    : t("home.currentDrop.stats.opening"),
               },
-              { label: "Make", value: "To order" },
-              { label: "Run", value: "Limited" },
+              {
+                label: t("home.currentDrop.stats.make"),
+                value: t("home.currentDrop.stats.makeValue"),
+              },
+              {
+                label: t("home.currentDrop.stats.run"),
+                value: t("home.currentDrop.stats.runValue"),
+              },
             ].map((item, index) => (
               <Box
                 key={item.label}
@@ -449,8 +460,13 @@ function CurrentDrop({
               variant="body2"
               sx={{ color: "text.secondary", mt: 3, maxWidth: "48ch" }}
             >
-              Includes {previewNames.join(", ")}
-              {designCount > previewNames.length ? " and more." : "."}
+              {designCount > previewNames.length
+                ? t("home.currentDrop.includesMore", {
+                    names: previewNames.join(", "),
+                  })
+                : t("home.currentDrop.includes", {
+                    names: previewNames.join(", "),
+                  })}
             </Typography>
           )}
         </Box>
@@ -467,7 +483,7 @@ function CurrentDrop({
             endIcon={<ArrowOutwardIcon sx={{ fontSize: 18 }} />}
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            View the drop
+            {t("home.currentDrop.viewCta")}
           </Button>
           <Button
             component={RouterLink}
@@ -475,7 +491,7 @@ function CurrentDrop({
             variant="outlined"
             sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            Fit guide
+            {t("home.currentDrop.fitGuideCta")}
           </Button>
         </Stack>
       </Box>
@@ -535,14 +551,14 @@ function CurrentDrop({
           }}
         >
           <Typography variant="overline" component="p" sx={{ color: brass }}>
-            Fabric-led run
+            {t("home.currentDrop.fabricEyebrow")}
           </Typography>
           <Typography
             variant="h4"
             component="p"
             sx={{ maxWidth: "12ch", color: cream }}
           >
-            Made until the cloth says stop.
+            {t("home.currentDrop.fabricTitle")}
           </Typography>
         </Box>
       </Box>
@@ -582,10 +598,11 @@ function GridSkeleton({ count, ratio }: { count: number; ratio: string }) {
 }
 
 function ErrorPanel({ error }: { error: unknown }) {
+  const { t } = useTranslation();
   return (
     <Box sx={{ bgcolor: ink, color: cream, p: { xs: 4, md: 6 } }}>
       <Typography variant="h4" component="p" sx={{ mb: 1 }}>
-        The store is catching its breath.
+        {t("home.error.title")}
       </Typography>
       <Typography variant="body2" sx={{ color: creamMuted }}>
         {errorMessage(error)}
@@ -597,10 +614,8 @@ function ErrorPanel({ error }: { error: unknown }) {
 // --- Page -------------------------------------------------------------------
 
 export function HomePage() {
-  useDocumentTitle(
-    undefined,
-    "Made-to-measure womenswear, cut to you in Accra. Browse limited, themed collections and have each piece made to your measurements.",
-  );
+  const { t } = useTranslation();
+  useDocumentTitle(undefined, t("home.meta.description"));
   const settings = usePublicSettings();
   const collections = usePublicCollections();
   const designs = usePublicDesigns({});
@@ -660,9 +675,9 @@ export function HomePage() {
         sx={{ pt: { xs: 4, md: 7 }, pb: { xs: 6, md: 9 } }}
       >
         <SectionHead
-          fig="Fig. 01 — Collections"
-          title="Named, limited runs."
-          action={{ to: "/store", label: "All collections" }}
+          fig={t("home.collections.fig")}
+          title={t("home.collections.title")}
+          action={{ to: "/store", label: t("home.collections.action") }}
         />
         {isPending ? (
           <GridSkeleton count={3} ratio="4 / 5" />
@@ -692,7 +707,7 @@ export function HomePage() {
           </Box>
         ) : (
           <Typography sx={{ color: "text.secondary" }}>
-            New collections are on the way.
+            {t("home.collections.empty")}
           </Typography>
         )}
       </Box>
@@ -713,8 +728,8 @@ export function HomePage() {
         <Container maxWidth="lg" disableGutters>
           <MeasureRule
             variant="light"
-            label="Fig. 02 — Method"
-            caption="Made to measure"
+            label={t("home.method.fig")}
+            caption={t("home.method.caption")}
             sx={{ mb: { xs: 4, md: 6 } }}
           />
           <Typography
@@ -722,7 +737,7 @@ export function HomePage() {
             component="h2"
             sx={{ mb: { xs: 4, md: 6 }, maxWidth: "16ch" }}
           >
-            Design to doorstep, in three.
+            {t("home.method.title")}
           </Typography>
           <Box
             sx={{
@@ -731,7 +746,7 @@ export function HomePage() {
               gap: { xs: 3.5, md: 5 },
             }}
           >
-            {STEPS.map((step, index) => (
+            {buildSteps(t).map((step, index) => (
               <Reveal key={step.n} delay={index * 90}>
                 <Stack
                   spacing={1.5}
@@ -768,9 +783,9 @@ export function HomePage() {
         sx={{ pt: { xs: 7, md: 11 }, pb: { xs: 6, md: 9 } }}
       >
         <SectionHead
-          fig="Fig. 03 — New In"
-          title="Fresh off the table."
-          action={{ to: "/store", label: "Shop now" }}
+          fig={t("home.newIn.fig")}
+          title={t("home.newIn.title")}
+          action={{ to: "/store", label: t("home.newIn.action") }}
         />
         {isPending ? (
           <GridSkeleton count={4} ratio="600 / 780" />
@@ -780,7 +795,7 @@ export function HomePage() {
           <DesignGrid designs={featuredDesigns} cloudName={cloudName} />
         ) : (
           <Typography sx={{ color: "text.secondary" }}>
-            New designs are on the way.
+            {t("home.newIn.empty")}
           </Typography>
         )}
       </Box>
@@ -816,13 +831,13 @@ export function HomePage() {
                   textTransform: "uppercase",
                 }}
               >
-                Fig. 04 — The list
+                {t("home.waitlist.fig")}
               </Box>
               <Typography variant="h2" component="h2" sx={{ mt: 2, mb: 2 }}>
-                Be the first to know.
+                {t("home.waitlist.title")}
               </Typography>
               <Typography sx={{ color: creamText, maxWidth: "38ch" }}>
-                One note when a new collection drops. Limited runs sell through.
+                {t("home.waitlist.body")}
               </Typography>
             </Box>
             <Box>

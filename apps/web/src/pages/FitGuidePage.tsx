@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
 import StraightenOutlined from "@mui/icons-material/StraightenOutlined";
+import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router";
 import { MeasureRule } from "@/components/MeasureRule";
 import { PageBanner } from "@/components/PageBanner";
@@ -20,53 +21,6 @@ import {
   ink,
   monoFamily,
 } from "@/theme";
-
-const FIT_PATHS = [
-  {
-    n: "01",
-    title: "Order a size band",
-    body: "Choose the closest band on the design page. The atelier still confirms the final fit before cutting.",
-    action: { label: "Browse designs", to: "/store" },
-  },
-  {
-    n: "02",
-    title: "Send measurements",
-    body: "Enter your bust, waist, hips, and desired length in centimetres when your band is not listed.",
-    action: { label: "Start in store", to: "/store" },
-  },
-  {
-    n: "03",
-    title: "Book a visit",
-    body: "Choose a home visit when you want the measuring handled in person before the garment is made.",
-    action: { label: "Book a visit", to: "/slots" },
-  },
-];
-
-const MEASURES = [
-  {
-    label: "Bust",
-    body: "Measure around the fullest part, with the tape level and relaxed.",
-  },
-  {
-    label: "Waist",
-    body: "Measure the natural waist, usually the narrowest point of the torso.",
-  },
-  {
-    label: "Hips",
-    body: "Measure the fullest part of the hips, standing naturally.",
-  },
-  {
-    label: "Length",
-    body: "Measure from the shoulder or waist point to where you want the hem to sit.",
-  },
-];
-
-const TIMELINE = [
-  { label: "Select", body: "Pick a design and fit path." },
-  { label: "Confirm", body: "The atelier checks details before cutting." },
-  { label: "Cut", body: "Your piece is made to order." },
-  { label: "Finish", body: "Pickup or dispatch when ready." },
-];
 
 function FitPathCard({
   n,
@@ -120,14 +74,64 @@ function FitPathCard({
 }
 
 export function FitGuidePage() {
-  useDocumentTitle(
-    "Fit guide",
-    "Choose a size band, send measurements, or book a fitting visit before your Eight Two Five piece is cut.",
-  );
+  const { t } = useTranslation();
+  useDocumentTitle(t("fit.documentTitle"), t("fit.documentDescription"));
   const settings = usePublicSettings();
   const deposit = settings.data?.depositPesewas ?? 500_00;
-  const location =
-    settings.data?.visitLocation || "the Eight Two Five workspace";
+  const location = settings.data?.visitLocation || t("fit.defaultLocation");
+
+  const fitPaths = [
+    {
+      n: "01",
+      title: t("fit.path1Title"),
+      body: t("fit.path1Body"),
+      action: { label: t("fit.path1ActionLabel"), to: "/store" },
+    },
+    {
+      n: "02",
+      title: t("fit.path2Title"),
+      body: t("fit.path2Body"),
+      action: { label: t("fit.path2ActionLabel"), to: "/store" },
+    },
+    {
+      n: "03",
+      title: t("fit.path3Title"),
+      body: t("fit.path3Body"),
+      action: { label: t("fit.path3ActionLabel"), to: "/slots" },
+    },
+  ];
+
+  const measures = [
+    {
+      label: t("fit.measureBustLabel"),
+      body: t("fit.measureBustBody"),
+    },
+    {
+      label: t("fit.measureWaistLabel"),
+      body: t("fit.measureWaistBody"),
+    },
+    {
+      label: t("fit.measureHipsLabel"),
+      body: t("fit.measureHipsBody"),
+    },
+    {
+      label: t("fit.measureLengthLabel"),
+      body: t("fit.measureLengthBody"),
+    },
+  ];
+
+  const timeline = [
+    { label: t("fit.timelineSelectLabel"), body: t("fit.timelineSelectBody") },
+    {
+      label: t("fit.timelineConfirmLabel"),
+      body: t("fit.timelineConfirmBody"),
+    },
+    { label: t("fit.timelineCutLabel"), body: t("fit.timelineCutBody") },
+    {
+      label: t("fit.timelineFinishLabel"),
+      body: t("fit.timelineFinishBody"),
+    },
+  ];
 
   return (
     <StorefrontLayout>
@@ -135,16 +139,19 @@ export function FitGuidePage() {
         <PageBanner
           tone="ink"
           icon={<StraightenOutlined />}
-          breadcrumbs={[{ label: "Home", to: "/" }, { label: "Fit guide" }]}
-          title="Fit, before fabric."
-          description="Choose a standard band, send your measurements, or book a visit. Every piece is confirmed before it is cut."
-          action={{ to: "/store", label: "Browse designs" }}
+          breadcrumbs={[
+            { label: t("fit.breadcrumbHome"), to: "/" },
+            { label: t("fit.breadcrumbFitGuide") },
+          ]}
+          title={t("fit.bannerTitle")}
+          description={t("fit.bannerDescription")}
+          action={{ to: "/store", label: t("fit.bannerActionLabel") }}
         />
       </Box>
 
       <Box component="section" sx={{ mb: { xs: 7, md: 10 } }}>
         <MeasureRule
-          label="Fig. 01 — Fit paths"
+          label={t("fit.fig01Label")}
           sx={{ mb: { xs: 3.5, md: 5 } }}
         />
         <Box
@@ -154,7 +161,7 @@ export function FitGuidePage() {
             gap: { xs: 2, md: 3 },
           }}
         >
-          {FIT_PATHS.map((path) => (
+          {fitPaths.map((path) => (
             <FitPathCard key={path.n} {...path} />
           ))}
         </Box>
@@ -172,23 +179,21 @@ export function FitGuidePage() {
       >
         <Box>
           <Typography variant="overline" component="p" sx={{ color: brass }}>
-            Measure yourself
+            {t("fit.measureYourselfOverline")}
           </Typography>
           <Typography variant="h2" component="h2" sx={{ mt: 1.5, mb: 2 }}>
-            Four numbers are enough to start.
+            {t("fit.measureYourselfTitle")}
           </Typography>
           <Typography
             variant="subtitle1"
             sx={{ color: "text.secondary", maxWidth: "42ch" }}
           >
-            Use a soft tape and measure in centimetres. The atelier reviews the
-            numbers with you before cutting, so the form is a starting point,
-            not a trap.
+            {t("fit.measureYourselfBody")}
           </Typography>
         </Box>
 
         <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
-          {MEASURES.map((measure, index) => (
+          {measures.map((measure, index) => (
             <Box
               key={measure.label}
               sx={{
@@ -238,8 +243,8 @@ export function FitGuidePage() {
       >
         <MeasureRule
           variant="light"
-          label="Fig. 02 — Visit"
-          caption="measured in person"
+          label={t("fit.fig02Label")}
+          caption={t("fit.fig02Caption")}
           sx={{ mb: { xs: 4, md: 5 } }}
         />
         <Box
@@ -256,12 +261,13 @@ export function FitGuidePage() {
               component="h2"
               sx={{ color: cream, maxWidth: "12ch" }}
             >
-              Want the tape handled for you?
+              {t("fit.visitTitle")}
             </Typography>
             <Typography sx={{ color: creamText, mt: 2.5, maxWidth: "44ch" }}>
-              Book a home visit, or arrange a fitting at {location}. The visit
-              deposit is {formatPesewas(deposit)} and counts toward your
-              garment.
+              {t("fit.visitBody", {
+                location,
+                deposit: formatPesewas(deposit),
+              })}
             </Typography>
           </Box>
           <Box
@@ -281,11 +287,10 @@ export function FitGuidePage() {
                 component="h3"
                 sx={{ color: cream, mb: 1 }}
               >
-                Visit deposit
+                {t("fit.visitDepositTitle")}
               </Typography>
               <Typography variant="body2" sx={{ color: creamText }}>
-                The deposit holds your slot and is credited to the final garment
-                payment.
+                {t("fit.visitDepositBody")}
               </Typography>
             </Box>
             <Button
@@ -300,7 +305,7 @@ export function FitGuidePage() {
                 width: { xs: "100%", sm: "fit-content" },
               }}
             >
-              Book a visit
+              {t("fit.visitButtonLabel")}
             </Button>
           </Box>
         </Box>
@@ -308,7 +313,7 @@ export function FitGuidePage() {
 
       <Box component="section" sx={{ mb: { xs: 8, md: 12 } }}>
         <MeasureRule
-          label="Fig. 03 — Order rhythm"
+          label={t("fit.fig03Label")}
           sx={{ mb: { xs: 3.5, md: 5 } }}
         />
         <Box
@@ -324,7 +329,7 @@ export function FitGuidePage() {
             borderColor: "divider",
           }}
         >
-          {TIMELINE.map((item, index) => (
+          {timeline.map((item, index) => (
             <Box
               key={item.label}
               sx={{
@@ -340,7 +345,9 @@ export function FitGuidePage() {
                 component="p"
                 sx={{ color: brass }}
               >
-                Step {String(index + 1).padStart(2, "0")}
+                {t("fit.timelineStep", {
+                  n: String(index + 1).padStart(2, "0"),
+                })}
               </Typography>
               <Typography variant="h5" component="h3" sx={{ mt: 1.5 }}>
                 {item.label}

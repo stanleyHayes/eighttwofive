@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
@@ -18,6 +19,7 @@ import { amber, brass, cream, creamMuted, GRAIN_URL, ink } from "@/theme";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [emailError, setEmailError] = useState<string | undefined>(undefined);
@@ -36,11 +38,11 @@ export function LoginPage() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (name.trim() === "") {
-      setNameError("Enter your name so we know how to address you.");
+      setNameError(t("login.nameError"));
       return;
     }
     if (!EMAIL_RE.test(email.trim())) {
-      setEmailError("Enter a valid email address, like ama@example.com.");
+      setEmailError(t("login.emailError"));
       emailRef.current?.focus();
       return;
     }
@@ -95,8 +97,8 @@ export function LoginPage() {
         <Box>
           <MeasureRule
             variant="light"
-            label="AUTH."
-            caption="private fitting room"
+            label={t("login.asideLabel")}
+            caption={t("login.asideCaption")}
             sx={{ mb: 4 }}
           />
           <Typography
@@ -104,16 +106,19 @@ export function LoginPage() {
             component="p"
             sx={{ color: cream, maxWidth: "10ch" }}
           >
-            Your order room.
+            {t("login.asideHeading")}
           </Typography>
           <Typography sx={{ color: creamMuted, mt: 2.5, maxWidth: "34ch" }}>
-            Sign in with a link, view active orders, and keep every fitting note
-            attached to the same account.
+            {t("login.asideBody")}
           </Typography>
         </Box>
 
         <Stack direction="row" spacing={2} sx={{ color: creamMuted }}>
-          {["No password", "Order updates", "Secure link"].map((item) => (
+          {[
+            t("login.featureNoPassword"),
+            t("login.featureOrderUpdates"),
+            t("login.featureSecureLink"),
+          ].map((item) => (
             <Typography key={item} variant="overline" component="span">
               {item}
             </Typography>
@@ -151,14 +156,13 @@ export function LoginPage() {
           </Link>
 
           <Typography variant="overline" component="p" sx={{ color: brass }}>
-            sign in
+            {t("login.eyebrow")}
           </Typography>
           <Typography variant="h2" component="h1" sx={{ mt: 1.5, mb: 2 }}>
-            Welcome back
+            {t("login.heading")}
           </Typography>
           <Typography sx={{ color: "text.secondary", mb: 4, maxWidth: "42ch" }}>
-            Enter your email and we'll send you a sign-in link. No passwords to
-            remember.
+            {t("login.intro")}
           </Typography>
 
           {sendLink.isSuccess ? (
@@ -184,15 +188,15 @@ export function LoginPage() {
                   sx={{ fontSize: 16, color: "success.main" }}
                 />
                 <Typography variant="overline" sx={{ color: "success.main" }}>
-                  check your email
+                  {t("login.successLabel")}
                 </Typography>
               </Stack>
               <Typography sx={{ mt: 1.5 }}>
-                We sent a sign-in link to{" "}
+                {t("login.successBodyBefore")}{" "}
                 <Box component="span" sx={{ fontWeight: 600 }}>
                   {email.trim().toLowerCase()}
                 </Box>
-                . Open it on this device to continue.
+                {t("login.successBodyAfter")}
               </Typography>
             </Box>
           ) : (
@@ -209,7 +213,7 @@ export function LoginPage() {
             >
               <Stack spacing={1.5}>
                 <TextField
-                  label="Name"
+                  label={t("login.nameLabel")}
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
@@ -222,7 +226,7 @@ export function LoginPage() {
                   required
                 />
                 <TextField
-                  label="Email"
+                  label={t("login.emailLabel")}
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -249,12 +253,10 @@ export function LoginPage() {
                     "&:hover": { bgcolor: brass },
                   }}
                 >
-                  Email me a link
+                  {t("login.submit")}
                 </Button>
                 {sendLink.isError && (
-                  <Alert severity="error">
-                    Something went wrong on our end. Try again in a moment.
-                  </Alert>
+                  <Alert severity="error">{t("login.submitError")}</Alert>
                 )}
               </Stack>
             </Box>
@@ -267,7 +269,7 @@ export function LoginPage() {
               variant="overline"
               sx={{ color: "text.secondary" }}
             >
-              back to the homepage
+              {t("login.backHome")}
             </Link>
           </Typography>
         </Box>
