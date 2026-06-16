@@ -22,7 +22,9 @@ export function VerifyPage() {
     onSuccess: async ({ user }) => {
       queryClient.setQueryData(["me"], user);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
-      navigate(user.role === "admin" ? "/admin" : "/account", { replace: true });
+      // Customers land on their account; every admin-area role (admin/staff/
+      // viewer) goes straight to the dashboard.
+      navigate(user.role === "customer" ? "/account" : "/admin", { replace: true });
     },
   });
   const { mutate } = verify;
