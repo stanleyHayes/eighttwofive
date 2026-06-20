@@ -535,10 +535,12 @@ function FooterColumn({
 function FooterLink({
   to,
   href,
+  icon,
   children,
 }: {
   to?: string;
   href?: string;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   const { pathname } = useLocation();
@@ -547,13 +549,22 @@ function FooterLink({
     color: active ? amber : creamText,
     fontSize: "0.9rem",
     width: "fit-content",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 0.9,
     transition: "color 160ms ease",
     "&:hover": { color: amber },
   } as const;
+  const content = (
+    <>
+      {icon}
+      {children}
+    </>
+  );
   if (href) {
     return (
       <Link href={href} target="_blank" rel="noopener" underline="none" sx={sx}>
-        {children}
+        {content}
       </Link>
     );
   }
@@ -565,7 +576,7 @@ function FooterLink({
       aria-current={active ? "page" : undefined}
       sx={sx}
     >
-      {children}
+      {content}
     </Link>
   );
 }
@@ -640,15 +651,24 @@ export function SiteFooter() {
           </FooterColumn>
 
           <FooterColumn heading={t("footer.connect")}>
-            <FooterLink href="https://instagram.com">
+            <FooterLink
+              href="https://instagram.com"
+              icon={<InstagramIcon sx={{ fontSize: 16 }} />}
+            >
               {t("footer.instagram")}
             </FooterLink>
             {whatsapp && (
-              <FooterLink href={`https://wa.me/${whatsapp}`}>
+              <FooterLink
+                href={`https://wa.me/${whatsapp}`}
+                icon={<WhatsAppIcon sx={{ fontSize: 16 }} />}
+              >
                 {t("footer.whatsapp")}
               </FooterLink>
             )}
-            <FooterLink href="mailto:hello@eighttwofive.com">
+            <FooterLink
+              href="mailto:hello@eighttwofive.com"
+              icon={<MailOutlined sx={{ fontSize: 16 }} />}
+            >
               {t("footer.email")}
             </FooterLink>
           </FooterColumn>

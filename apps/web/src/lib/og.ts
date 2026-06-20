@@ -102,8 +102,10 @@ export function buildOgHtml(data: OgData): string {
     ? `    <meta property="og:image" content="${escapeHtml(data.image)}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${title}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="${escapeHtml(data.image)}" />`
+    <meta name="twitter:image" content="${escapeHtml(data.image)}" />
+    <meta name="twitter:image:alt" content="${title}" />`
     : '    <meta name="twitter:card" content="summary" />';
 
   return `<!doctype html>

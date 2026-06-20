@@ -40,9 +40,12 @@ export const noirAlpha70 = "rgba(22, 18, 13, 0.72)";
 export const darkBg = "#1b1611";
 export const darkPaper = "#241d15";
 
-export const displayFamily = '"Bricolage Grotesque", "Archivo", sans-serif';
-export const monoFamily = '"Spline Sans Mono", ui-monospace, monospace';
-const bodyFamily = '"Archivo", system-ui, sans-serif';
+// Fraunces (soft serif) for display titles, Outfit (geometric sans) for body,
+// IBM Plex Sans for technical labels/status. monoFamily keeps its name to avoid
+// churn across callers, but now points at the label sans, not a monospace.
+export const displayFamily = '"Fraunces", "Georgia", serif';
+export const monoFamily = '"IBM Plex Sans", system-ui, sans-serif';
+const bodyFamily = '"Outfit", system-ui, sans-serif';
 
 function buildPalette(mode: ThemeModeName): PaletteOptions {
   if (mode === "dark") {
@@ -162,8 +165,12 @@ export function createAppTheme(mode: ThemeModeName): Theme {
             paddingBlock: 16,
             boxShadow: "none",
             transition:
-              "background-color 200ms ease, color 200ms ease, border-color 200ms ease",
+              "background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1)",
             "&:hover": { boxShadow: "none" },
+            "@media (prefers-reduced-motion: no-preference)": {
+              "&:hover": { transform: "translateY(-2px)" },
+              "&:active": { transform: "translateY(0)" },
+            },
             "&.Mui-focusVisible": {
               outline: `2px solid ${amber}`,
               outlineOffset: "3px",
@@ -179,11 +186,16 @@ export function createAppTheme(mode: ThemeModeName): Theme {
         styleOverrides: {
           root: {
             borderRadius: 0,
-            transition: "background-color 180ms ease, color 180ms ease",
+            transition:
+              "background-color 180ms ease, color 180ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1)",
             "&:hover": {
               backgroundColor: isDark
                 ? "rgba(232, 222, 203, 0.08)"
                 : "rgba(22, 18, 13, 0.06)",
+            },
+            "@media (prefers-reduced-motion: no-preference)": {
+              "&:hover": { transform: "scale(1.1)" },
+              "&:active": { transform: "scale(1)" },
             },
             "&.Mui-focusVisible": {
               outline: `2px solid ${amber}`,
