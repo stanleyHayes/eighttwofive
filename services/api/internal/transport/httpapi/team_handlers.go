@@ -33,6 +33,36 @@ func (h *Handlers) AdminListUsers(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type inviteRequest struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	Role  string `json:"role"`
+}
+
+// AdminInvitePartner handles POST /api/v1/admin/invitations — provision a team
+// member with a dashboard role and email them a sign-in link.
+func (h *Handlers) AdminInvitePartner(w http.ResponseWriter, r *http.Request) {
+	var req inviteRequest
+	if !decodeBody(w, r, &req) {
+		return
+	}
+
+	user, err := h.auth.InvitePartner(r.Context(), req.Email, req.Name, domain.Role(req.Role))
+
+	switch {
+	case errors.Is(err, domain.ErrInvalidInput):
+		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
+	case errors.Is(err, domain.ErrEmailSendFailed):
+		logRequestError(r, err)
+		respondError(w, http.StatusBadGateway, "email_unavailable",
+			"We couldn't send the invite right now. Please try again in a moment.")
+	case err != nil:
+		respondInternal(w, r, err)
+	default:
+		respondJSON(w, http.StatusCreated, map[string]userDTO{"user": h.toUserDTO(r.Context(), user)})
+	}
+}
+
 type setRoleRequest struct {
 	Role string `json:"role"`
 }

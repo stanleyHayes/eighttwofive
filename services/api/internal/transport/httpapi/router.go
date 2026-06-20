@@ -90,6 +90,27 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 	return r
 }
 
+// adminTeamRoutes mounts team and access-control management under /admin:
+// members, partner invitations, custom roles, and the permission catalogue.
+func adminTeamRoutes(
+	r chi.Router, h *Handlers, read func(domain.Permission) func(http.Handler) http.Handler,
+) {
+	r.Route("/users", func(r chi.Router) {
+		r.With(read(domain.PermTeamRead)).Get("/", h.AdminListUsers)
+		r.With(read(domain.PermTeamWrite)).Put("/{id}/role", h.AdminSetUserRole)
+	})
+
+	// Invite a partner: provision an account with a role + email a sign-in link.
+	r.With(read(domain.PermTeamWrite)).Post("/invitations", h.AdminInvitePartner)
+
+	// Role definitions + the permission catalogue back the team-management UI.
+	r.With(read(domain.PermTeamRead)).Get("/roles", h.AdminListRoles)
+	r.With(read(domain.PermTeamWrite)).Post("/roles", h.AdminCreateRole)
+	r.With(read(domain.PermTeamWrite)).Put("/roles/{key}", h.AdminUpdateRole)
+	r.With(read(domain.PermTeamWrite)).Delete("/roles/{key}", h.AdminDeleteRole)
+	r.With(read(domain.PermTeamRead)).Get("/permissions", h.AdminListPermissions)
+}
+
 func adminRoutes(h *Handlers) func(chi.Router) {
 	// Per-permission guards keep each route's required capability explicit.
 	read := func(p domain.Permission) func(http.Handler) http.Handler { return h.RequirePermission(p) }
@@ -111,17 +132,7 @@ func adminRoutes(h *Handlers) func(chi.Router) {
 		r.With(read(domain.PermOrdersWrite)).Post("/orders/{ref}/mark-paid", h.AdminMarkPaid)
 		r.With(read(domain.PermOrdersWrite)).Post("/orders/{ref}/status", h.AdminUpdateOrderStatus)
 
-		r.Route("/users", func(r chi.Router) {
-			r.With(read(domain.PermTeamRead)).Get("/", h.AdminListUsers)
-			r.With(read(domain.PermTeamWrite)).Put("/{id}/role", h.AdminSetUserRole)
-		})
-
-		// Role definitions + the permission catalogue back the team-management UI.
-		r.With(read(domain.PermTeamRead)).Get("/roles", h.AdminListRoles)
-		r.With(read(domain.PermTeamWrite)).Post("/roles", h.AdminCreateRole)
-		r.With(read(domain.PermTeamWrite)).Put("/roles/{key}", h.AdminUpdateRole)
-		r.With(read(domain.PermTeamWrite)).Delete("/roles/{key}", h.AdminDeleteRole)
-		r.With(read(domain.PermTeamRead)).Get("/permissions", h.AdminListPermissions)
+		adminTeamRoutes(r, h, read)
 
 		r.Route("/slots", func(r chi.Router) {
 			r.With(read(domain.PermSlotsRead)).Get("/", h.AdminListSlots)

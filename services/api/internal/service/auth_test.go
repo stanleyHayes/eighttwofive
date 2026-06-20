@@ -83,6 +83,34 @@ func TestSetUserRole(t *testing.T) {
 	require.ErrorIs(t, err, domain.ErrInvalidInput, "unknown role rejected")
 }
 
+func TestInvitePartner(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	users := newFakeUsers()
+	sender := &linkSender{}
+	auth := newAuth(users, newFakeTokens(), sender, "boss@example.com")
+
+	// Invite a brand-new partner as staff: account created, link emailed.
+	user, err := auth.InvitePartner(ctx, "Partner@Example.com", "Partner", domain.RoleStaff)
+	require.NoError(t, err)
+	assert.Equal(t, domain.RoleStaff, user.Role)
+	assert.Equal(t, "partner@example.com", user.Email, "email is normalised")
+	assert.NotEmpty(t, sender.link, "a sign-in link is emailed")
+
+	reloaded, err := users.GetByID(ctx, user.ID)
+	require.NoError(t, err)
+	assert.Equal(t, domain.RoleStaff, reloaded.Role, "the invited role is persisted")
+
+	// An unknown role is rejected.
+	_, err = auth.InvitePartner(ctx, "ghost@example.com", "Ghost", domain.Role("wizard"))
+	require.ErrorIs(t, err, domain.ErrInvalidInput)
+
+	// A non-dashboard role (customer) cannot be invited as a partner.
+	_, err = auth.InvitePartner(ctx, "shopper@example.com", "Shopper", domain.RoleCustomer)
+	require.ErrorIs(t, err, domain.ErrInvalidInput)
+}
+
 func (f *fakeUsers) Count(_ context.Context) (int64, error) {
 	return int64(len(f.byEmail)), nil
 }

@@ -89,27 +89,59 @@ func (a *Auth) RequestLink(ctx context.Context, emailAddr, name string) error {
 		return fmt.Errorf("upsert user: %w", err)
 	}
 
-	token, tokenHash, err := newToken()
-	if err != nil {
-		return err
+	return a.sendLoginLink(ctx, user)
+}
+
+// InvitePartner provisions a team member with the given dashboard role and
+// emails them a sign-in link. It works for a brand-new email or an existing
+// account (whose role is updated to the invited one). The role must exist in
+// the store and grant dashboard access.
+func (a *Auth) InvitePartner(
+	ctx context.Context, emailAddr, name string, role domain.Role,
+) (*domain.User, error) {
+	emailAddr = strings.ToLower(strings.TrimSpace(emailAddr))
+	name = strings.TrimSpace(name)
+
+	if name == "" {
+		return nil, fmt.Errorf("%w: name is required", domain.ErrInvalidInput)
 	}
 
-	// Store the token hash before sending. A stored-but-unsent token is harmless
-	// — it is single-use and the TTL index sweeps it within loginTokenTTL — so we
-	// deliberately do not delete it if the send fails: a send error can follow a
-	// message that was actually delivered (e.g. a response timeout), and deleting
-	// then would break a link the customer already holds.
-	err = a.tokens.StoreLoginToken(ctx, tokenHash, user.ID, a.now().Add(loginTokenTTL))
+	_, err := mail.ParseAddress(emailAddr)
 	if err != nil {
-		return fmt.Errorf("store login token: %w", err)
+		return nil, fmt.Errorf("%w: invalid email address", domain.ErrInvalidInput)
 	}
 
-	err = a.email.SendLoginLink(ctx, user.Email, a.webURL+"/auth/verify?token="+token)
+	err = a.dashboardRole(ctx, role)
 	if err != nil {
-		return fmt.Errorf("%w: %w", domain.ErrEmailSendFailed, err)
+		return nil, err
 	}
 
-	return nil
+	if a.IsSuperAdmin(emailAddr) && role != domain.RoleAdmin {
+		return nil, fmt.Errorf("%w: %s is a protected super-admin and stays an admin", domain.ErrInvalidInput, emailAddr)
+	}
+
+	user := &domain.User{ID: "", Email: emailAddr, Name: name, Role: role, CreatedAt: a.now().UTC()}
+
+	err = a.users.Upsert(ctx, user)
+	if err != nil {
+		return nil, fmt.Errorf("upsert user: %w", err)
+	}
+
+	// Upsert never demotes an existing user, so set the invited role explicitly
+	// (a no-op for a freshly created account).
+	err = a.users.UpdateRole(ctx, user.ID, role)
+	if err != nil {
+		return nil, fmt.Errorf("set invited role: %w", err)
+	}
+
+	user.Role = role
+
+	err = a.sendLoginLink(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // Verify exchanges a one-time login token for a session token and the user.
@@ -232,6 +264,51 @@ func (a *Auth) SetUserRole(ctx context.Context, userID string, role domain.Role)
 	user.Role = role
 
 	return user, nil
+}
+
+// dashboardRole validates that a role exists in the store and grants access to
+// the admin dashboard (so it can be the target of a partner invite).
+func (a *Auth) dashboardRole(ctx context.Context, role domain.Role) error {
+	def, err := a.roles.Get(ctx, string(role))
+	if errors.Is(err, domain.ErrNotFound) {
+		return fmt.Errorf("%w: unknown role %q", domain.ErrInvalidInput, role)
+	}
+
+	if err != nil {
+		return fmt.Errorf("check role: %w", err)
+	}
+
+	if !def.AdminArea {
+		return fmt.Errorf("%w: %q cannot enter the dashboard", domain.ErrInvalidInput, role)
+	}
+
+	return nil
+}
+
+// sendLoginLink mints a single-use token and emails the sign-in link.
+//
+// The token hash is stored before sending. A stored-but-unsent token is
+// harmless — it is single-use and the TTL index sweeps it within loginTokenTTL
+// — so we deliberately do not delete it if the send fails: a send error can
+// follow a message that was actually delivered (e.g. a response timeout), and
+// deleting then would break a link the recipient already holds.
+func (a *Auth) sendLoginLink(ctx context.Context, user *domain.User) error {
+	token, tokenHash, err := newToken()
+	if err != nil {
+		return err
+	}
+
+	err = a.tokens.StoreLoginToken(ctx, tokenHash, user.ID, a.now().Add(loginTokenTTL))
+	if err != nil {
+		return fmt.Errorf("store login token: %w", err)
+	}
+
+	err = a.email.SendLoginLink(ctx, user.Email, a.webURL+"/auth/verify?token="+token)
+	if err != nil {
+		return fmt.Errorf("%w: %w", domain.ErrEmailSendFailed, err)
+	}
+
+	return nil
 }
 
 func newToken() (string, string, error) {
