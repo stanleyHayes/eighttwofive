@@ -87,6 +87,25 @@ func (r *SubscriberRepository) ListPaged(ctx context.Context, params domain.Page
 		SetLimit(params.Limit()))
 }
 
+// Delete removes a subscriber by id. A malformed or unknown id is ErrNotFound.
+func (r *SubscriberRepository) Delete(ctx context.Context, id string) error {
+	oid, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return domain.ErrNotFound
+	}
+
+	res, err := r.col.DeleteOne(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return fmt.Errorf("delete subscriber: %w", err)
+	}
+
+	if res.DeletedCount == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
+}
+
 func (r *SubscriberRepository) find(
 	ctx context.Context, opts *options.FindOptionsBuilder,
 ) ([]domain.Subscriber, error) {

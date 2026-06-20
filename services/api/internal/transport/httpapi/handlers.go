@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 	"github.com/hayfordstanley/eightfivetwo/services/api/internal/service"
 )
@@ -190,6 +192,20 @@ func (h *Handlers) ListWaitlist(w http.ResponseWriter, r *http.Request) {
 		Page:     result.Page,
 		PageSize: result.PageSize,
 	})
+}
+
+// AdminDeleteSubscriber handles DELETE /api/v1/admin/waitlist/{id}.
+func (h *Handlers) AdminDeleteSubscriber(w http.ResponseWriter, r *http.Request) {
+	err := h.waitlist.Delete(r.Context(), chi.URLParam(r, "id"))
+
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		respondError(w, http.StatusNotFound, "not_found", "subscriber not found")
+	case err != nil:
+		respondInternal(w, r, err)
+	default:
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 type signUploadResponse struct {

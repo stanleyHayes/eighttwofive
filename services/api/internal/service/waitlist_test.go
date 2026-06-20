@@ -46,6 +46,18 @@ func (f *fakeRepo) ListPaged(_ context.Context, params domain.PageParams) ([]dom
 	return catalogPageSlice(f.subscribers, params), nil
 }
 
+func (f *fakeRepo) Delete(_ context.Context, id string) error {
+	for i, s := range f.subscribers {
+		if s.ID == id {
+			f.subscribers = append(f.subscribers[:i], f.subscribers[i+1:]...)
+
+			return nil
+		}
+	}
+
+	return domain.ErrNotFound
+}
+
 type fakeSender struct {
 	sent    []string
 	sendErr error

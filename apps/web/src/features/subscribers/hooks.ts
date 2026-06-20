@@ -1,5 +1,10 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { DEFAULT_PAGE_SIZE, listSubscribers, type PageParams } from "./api";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { DEFAULT_PAGE_SIZE, deleteSubscriber, listSubscribers, type PageParams } from "./api";
 
 const subscribersKey = ["admin", "subscribers"] as const;
 
@@ -12,6 +17,17 @@ export function useSubscribers(params: PageParams) {
     queryKey: [...subscribersKey, params.page, params.pageSize],
     queryFn: () => listSubscribers(params),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useDeleteSubscriber() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteSubscriber(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: subscribersKey });
+    },
   });
 }
 

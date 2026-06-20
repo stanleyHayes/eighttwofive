@@ -63,6 +63,7 @@ func AllPermissionsMeta() []PermissionMeta {
 		{PermCatalogueDelete, "Delete catalogue", "Permanently delete collections and designs", "Catalogue"},
 		{PermAnalyticsRead, "View analytics", "See the store dashboard and metrics", "Insights"},
 		{PermSubscribersRead, "View subscribers", "See and export the waitlist", "Insights"},
+		{PermSubscribersWrite, "Manage subscribers", "Remove people from the waitlist", "Insights"},
 		{PermSettingsWrite, "Edit settings", "Change deposit, delivery rates and contact details", "Store"},
 		{PermTeamRead, "View team", "See team members and their roles", "Team"},
 		{PermTeamWrite, "Manage team", "Invite members, assign roles, edit roles & permissions", "Team"},

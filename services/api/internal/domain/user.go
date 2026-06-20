@@ -31,25 +31,27 @@ type Permission string
 
 // Permission identifiers checked per route by RequirePermission.
 const (
-	PermAnalyticsRead   Permission = "analytics:read"
-	PermOrdersRead      Permission = "orders:read"
-	PermOrdersWrite     Permission = "orders:write"
-	PermSlotsRead       Permission = "slots:read"
-	PermSlotsWrite      Permission = "slots:write"
-	PermCatalogueRead   Permission = "catalogue:read"
-	PermCatalogueWrite  Permission = "catalogue:write"
-	PermCatalogueDelete Permission = "catalogue:delete"
-	PermSubscribersRead Permission = "subscribers:read"
-	PermSettingsWrite   Permission = "settings:write"
-	PermTeamRead        Permission = "team:read"
-	PermTeamWrite       Permission = "team:write"
+	PermAnalyticsRead    Permission = "analytics:read"
+	PermOrdersRead       Permission = "orders:read"
+	PermOrdersWrite      Permission = "orders:write"
+	PermSlotsRead        Permission = "slots:read"
+	PermSlotsWrite       Permission = "slots:write"
+	PermCatalogueRead    Permission = "catalogue:read"
+	PermCatalogueWrite   Permission = "catalogue:write"
+	PermCatalogueDelete  Permission = "catalogue:delete"
+	PermSubscribersRead  Permission = "subscribers:read"
+	PermSubscribersWrite Permission = "subscribers:write"
+	PermSettingsWrite    Permission = "settings:write"
+	PermTeamRead         Permission = "team:read"
+	PermTeamWrite        Permission = "team:write"
 )
 
 // allPermissions is the full capability set, granted to admins.
 func allPermissions() []Permission {
 	return []Permission{
 		PermAnalyticsRead, PermOrdersRead, PermOrdersWrite, PermSlotsRead, PermSlotsWrite,
-		PermCatalogueRead, PermCatalogueWrite, PermCatalogueDelete, PermSubscribersRead,
+		PermCatalogueRead, PermCatalogueWrite, PermCatalogueDelete,
+		PermSubscribersRead, PermSubscribersWrite,
 		PermSettingsWrite, PermTeamRead, PermTeamWrite,
 	}
 }

@@ -121,6 +121,7 @@ func adminRoutes(h *Handlers) func(chi.Router) {
 		r.Use(h.RequireAuth, h.RequireAdminArea)
 
 		r.With(read(domain.PermSubscribersRead)).Get("/waitlist", h.ListWaitlist)
+		r.With(read(domain.PermSubscribersWrite)).Delete("/waitlist/{id}", h.AdminDeleteSubscriber)
 		r.With(read(domain.PermSettingsWrite)).Put("/settings", h.UpdateSettings)
 		r.With(read(domain.PermCatalogueWrite)).Post("/uploads/sign", h.SignUpload)
 		r.With(read(domain.PermAnalyticsRead)).Get("/analytics", h.AdminGetAnalytics)

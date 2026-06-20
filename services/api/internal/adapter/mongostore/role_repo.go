@@ -71,17 +71,27 @@ func (r *RoleRepository) EnsureIndexes(ctx context.Context) error {
 	for _, def := range domain.BuiltInRoles() {
 		doc := roleToDoc(&def)
 
-		_, err := r.col.UpdateOne(ctx,
-			bson.M{"_id": def.Key},
-			bson.M{"$setOnInsert": bson.M{
-				"name":        doc.Name,
-				"description": doc.Description,
-				"permissions": doc.Permissions,
-				"system":      doc.System,
-				"adminArea":   doc.AdminArea,
-			}},
-			options.UpdateOne().SetUpsert(true),
-		)
+		setOnInsert := bson.M{
+			"name":        doc.Name,
+			"description": doc.Description,
+			"permissions": doc.Permissions,
+			"system":      doc.System,
+			"adminArea":   doc.AdminArea,
+		}
+		update := bson.M{"$setOnInsert": setOnInsert}
+
+		// The admin role is the recovery path and is never reducible, so always
+		// re-sync its permissions and dashboard access to the full built-in set.
+		// This is how a capability added to the catalogue after seeding reaches
+		// existing admins, without disturbing any other (editable) built-in role.
+		if def.Key == string(domain.RoleAdmin) {
+			delete(setOnInsert, "permissions")
+			delete(setOnInsert, "adminArea")
+
+			update["$set"] = bson.M{"permissions": doc.Permissions, "adminArea": doc.AdminArea}
+		}
+
+		_, err := r.col.UpdateOne(ctx, bson.M{"_id": def.Key}, update, options.UpdateOne().SetUpsert(true))
 		if err != nil {
 			return fmt.Errorf("seed role %q: %w", def.Key, err)
 		}

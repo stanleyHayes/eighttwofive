@@ -11,6 +11,7 @@ export const PERMISSIONS = {
   catalogueWrite: "catalogue:write",
   catalogueDelete: "catalogue:delete",
   subscribersRead: "subscribers:read",
+  subscribersWrite: "subscribers:write",
   settingsWrite: "settings:write",
   teamRead: "team:read",
   teamWrite: "team:write",

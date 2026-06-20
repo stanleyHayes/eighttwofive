@@ -46,13 +46,29 @@ func TestRoleRepository_SeedAndCRUD(t *testing.T) {
 	_, err = repo.Get(t.Context(), "photographer")
 	require.ErrorIs(t, err, domain.ErrNotFound)
 
-	// Re-seeding is insert-if-missing: a built-in edited by an admin is not reset.
-	edited := admin
-	edited.Permissions = []domain.Permission{domain.PermOrdersRead}
-	require.NoError(t, repo.Upsert(t.Context(), edited))
+	// Re-seeding preserves an edit to a NON-admin built-in role.
+	staff, err := repo.Get(t.Context(), "staff")
+	require.NoError(t, err)
+
+	staff.Permissions = []domain.Permission{domain.PermOrdersRead}
+	require.NoError(t, repo.Upsert(t.Context(), staff))
+
+	// The admin role, by contrast, is always re-synced to the full permission set
+	// on re-seed (it is the recovery path and must never lose access).
+	demoted := *admin
+	demoted.Permissions = []domain.Permission{domain.PermOrdersRead}
+	demoted.AdminArea = false
+	require.NoError(t, repo.Upsert(t.Context(), &demoted))
+
 	require.NoError(t, repo.EnsureIndexes(t.Context()))
 
-	after, err := repo.Get(t.Context(), "admin")
+	afterStaff, err := repo.Get(t.Context(), "staff")
 	require.NoError(t, err)
-	assert.False(t, after.Has(domain.PermTeamWrite), "re-seed must not overwrite an edited built-in")
+	assert.False(t, afterStaff.Has(domain.PermCatalogueWrite), "an edited non-admin built-in survives re-seed")
+
+	afterAdmin, err := repo.Get(t.Context(), "admin")
+	require.NoError(t, err)
+	assert.True(t, afterAdmin.Has(domain.PermTeamWrite), "admin is re-synced to full on re-seed")
+	assert.True(t, afterAdmin.Has(domain.PermSubscribersWrite), "admin gains newly added capabilities on re-seed")
+	assert.True(t, afterAdmin.AdminArea, "admin keeps dashboard access on re-seed")
 }

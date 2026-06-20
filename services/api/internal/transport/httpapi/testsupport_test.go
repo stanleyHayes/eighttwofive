@@ -79,6 +79,18 @@ func (m *memRepo) ListPaged(_ context.Context, params domain.PageParams) ([]doma
 	return pageSlice(out, params), nil
 }
 
+func (m *memRepo) Delete(_ context.Context, id string) error {
+	for email, s := range m.byEmail {
+		if s.ID == id {
+			delete(m.byEmail, email)
+
+			return nil
+		}
+	}
+
+	return domain.ErrNotFound
+}
+
 type memUsers struct {
 	byEmail map[string]*domain.User
 	nextID  int

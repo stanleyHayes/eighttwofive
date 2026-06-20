@@ -31,4 +31,6 @@ type SubscriberRepository interface {
 	Count(ctx context.Context) (int64, error)
 	// ListPaged returns one page of subscribers, newest first.
 	ListPaged(ctx context.Context, params PageParams) ([]Subscriber, error)
+	// Delete removes a subscriber by id. An unknown or malformed id is ErrNotFound.
+	Delete(ctx context.Context, id string) error
 }

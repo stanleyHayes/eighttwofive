@@ -97,3 +97,13 @@ func (s *Waitlist) ListPaged(ctx context.Context, page, pageSize int) (domain.Pa
 
 	return domain.NewPage(subs, total, params), nil
 }
+
+// Delete removes a subscriber from the waitlist.
+func (s *Waitlist) Delete(ctx context.Context, id string) error {
+	err := s.repo.Delete(ctx, id)
+	if err != nil {
+		return fmt.Errorf("delete subscriber: %w", err)
+	}
+
+	return nil
+}

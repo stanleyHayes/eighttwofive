@@ -38,6 +38,13 @@ export function listSubscribers(params: PageParams): Promise<PagedResult<Subscri
   return request<PagedResult<Subscriber>>(`/api/v1/admin/waitlist?${pageQuery(params)}`);
 }
 
+/** Removes a subscriber from the waitlist (requires subscribers:write). */
+export function deleteSubscriber(id: string): Promise<void> {
+  return request<void>(`/api/v1/admin/waitlist/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
 /**
  * Serializes subscribers to a CSV string with a header row. Fields are quoted
  * and embedded quotes are doubled, so commas and quotes in names survive.
