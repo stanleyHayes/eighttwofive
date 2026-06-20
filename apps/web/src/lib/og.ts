@@ -1,7 +1,9 @@
 // Shared helpers for Open Graph meta tags. Used by the Vercel Edge Middleware
 // (apps/web/middleware.ts) and by unit tests. Must stay runtime-agnostic.
 
-export const OG_TRANSFORM = "c_fill,w_1200,h_630";
+// f_jpg + q_auto keep the share image a small JPEG (social crawlers like
+// WhatsApp/Facebook silently drop og:images over ~600KB and don't render WebP).
+export const OG_TRANSFORM = "f_jpg,q_auto,c_fill,w_1200,h_630";
 
 export interface OgData {
   title: string;

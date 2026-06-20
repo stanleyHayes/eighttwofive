@@ -118,7 +118,7 @@ describe("buildOgHtml", () => {
 describe("photoUrl", () => {
   it("builds a Cloudinary delivery URL", () => {
     expect(photoUrl("demo", "my-folder/photo", OG_TRANSFORM)).toBe(
-      "https://res.cloudinary.com/demo/image/upload/c_fill,w_1200,h_630/my-folder/photo",
+      "https://res.cloudinary.com/demo/image/upload/f_jpg,q_auto,c_fill,w_1200,h_630/my-folder/photo",
     );
   });
 });
