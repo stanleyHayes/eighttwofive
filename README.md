@@ -85,6 +85,8 @@ CI (`.github/workflows/ci.yml`) runs both sides on every push/PR: turbo tasks fo
 
 **API → Render.** Create a Blueprint from this repo; `render.yaml` provisions the Docker service from `services/api`. Fill the `sync: false` env vars in the dashboard: `MONGODB_URI` (MongoDB Atlas), `CORS_ALLOWED_ORIGINS` **and** `WEB_URL` (both your exact Vercel origin, e.g. `https://eighttwofive.vercel.app`), `ADMIN_EMAILS` (comma-separated bootstrap super-admins — required or no one can reach `/admin`), `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY` + `EMAIL_FROM`, and the `CLOUDINARY_*` keys.
 
+> **Resend: verify a domain first.** `EMAIL_FROM` must be an address on a domain you've verified in Resend (add its SPF/DKIM DNS records). The default `onboarding@resend.dev` shared sender only delivers to your own Resend account email — every other customer is rejected, so sign-in links fail (the API returns 500 and logs a startup warning). Set e.g. `EMAIL_FROM=Eight Two Five <hello@eighttwofive.com>`.
+
 ### Environment variables (API)
 
 See [services/api/.env.example](services/api/.env.example) for the full list with defaults.

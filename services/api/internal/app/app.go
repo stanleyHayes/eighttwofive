@@ -34,6 +34,10 @@ type App struct {
 // New connects infrastructure and injects every dependency. It fails fast:
 // an App that constructs successfully is ready to serve.
 func New(ctx context.Context, cfg *config.Config, logger *slog.Logger) (*App, error) {
+	for _, warning := range cfg.Warnings() {
+		logger.Warn("configuration", "warning", warning)
+	}
+
 	client, err := mongostore.Connect(ctx, cfg.MongoURI)
 	if err != nil {
 		return nil, fmt.Errorf("connect storage: %w", err)

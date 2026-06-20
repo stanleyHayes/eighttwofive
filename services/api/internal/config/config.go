@@ -39,12 +39,42 @@ func (c *Config) IsProduction() bool { return c.Env == "production" }
 // EmailEnabled reports whether a Resend API key is configured.
 func (c *Config) EmailEnabled() bool { return c.ResendAPIKey != "" }
 
+// Warnings returns non-fatal configuration problems worth surfacing at boot.
+// These are setups that look fine but silently fail to reach customers — most
+// often an email sender that Resend will refuse to deliver to anyone but the
+// account owner.
+func (c *Config) Warnings() []string {
+	var out []string
+
+	if c.IsProduction() && !c.EmailEnabled() {
+		out = append(out,
+			"RESEND_API_KEY is not set: sign-in links and emails are only logged, "+
+				"so customers cannot receive them — set RESEND_API_KEY and EMAIL_FROM")
+	}
+
+	if c.EmailEnabled() && c.usesSharedResendSender() {
+		out = append(out,
+			"EMAIL_FROM uses Resend's shared onboarding@resend.dev sender, which only "+
+				"delivers to your own Resend account email; verify a domain in Resend and "+
+				"set EMAIL_FROM to an address on it so customers receive emails")
+	}
+
+	return out
+}
+
 // PaystackEnabled reports whether a Paystack secret key is configured.
 func (c *Config) PaystackEnabled() bool { return c.PaystackSecretKey != "" }
 
 // UploadsEnabled reports whether the full Cloudinary credential trio is configured.
 func (c *Config) UploadsEnabled() bool {
 	return c.CloudinaryCloudName != "" && c.CloudinaryAPIKey != "" && c.CloudinaryAPISecret != ""
+}
+
+// usesSharedResendSender reports whether EMAIL_FROM is Resend's shared test
+// sender (anything @resend.dev). Resend only delivers from that address to the
+// account owner's own email, so customers never receive anything.
+func (c *Config) usesSharedResendSender() bool {
+	return strings.Contains(strings.ToLower(c.EmailFrom), "resend.dev")
 }
 
 // Load reads configuration from environment variables and validates it.
@@ -58,7 +88,7 @@ func Load() (*Config, error) {
 		AdminEmails:         splitAndTrim(os.Getenv("ADMIN_EMAILS")),
 		CORSAllowedOrigins:  splitAndTrim(getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:5173")),
 		ResendAPIKey:        os.Getenv("RESEND_API_KEY"),
-		EmailFrom:           getEnv("EMAIL_FROM", "eightfivetwo <onboarding@resend.dev>"),
+		EmailFrom:           getEnv("EMAIL_FROM", "Eight Two Five <onboarding@resend.dev>"),
 		PaystackSecretKey:   os.Getenv("PAYSTACK_SECRET_KEY"),
 		CloudinaryCloudName: os.Getenv("CLOUDINARY_CLOUD_NAME"),
 		CloudinaryAPIKey:    os.Getenv("CLOUDINARY_API_KEY"),
