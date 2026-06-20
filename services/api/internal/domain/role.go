@@ -10,6 +10,10 @@ import (
 // role, which the dashboard must never allow.
 var ErrSystemRole = errors.New("built-in role cannot be modified that way")
 
+// ErrDuplicateRole is returned when a new role's key collides with an existing
+// one and no free variant could be derived.
+var ErrDuplicateRole = errors.New("role key already exists")
+
 // RoleDef is a named, editable bundle of permissions. The four built-in roles
 // (customer/viewer/staff/admin) are seeded as System roles — their key can't
 // change and they can't be deleted — while admins may add custom roles with any

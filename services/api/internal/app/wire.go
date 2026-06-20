@@ -77,7 +77,7 @@ func buildRouter(
 
 	// Application services (use-cases over ports).
 	waitlist := service.NewWaitlist(subscribers, sender, logger)
-	auth := service.NewAuth(users, tokens, sender, logger, cfg.WebURL, cfg.AdminEmails)
+	auth := service.NewAuth(users, tokens, roles, sender, logger, cfg.WebURL, cfg.AdminEmails)
 	store := service.NewStoreSettings(settings)
 	catalog := service.NewCatalog(collections, designs)
 	orderService := service.NewOrder(orders, designs, users, payments, paymentEvents, sender, settings, cfg.WebURL, logger)

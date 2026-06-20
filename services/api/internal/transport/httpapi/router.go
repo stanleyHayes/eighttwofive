@@ -118,6 +118,9 @@ func adminRoutes(h *Handlers) func(chi.Router) {
 
 		// Role definitions + the permission catalogue back the team-management UI.
 		r.With(read(domain.PermTeamRead)).Get("/roles", h.AdminListRoles)
+		r.With(read(domain.PermTeamWrite)).Post("/roles", h.AdminCreateRole)
+		r.With(read(domain.PermTeamWrite)).Put("/roles/{key}", h.AdminUpdateRole)
+		r.With(read(domain.PermTeamWrite)).Delete("/roles/{key}", h.AdminDeleteRole)
 		r.With(read(domain.PermTeamRead)).Get("/permissions", h.AdminListPermissions)
 
 		r.Route("/slots", func(r chi.Router) {

@@ -86,11 +86,6 @@ func (r Role) IsAdminArea() bool {
 	return r == RoleAdmin || r == RoleStaff || r == RoleViewer
 }
 
-// IsAssignable reports whether a role may be assigned through the team UI.
-func (r Role) IsAssignable() bool {
-	return r == RoleCustomer || r == RoleViewer || r == RoleStaff || r == RoleAdmin
-}
-
 // User is a person with an account — created lightly, at the last step of
 // completing an order (scope §4.8), or on first sign-in.
 type User struct {

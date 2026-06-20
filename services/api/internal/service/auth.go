@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/mail"
@@ -27,6 +28,7 @@ const (
 type Auth struct {
 	users  domain.UserRepository
 	tokens domain.TokenRepository
+	roles  domain.RoleRepository
 	email  domain.EmailSender
 	logger *slog.Logger
 	webURL string
@@ -38,6 +40,7 @@ type Auth struct {
 func NewAuth(
 	users domain.UserRepository,
 	tokens domain.TokenRepository,
+	roles domain.RoleRepository,
 	email domain.EmailSender,
 	logger *slog.Logger,
 	webURL string,
@@ -51,6 +54,7 @@ func NewAuth(
 	return &Auth{
 		users:  users,
 		tokens: tokens,
+		roles:  roles,
 		email:  email,
 		logger: logger,
 		webURL: strings.TrimRight(webURL, "/"),
@@ -199,10 +203,16 @@ func (a *Auth) ListUsers(ctx context.Context, page, pageSize int) (domain.Page[d
 }
 
 // SetUserRole changes a user's role. Bootstrap super-admins cannot be demoted,
-// and only assignable roles are accepted.
+// and the role must exist in the store (built-in or custom).
 func (a *Auth) SetUserRole(ctx context.Context, userID string, role domain.Role) (*domain.User, error) {
-	if !role.IsAssignable() {
+	// A user can only hold a role that exists in the store — built-in or custom.
+	_, err := a.roles.Get(ctx, string(role))
+	if errors.Is(err, domain.ErrNotFound) {
 		return nil, fmt.Errorf("%w: unknown role %q", domain.ErrInvalidInput, role)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("check role: %w", err)
 	}
 
 	user, err := a.users.GetByID(ctx, userID)

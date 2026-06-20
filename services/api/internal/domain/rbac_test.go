@@ -49,17 +49,3 @@ func TestRoleIsAdminArea(t *testing.T) {
 		}
 	}
 }
-
-func TestRoleIsAssignable(t *testing.T) {
-	t.Parallel()
-
-	if domain.Role("superuser").IsAssignable() {
-		t.Error("unknown role must not be assignable")
-	}
-
-	for _, r := range []domain.Role{domain.RoleCustomer, domain.RoleViewer, domain.RoleStaff, domain.RoleAdmin} {
-		if !r.IsAssignable() {
-			t.Errorf("%s must be assignable", r)
-		}
-	}
-}

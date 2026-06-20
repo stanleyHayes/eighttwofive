@@ -66,10 +66,11 @@ func newAdminLinkCommand() *cobra.Command {
 func mintAdminLink(ctx context.Context, out io.Writer, db *mongo.Database, webURL, email, name string) error {
 	users := mongostore.NewUserRepository(db)
 	tokens := mongostore.NewTokenRepository(db)
+	roles := mongostore.NewRoleRepository(db)
 
 	for _, ensure := range []interface {
 		EnsureIndexes(ctx context.Context) error
-	}{users, tokens} {
+	}{users, tokens, roles} {
 		err := ensure.EnsureIndexes(ctx)
 		if err != nil {
 			return fmt.Errorf("ensure indexes: %w", err)
@@ -78,7 +79,7 @@ func mintAdminLink(ctx context.Context, out io.Writer, db *mongo.Database, webUR
 
 	sender := &captureSender{link: ""}
 	// Passing the email as the allowlist makes RequestLink assign the admin role.
-	auth := service.NewAuth(users, tokens, sender, quietLogger(), webURL, []string{email})
+	auth := service.NewAuth(users, tokens, roles, sender, quietLogger(), webURL, []string{email})
 
 	err := auth.RequestLink(ctx, email, name)
 	if err != nil {

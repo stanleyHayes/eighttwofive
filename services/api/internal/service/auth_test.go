@@ -204,8 +204,53 @@ func (l *linkSender) token(t *testing.T) string {
 	return token
 }
 
+// fakeRoles is a minimal in-memory domain.RoleRepository seeded with the
+// built-in roles, so SetUserRole can validate role keys against the store.
+type fakeRoles struct {
+	byKey map[string]domain.RoleDef
+}
+
+func newFakeRoles() *fakeRoles {
+	m := &fakeRoles{byKey: map[string]domain.RoleDef{}}
+	for _, def := range domain.BuiltInRoles() {
+		m.byKey[def.Key] = def
+	}
+
+	return m
+}
+
+func (f *fakeRoles) List(_ context.Context) ([]domain.RoleDef, error) {
+	out := make([]domain.RoleDef, 0, len(f.byKey))
+	for _, role := range f.byKey {
+		out = append(out, role)
+	}
+
+	return out, nil
+}
+
+func (f *fakeRoles) Get(_ context.Context, key string) (*domain.RoleDef, error) {
+	role, ok := f.byKey[key]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+
+	return &role, nil
+}
+
+func (f *fakeRoles) Upsert(_ context.Context, role *domain.RoleDef) error {
+	f.byKey[role.Key] = *role
+
+	return nil
+}
+
+func (f *fakeRoles) Delete(_ context.Context, key string) error {
+	delete(f.byKey, key)
+
+	return nil
+}
+
 func newAuth(users *fakeUsers, tokens *fakeTokens, sender *linkSender, adminEmails ...string) *service.Auth {
-	return service.NewAuth(users, tokens, sender, slog.New(slog.DiscardHandler),
+	return service.NewAuth(users, tokens, newFakeRoles(), sender, slog.New(slog.DiscardHandler),
 		"https://shop.test/", adminEmails)
 }
 

@@ -953,8 +953,9 @@ func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
 	sender := &recordingSender{lastLink: ""}
 	users := newMemUsers()
 	tokens := newMemTokens()
+	roleStore := newMemRoles()
 	waitlist := service.NewWaitlist(newMemRepo(), sender, logger)
-	auth := service.NewAuth(users, tokens, sender, logger, "http://test.local", adminEmails)
+	auth := service.NewAuth(users, tokens, roleStore, sender, logger, "http://test.local", adminEmails)
 	settings := service.NewStoreSettings(&memSettings{saved: nil})
 	collections := newMemCollections()
 	designs := newMemDesigns()
@@ -971,7 +972,6 @@ func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
 	visitService := service.NewCalendarVisit(
 		slots, visitsRepo, orders, designs, users, paymentProvider, settings, sender, "http://test.local", logger,
 	)
-	roleStore := newMemRoles()
 	handlers := httpapi.NewHandlers(
 		waitlist, auth, settings, catalog, orderService, analyticsService,
 		service.NewRoles(roleStore), slotService, visitService, nil, "test-cloud", false, nil,
@@ -994,6 +994,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 func newHandlersWithSigner(env *testEnv, signer domain.UploadSigner) *httpapi.Handlers {
 	users := newMemUsers()
 	tokens := newMemTokens()
+	roleStore := newMemRoles()
 	collections := newMemCollections()
 	designs := newMemDesigns()
 	catalog := service.NewCatalog(collections, designs)
@@ -1014,13 +1015,13 @@ func newHandlersWithSigner(env *testEnv, signer domain.UploadSigner) *httpapi.Ha
 
 	return httpapi.NewHandlers(
 		service.NewWaitlist(newMemRepo(), env.sender, slog.New(slog.DiscardHandler)),
-		service.NewAuth(users, tokens, env.sender, slog.New(slog.DiscardHandler),
+		service.NewAuth(users, tokens, roleStore, env.sender, slog.New(slog.DiscardHandler),
 			"http://test.local", []string{"boss@e25.com"}),
 		settings,
 		catalog,
 		orderService,
 		analyticsService,
-		service.NewRoles(newMemRoles()),
+		service.NewRoles(roleStore),
 		slotService,
 		visitService,
 		signer,
