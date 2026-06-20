@@ -833,6 +833,49 @@ func (m *memVisits) Update(_ context.Context, visit *domain.Visit) error {
 
 // --- recording email sender ---------------------------------------------------
 
+type memRoles struct {
+	byKey map[string]domain.RoleDef
+}
+
+func newMemRoles() *memRoles {
+	m := &memRoles{byKey: map[string]domain.RoleDef{}}
+	for _, def := range domain.BuiltInRoles() {
+		m.byKey[def.Key] = def
+	}
+
+	return m
+}
+
+func (m *memRoles) List(_ context.Context) ([]domain.RoleDef, error) {
+	out := make([]domain.RoleDef, 0, len(m.byKey))
+	for _, role := range m.byKey {
+		out = append(out, role)
+	}
+
+	return out, nil
+}
+
+func (m *memRoles) Get(_ context.Context, key string) (*domain.RoleDef, error) {
+	role, ok := m.byKey[key]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+
+	return &role, nil
+}
+
+func (m *memRoles) Upsert(_ context.Context, role *domain.RoleDef) error {
+	m.byKey[role.Key] = *role
+
+	return nil
+}
+
+func (m *memRoles) Delete(_ context.Context, key string) error {
+	delete(m.byKey, key)
+
+	return nil
+}
+
 type recordingSender struct {
 	lastLink           string
 	lastStatusUpdateTo string
@@ -915,7 +958,7 @@ func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
 	)
 	handlers := httpapi.NewHandlers(
 		waitlist, auth, settings, catalog, orderService, analyticsService,
-		slotService, visitService, nil, "test-cloud", false, nil,
+		service.NewRoles(newMemRoles()), slotService, visitService, nil, "test-cloud", false, nil,
 	)
 	srv := httptest.NewServer(httpapi.NewRouter(handlers, logger, []string{"*"}))
 	t.Cleanup(srv.Close)
@@ -959,6 +1002,7 @@ func newHandlersWithSigner(env *testEnv, signer domain.UploadSigner) *httpapi.Ha
 		catalog,
 		orderService,
 		analyticsService,
+		service.NewRoles(newMemRoles()),
 		slotService,
 		visitService,
 		signer,

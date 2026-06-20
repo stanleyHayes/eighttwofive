@@ -65,6 +65,7 @@ type Handlers struct {
 	catalog       *service.Catalog
 	orders        *service.Order
 	analytics     *service.Analytics
+	roles         *service.Roles
 	slots         *service.CalendarSlot
 	visits        *service.CalendarVisit
 	signer        domain.UploadSigner // nil when uploads are not configured
@@ -81,6 +82,7 @@ func NewHandlers(
 	catalog *service.Catalog,
 	orders *service.Order,
 	analytics *service.Analytics,
+	roles *service.Roles,
 	slots *service.CalendarSlot,
 	visits *service.CalendarVisit,
 	signer domain.UploadSigner,
@@ -95,6 +97,7 @@ func NewHandlers(
 		catalog:       catalog,
 		orders:        orders,
 		analytics:     analytics,
+		roles:         roles,
 		slots:         slots,
 		visits:        visits,
 		signer:        signer,

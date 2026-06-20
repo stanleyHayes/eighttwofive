@@ -25,7 +25,7 @@ func TestHealth_DatabaseUnreachable(t *testing.T) {
 	// Only the readiness pinger is exercised by /healthz, so the services can
 	// stay nil for this check.
 	handlers := httpapi.NewHandlers(
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "", false,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", false,
 		stubPinger{err: errors.New("connection refused")},
 	)
 	srv := httptest.NewServer(httpapi.NewRouter(handlers, slog.New(slog.DiscardHandler), []string{"*"}))
@@ -38,7 +38,7 @@ func TestHealth_DatabaseReachable(t *testing.T) {
 	t.Parallel()
 
 	handlers := httpapi.NewHandlers(
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "", false,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", false,
 		stubPinger{err: nil},
 	)
 	srv := httptest.NewServer(httpapi.NewRouter(handlers, slog.New(slog.DiscardHandler), []string{"*"}))

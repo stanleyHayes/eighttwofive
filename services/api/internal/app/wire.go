@@ -52,16 +52,13 @@ func buildRouter(
 	analyticsRepo := mongostore.NewAnalyticsRepository(db)
 	slots := mongostore.NewSlotRepository(db)
 	visits := mongostore.NewVisitRepository(db)
+	roles := mongostore.NewRoleRepository(db)
 
-	indexRepos := []indexEnsurer{
-		subscribers, users, tokens, collections, designs, orders, paymentEvents, analyticsRepo, slots, visits,
-	}
-
-	for _, repo := range indexRepos {
-		err := repo.EnsureIndexes(ctx)
-		if err != nil {
-			return nil, nil, fmt.Errorf("ensure indexes: %w", err)
-		}
+	err := ensureIndexes(ctx, []indexEnsurer{
+		subscribers, users, tokens, collections, designs, orders, paymentEvents, analyticsRepo, slots, visits, roles,
+	})
+	if err != nil {
+		return nil, nil, err
 	}
 
 	// Driven adapters (integrations) — degrade gracefully when unconfigured.
@@ -85,6 +82,7 @@ func buildRouter(
 	catalog := service.NewCatalog(collections, designs)
 	orderService := service.NewOrder(orders, designs, users, payments, paymentEvents, sender, settings, cfg.WebURL, logger)
 	analyticsService := service.NewAnalytics(analyticsRepo)
+	roleService := service.NewRoles(roles)
 	slotService := service.NewCalendarSlot(slots)
 	visitService := service.NewCalendarVisit(
 		slots, visits, orders, designs, users, payments, settings, sender, cfg.WebURL, logger,
@@ -92,9 +90,22 @@ func buildRouter(
 
 	// Driving adapter (HTTP).
 	handlers := httpapi.NewHandlers(
-		waitlist, auth, store, catalog, orderService, analyticsService, slotService, visitService,
+		waitlist, auth, store, catalog, orderService, analyticsService, roleService, slotService, visitService,
 		signer, cfg.CloudinaryCloudName, cfg.IsProduction(), mongostore.NewHealthChecker(client),
 	)
 
 	return httpapi.NewRouter(handlers, logger, cfg.CORSAllowedOrigins), visitService, nil
+}
+
+// ensureIndexes runs EnsureIndexes (which also seeds where applicable) on every
+// repository, failing fast on the first error.
+func ensureIndexes(ctx context.Context, repos []indexEnsurer) error {
+	for _, repo := range repos {
+		err := repo.EnsureIndexes(ctx)
+		if err != nil {
+			return fmt.Errorf("ensure indexes: %w", err)
+		}
+	}
+
+	return nil
 }
