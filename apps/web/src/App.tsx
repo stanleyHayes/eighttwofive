@@ -30,6 +30,7 @@ import { AdminAnalyticsPage } from "@/pages/admin/AdminAnalyticsPage";
 import { AdminSettingsPage } from "@/pages/admin/AdminSettingsPage";
 import { AdminSlotsPage } from "@/pages/admin/AdminSlotsPage";
 import { AdminTeamPage } from "@/pages/admin/AdminTeamPage";
+import { AdminRolesPage } from "@/pages/admin/AdminRolesPage";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { VerifyPage } from "@/features/auth/VerifyPage";
 import { AuthGuard, AdminGuard, PermissionGuard } from "@/features/auth/guards";
@@ -115,6 +116,14 @@ const router = createBrowserRouter([
             element: (
               <PermissionGuard permission={PERMISSIONS.teamRead}>
                 <AdminTeamPage />
+              </PermissionGuard>
+            ),
+          },
+          {
+            path: "roles",
+            element: (
+              <PermissionGuard permission={PERMISSIONS.teamRead}>
+                <AdminRolesPage />
               </PermissionGuard>
             ),
           },

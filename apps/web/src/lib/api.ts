@@ -68,7 +68,9 @@ export function getHealth(): Promise<Health> {
   return request<Health>("/api/v1/healthz");
 }
 
-export type UserRole = "customer" | "viewer" | "staff" | "admin";
+// The four built-ins are suggested for autocomplete, but custom roles created
+// in the dashboard mean a role can be any key — so any string is accepted.
+export type UserRole = "customer" | "viewer" | "staff" | "admin" | (string & {});
 
 export interface User {
   id: string;

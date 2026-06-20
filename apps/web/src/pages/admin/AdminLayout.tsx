@@ -35,6 +35,7 @@ const NAV_ITEMS: { label: string; to: string; permission: Permission }[] = [
     permission: PERMISSIONS.analyticsRead,
   },
   { label: "Team", to: "/admin/team", permission: PERMISSIONS.teamRead },
+  { label: "Roles", to: "/admin/roles", permission: PERMISSIONS.teamRead },
   {
     label: "Settings",
     to: "/admin/settings",
