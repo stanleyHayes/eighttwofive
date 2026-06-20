@@ -4,4 +4,4 @@
  * actually runs (preview deploys, localhost). Defined once so every layer —
  * the SPA, the SEO helpers, and the edge middleware — agrees on one domain.
  */
-export const SITE_ORIGIN = "https://eighttwofive.vercel.app";
+export const SITE_ORIGIN = "https://eighttwofive.com";
