@@ -1,6 +1,7 @@
 package httpapi_test
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 
@@ -80,6 +81,22 @@ func TestRequestLink_InvalidEmail(t *testing.T) {
 	status := postJSON(t, env.srv.URL+"/api/v1/auth/request-link", `{"email":"nope","name":"X"}`)
 	assert.Equal(t, http.StatusUnprocessableEntity, status)
 }
+
+func TestRequestLink_EmailUnavailable(t *testing.T) {
+	t.Parallel()
+
+	env := newTestEnv(t)
+	env.sender.loginErr = errEmailDown
+
+	// A delivery failure reports a distinct 502/email_unavailable so the customer
+	// is told to retry, not shown a generic crash.
+	reply := doJSON(t, http.MethodPost, env.srv.URL+"/api/v1/auth/request-link",
+		`{"email":"ama@example.com","name":"Ama"}`, nil)
+	assert.Equal(t, http.StatusBadGateway, reply.status)
+	assert.Contains(t, reply.body, `"code":"email_unavailable"`)
+}
+
+var errEmailDown = errors.New("resend unavailable")
 
 func TestRequestLink_EmptyName(t *testing.T) {
 	t.Parallel()

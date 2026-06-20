@@ -13,7 +13,7 @@ import { Link as RouterLink } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { BrandMark } from "@/components/BrandMark";
 import { MeasureRule } from "@/components/MeasureRule";
-import { requestLoginLink } from "@/lib/api";
+import { ApiError, requestLoginLink } from "@/lib/api";
 import { amber, brass, cream, creamMuted, GRAIN_URL, ink } from "@/theme";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -256,7 +256,12 @@ export function LoginPage() {
                   {t("login.submit")}
                 </Button>
                 {sendLink.isError && (
-                  <Alert severity="error">{t("login.submitError")}</Alert>
+                  <Alert severity="error">
+                    {sendLink.error instanceof ApiError &&
+                    sendLink.error.code === "email_unavailable"
+                      ? t("login.emailUnavailable")
+                      : t("login.submitError")}
+                  </Alert>
                 )}
               </Stack>
             </Box>

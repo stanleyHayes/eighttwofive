@@ -9,6 +9,12 @@ import (
 // ErrTokenInvalid is returned for unknown, expired, or already-used tokens.
 var ErrTokenInvalid = errors.New("token invalid or expired")
 
+// ErrEmailSendFailed marks a failure to hand a message to the email provider —
+// distinct from a programming/storage fault — so the transport can tell the
+// customer their sign-in link couldn't be sent rather than showing a generic
+// server error.
+var ErrEmailSendFailed = errors.New("email send failed")
+
 // TokenRepository is the persistence port for login tokens and sessions.
 // Both are stored hashed; raw tokens never touch the database.
 type TokenRepository interface {

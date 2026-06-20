@@ -5,8 +5,19 @@ import (
 	"context"
 	"fmt"
 	"html"
+	"time"
 
 	"github.com/resend/resend-go/v2"
+)
+
+const (
+	// maxSendAttempts and sendRetryBackoff bound how hard we retry a failed send.
+	// Resend collapses most failures into opaque errors, so we can't reliably
+	// tell a transient blip (5xx, network, 429) from a permanent one (invalid
+	// recipient, unverified domain); a few short retries recover the transient
+	// cases while a permanent failure still surfaces quickly.
+	maxSendAttempts  = 3
+	sendRetryBackoff = 200 * time.Millisecond
 )
 
 // ResendSender sends transactional email through Resend.
@@ -22,7 +33,7 @@ func NewResendSender(apiKey, from string) *ResendSender {
 
 // SendLoginLink sends the single-use sign-in link.
 func (s *ResendSender) SendLoginLink(ctx context.Context, to, link string) error {
-	_, err := s.client.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+	err := s.send(ctx, &resend.SendEmailRequest{
 		From:    s.from,
 		To:      []string{to},
 		Subject: "Your Eight Two Five sign-in link",
@@ -39,7 +50,7 @@ func (s *ResendSender) SendLoginLink(ctx context.Context, to, link string) error
 
 // SendWelcome sends the waitlist confirmation email.
 func (s *ResendSender) SendWelcome(ctx context.Context, to, name string) error {
-	_, err := s.client.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+	err := s.send(ctx, &resend.SendEmailRequest{
 		From:    s.from,
 		To:      []string{to},
 		Subject: "You're on the Eight Two Five waitlist",
@@ -59,7 +70,7 @@ func (s *ResendSender) SendWelcome(ctx context.Context, to, name string) error {
 
 // SendOrderConfirmation notifies the customer that an order status changed.
 func (s *ResendSender) SendOrderConfirmation(ctx context.Context, to, name, ref, status string) error {
-	_, err := s.client.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+	err := s.send(ctx, &resend.SendEmailRequest{
 		From:    s.from,
 		To:      []string{to},
 		Subject: fmt.Sprintf("Eight Two Five order %s is %s", ref, status),
@@ -82,7 +93,7 @@ func (s *ResendSender) SendOrderConfirmation(ctx context.Context, to, name, ref,
 func (s *ResendSender) SendOrderStatusUpdate(
 	ctx context.Context, to, name, ref, status, timeframe string,
 ) error {
-	_, err := s.client.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+	err := s.send(ctx, &resend.SendEmailRequest{
 		From:    s.from,
 		To:      []string{to},
 		Subject: fmt.Sprintf("Eight Two Five order %s — %s", ref, status),
@@ -99,4 +110,28 @@ func (s *ResendSender) SendOrderStatusUpdate(
 	}
 
 	return nil
+}
+
+// send dispatches one email, retrying a bounded number of times with a short
+// backoff. Retries are safe because the worst case is a duplicate of the same
+// transactional message (e.g. the same single-use sign-in link).
+func (s *ResendSender) send(ctx context.Context, req *resend.SendEmailRequest) error {
+	var lastErr error
+
+	for attempt := range maxSendAttempts {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return fmt.Errorf("send email: %w", ctx.Err())
+			case <-time.After(sendRetryBackoff * time.Duration(attempt)):
+			}
+		}
+
+		_, lastErr = s.client.Emails.SendWithContext(ctx, req)
+		if lastErr == nil {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("send email: %w", lastErr)
 }

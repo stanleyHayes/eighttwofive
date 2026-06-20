@@ -838,11 +838,16 @@ type recordingSender struct {
 	lastStatusUpdateTo string
 	lastStatus         string
 	lastTimeframe      string
+	loginErr           error // when set, SendLoginLink fails with it
 }
 
 func (r *recordingSender) SendWelcome(context.Context, string, string) error { return nil }
 
 func (r *recordingSender) SendLoginLink(_ context.Context, _, link string) error {
+	if r.loginErr != nil {
+		return r.loginErr
+	}
+
 	r.lastLink = link
 
 	return nil

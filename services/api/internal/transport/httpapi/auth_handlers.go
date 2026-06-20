@@ -61,6 +61,13 @@ func (h *Handlers) RequestLoginLink(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case errors.Is(err, domain.ErrInvalidInput):
 		respondError(w, http.StatusUnprocessableEntity, "invalid_input", err.Error())
+	case errors.Is(err, domain.ErrEmailSendFailed):
+		// The account and token are fine; only delivery failed. Tell the customer
+		// it's a transient send problem, not a generic crash, but still record the
+		// underlying cause.
+		logRequestError(r, err)
+		respondError(w, http.StatusBadGateway, "email_unavailable",
+			"We couldn't send your sign-in link right now. Please try again in a moment.")
 	case err != nil:
 		respondInternal(w, r, err)
 	default:

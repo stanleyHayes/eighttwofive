@@ -432,6 +432,7 @@
     "emailLabel": "E-mail",
     "submit": "Envoyez-moi un lien",
     "submitError": "Une erreur est survenue de notre côté. Veuillez réessayer dans un instant.",
+    "emailUnavailable": "Nous n'avons pas pu envoyer votre lien de connexion pour le moment. Veuillez réessayer dans un instant.",
     "backHome": "retour à l'accueil"
   },
   "verify": {

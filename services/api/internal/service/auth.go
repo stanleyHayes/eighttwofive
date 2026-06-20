@@ -90,6 +90,11 @@ func (a *Auth) RequestLink(ctx context.Context, emailAddr, name string) error {
 		return err
 	}
 
+	// Store the token hash before sending. A stored-but-unsent token is harmless
+	// — it is single-use and the TTL index sweeps it within loginTokenTTL — so we
+	// deliberately do not delete it if the send fails: a send error can follow a
+	// message that was actually delivered (e.g. a response timeout), and deleting
+	// then would break a link the customer already holds.
 	err = a.tokens.StoreLoginToken(ctx, tokenHash, user.ID, a.now().Add(loginTokenTTL))
 	if err != nil {
 		return fmt.Errorf("store login token: %w", err)
@@ -97,7 +102,7 @@ func (a *Auth) RequestLink(ctx context.Context, emailAddr, name string) error {
 
 	err = a.email.SendLoginLink(ctx, user.Email, a.webURL+"/auth/verify?token="+token)
 	if err != nil {
-		return fmt.Errorf("send login link: %w", err)
+		return fmt.Errorf("%w: %w", domain.ErrEmailSendFailed, err)
 	}
 
 	return nil

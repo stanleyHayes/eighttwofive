@@ -432,6 +432,7 @@
     "emailLabel": "Email",
     "submit": "Email me a link",
     "submitError": "Something went wrong on our end. Try again in a moment.",
+    "emailUnavailable": "We couldn't send your sign-in link right now. Please try again in a moment.",
     "backHome": "back to the homepage"
   },
   "verify": {

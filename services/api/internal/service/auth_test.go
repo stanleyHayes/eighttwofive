@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -168,8 +169,9 @@ func (f *fakeTokens) DeleteSession(_ context.Context, hash string) error {
 }
 
 type linkSender struct {
-	to   string
-	link string
+	to      string
+	link    string
+	failErr error // when set, SendLoginLink returns it instead of recording
 }
 
 func (l *linkSender) SendWelcome(context.Context, string, string) error { return nil }
@@ -183,6 +185,10 @@ func (l *linkSender) SendOrderStatusUpdate(context.Context, string, string, stri
 }
 
 func (l *linkSender) SendLoginLink(_ context.Context, to, link string) error {
+	if l.failErr != nil {
+		return l.failErr
+	}
+
 	l.to = to
 	l.link = link
 
@@ -222,6 +228,28 @@ func TestRequestLink_CreatesUserAndSendsLink(t *testing.T) {
 	assert.True(t, strings.HasPrefix(sender.link, "https://shop.test/auth/verify?token="),
 		"link %q must point at the web verify page", sender.link)
 	assert.Len(t, tokens.logins, 1, "one hashed login token stored")
+}
+
+func TestRequestLink_EmailSendFailure(t *testing.T) {
+	t.Parallel()
+
+	users := newFakeUsers()
+	tokens := newFakeTokens()
+	errSendDown := errors.New("resend 503")
+	sender := &linkSender{failErr: errSendDown}
+
+	err := newAuth(users, tokens, sender).RequestLink(t.Context(), "ama@example.com", "Ama")
+
+	// The failure is reported as a send problem (so the API can tell the customer
+	// to retry) while keeping the underlying cause reachable through the double
+	// wrap — asserted by errors.Is, which a %w->%v regression would break.
+	require.ErrorIs(t, err, domain.ErrEmailSendFailed)
+	require.ErrorIs(t, err, errSendDown)
+
+	// The token stays stored: it's single-use and TTL-swept, and a send error can
+	// follow an actually-delivered message, so deleting it would risk breaking a
+	// link the customer holds.
+	assert.Len(t, tokens.logins, 1, "the stored token is left for the TTL to sweep")
 }
 
 func TestRequestLink_AdminAllowlist(t *testing.T) {

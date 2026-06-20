@@ -40,18 +40,24 @@ func respondError(w http.ResponseWriter, status int, code, message string) {
 	}
 }
 
-// respondInternal logs the underlying cause of a 500 — with the request id, so
-// it can be matched to the client's failed request — and returns the generic
-// error message, keeping internals out of the response body. Every unexpected
-// server-side failure should funnel through here instead of a bare respondError
-// so no 500 goes unrecorded.
-func respondInternal(w http.ResponseWriter, r *http.Request, err error) {
+// logRequestError records a server-side failure with the request id so it can
+// be matched to the client's failed request. Used by respondInternal and by
+// handlers that map a known failure to a non-500 status but still want the
+// cause recorded.
+func logRequestError(r *http.Request, err error) {
 	slog.ErrorContext(r.Context(), "request failed",
 		"error", err,
 		"method", r.Method,
 		"path", r.URL.Path,
 		"request_id", chimw.GetReqID(r.Context()),
 	)
+}
 
+// respondInternal logs the underlying cause of a 500 and returns the generic
+// error message, keeping internals out of the response body. Every unexpected
+// server-side failure should funnel through here instead of a bare respondError
+// so no 500 goes unrecorded.
+func respondInternal(w http.ResponseWriter, r *http.Request, err error) {
+	logRequestError(r, err)
 	respondError(w, http.StatusInternalServerError, "internal", "something went wrong")
 }
