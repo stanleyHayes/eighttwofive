@@ -18,6 +18,7 @@ const defaultSettings = {
   whatsappNumber: "+233200000000",
   visitLocation: "Osu, Accra",
   instagramHandle: "eight_two_five_",
+  contactEmail: "hello@eighttwofive.com",
   deliveryRates: [{ area: "Accra", ratePesewas: 1000 }],
 };
 

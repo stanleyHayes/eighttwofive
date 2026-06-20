@@ -36,6 +36,7 @@ func (s *StoreSettings) Update(ctx context.Context, settings *domain.Settings) e
 
 	settings.WhatsAppNumber = strings.TrimSpace(settings.WhatsAppNumber)
 	settings.VisitLocation = strings.TrimSpace(settings.VisitLocation)
+	settings.ContactEmail = strings.TrimSpace(settings.ContactEmail)
 	settings.InstagramHandle = normalizeInstagramHandle(settings.InstagramHandle)
 
 	seen := make(map[string]struct{}, len(settings.DeliveryRates))

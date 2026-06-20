@@ -25,6 +25,7 @@ type settingsDoc struct {
 	WhatsAppNumber  string            `bson:"whatsappNumber"`
 	VisitLocation   string            `bson:"visitLocation"`
 	InstagramHandle string            `bson:"instagramHandle"`
+	ContactEmail    string            `bson:"contactEmail"`
 	DeliveryRates   []deliveryRateDoc `bson:"deliveryRates"`
 }
 
@@ -62,6 +63,7 @@ func (r *SettingsRepository) Get(ctx context.Context) (*domain.Settings, error) 
 		WhatsAppNumber:  doc.WhatsAppNumber,
 		VisitLocation:   doc.VisitLocation,
 		InstagramHandle: doc.InstagramHandle,
+		ContactEmail:    doc.ContactEmail,
 		DeliveryRates:   rates,
 	}, nil
 }
@@ -79,6 +81,7 @@ func (r *SettingsRepository) Update(ctx context.Context, s *domain.Settings) err
 		WhatsAppNumber:  s.WhatsAppNumber,
 		VisitLocation:   s.VisitLocation,
 		InstagramHandle: s.InstagramHandle,
+		ContactEmail:    s.ContactEmail,
 		DeliveryRates:   rates,
 	}
 

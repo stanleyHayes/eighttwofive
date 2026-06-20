@@ -10,6 +10,7 @@ export interface Settings {
   whatsappNumber: string;
   visitLocation: string;
   instagramHandle: string;
+  contactEmail: string;
   deliveryRates: DeliveryRate[];
 }
 

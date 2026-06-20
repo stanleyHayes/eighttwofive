@@ -25,6 +25,7 @@ type Settings struct {
 	WhatsAppNumber  string
 	VisitLocation   string
 	InstagramHandle string // bare handle, e.g. "eight_two_five_" (no @, no URL)
+	ContactEmail    string
 	DeliveryRates   []DeliveryRate
 }
 
@@ -35,6 +36,7 @@ func DefaultSettings() *Settings {
 		WhatsAppNumber:  "",
 		VisitLocation:   "",
 		InstagramHandle: "",
+		ContactEmail:    "",
 		DeliveryRates:   []DeliveryRate{},
 	}
 }

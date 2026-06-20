@@ -13,6 +13,7 @@ export interface PublicSettings {
   whatsappNumber: string;
   visitLocation: string;
   instagramHandle: string;
+  contactEmail: string;
   cloudName: string;
   deliveryRates: DeliveryRate[];
 }

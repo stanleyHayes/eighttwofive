@@ -18,6 +18,7 @@ type settingsDTO struct {
 	WhatsAppNumber  string            `json:"whatsappNumber"`
 	VisitLocation   string            `json:"visitLocation"`
 	InstagramHandle string            `json:"instagramHandle"`
+	ContactEmail    string            `json:"contactEmail"`
 	DeliveryRates   []deliveryRateDTO `json:"deliveryRates"`
 }
 
@@ -40,6 +41,7 @@ func toSettingsDTO(s *domain.Settings) settingsDTO {
 		WhatsAppNumber:  s.WhatsAppNumber,
 		VisitLocation:   s.VisitLocation,
 		InstagramHandle: s.InstagramHandle,
+		ContactEmail:    s.ContactEmail,
 		DeliveryRates:   rates,
 	}
 }
@@ -55,6 +57,7 @@ func fromSettingsDTO(dto settingsDTO) *domain.Settings {
 		WhatsAppNumber:  dto.WhatsAppNumber,
 		VisitLocation:   dto.VisitLocation,
 		InstagramHandle: dto.InstagramHandle,
+		ContactEmail:    dto.ContactEmail,
 		DeliveryRates:   rates,
 	}
 }

@@ -31,6 +31,7 @@ function SettingsForm({ initial }: SettingsFormProps) {
   const [whatsapp, setWhatsapp] = useState(initial.whatsappNumber);
   const [visitLocation, setVisitLocation] = useState(initial.visitLocation);
   const [instagram, setInstagram] = useState(initial.instagramHandle ?? "");
+  const [contactEmail, setContactEmail] = useState(initial.contactEmail ?? "");
   const [rates, setRates] = useState<DeliveryRate[]>(
     initial.deliveryRates.length > 0 ? initial.deliveryRates : [{ area: "", ratePesewas: 0 }],
   );
@@ -43,9 +44,10 @@ function SettingsForm({ initial }: SettingsFormProps) {
       whatsappNumber: whatsapp.trim(),
       visitLocation: visitLocation.trim(),
       instagramHandle: instagram.trim(),
+      contactEmail: contactEmail.trim(),
       deliveryRates: rates,
     }),
-    [depositGhs, whatsapp, visitLocation, instagram, rates],
+    [depositGhs, whatsapp, visitLocation, instagram, contactEmail, rates],
   );
 
   const handleRateAreaChange = (index: number, value: string) => {
@@ -131,6 +133,17 @@ function SettingsForm({ initial }: SettingsFormProps) {
               setSaved(false);
             }}
             helperText="Your handle or profile link — paste @eight_two_five_ or the full instagram.com URL; the storefront links to it."
+            fullWidth
+          />
+          <TextField
+            label="Contact email"
+            type="email"
+            value={contactEmail}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              setContactEmail(event.target.value);
+              setSaved(false);
+            }}
+            helperText="Shown in the storefront header and footer. Leave blank to use the default hello@eighttwofive.com."
             fullWidth
           />
           <TextField

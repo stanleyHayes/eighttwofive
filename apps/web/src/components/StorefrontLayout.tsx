@@ -103,6 +103,7 @@ export function UtilityBar() {
   const whatsappDisplay = settings.data?.whatsappNumber ?? "";
   const whatsapp = whatsappDisplay.replace(/\D/g, "");
   const instagramUrl = instagramUrlFrom(settings.data?.instagramHandle);
+  const email = settings.data?.contactEmail?.trim() || CONTACT_EMAIL;
 
   return (
     <Box
@@ -136,11 +137,11 @@ export function UtilityBar() {
               </UtilityLink>
             )}
             <UtilityLink
-              href={`mailto:${CONTACT_EMAIL}`}
+              href={`mailto:${email}`}
               icon={<MailOutlined sx={{ fontSize: 15 }} />}
               hideOnXs
             >
-              {CONTACT_EMAIL}
+              {email}
             </UtilityLink>
           </Stack>
 
@@ -595,6 +596,7 @@ export function SiteFooter() {
   const settings = usePublicSettings();
   const whatsapp = settings.data?.whatsappNumber?.replace(/\D/g, "") ?? "";
   const instagramUrl = instagramUrlFrom(settings.data?.instagramHandle);
+  const email = settings.data?.contactEmail?.trim() || CONTACT_EMAIL;
   const location = settings.data?.visitLocation || t("layout.defaultLocation");
 
   return (
@@ -678,7 +680,7 @@ export function SiteFooter() {
               </FooterLink>
             )}
             <FooterLink
-              href="mailto:hello@eighttwofive.com"
+              href={`mailto:${email}`}
               icon={<MailOutlined sx={{ fontSize: 16 }} />}
             >
               {t("footer.email")}
