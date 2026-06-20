@@ -35,6 +35,12 @@ const WORDMARK = "Eight Two Five";
 
 const CONTACT_EMAIL = "hello@eighttwofive.com";
 
+/** Build a profile URL from the merchant's saved Instagram handle, or null. */
+function instagramUrlFrom(handle?: string): string | null {
+  const clean = handle?.trim();
+  return clean ? `https://instagram.com/${clean}` : null;
+}
+
 interface NavItem {
   tKey: string;
   to: string;
@@ -96,6 +102,7 @@ export function UtilityBar() {
   const settings = usePublicSettings();
   const whatsappDisplay = settings.data?.whatsappNumber ?? "";
   const whatsapp = whatsappDisplay.replace(/\D/g, "");
+  const instagramUrl = instagramUrlFrom(settings.data?.instagramHandle);
 
   return (
     <Box
@@ -138,17 +145,19 @@ export function UtilityBar() {
           </Stack>
 
           <Stack direction="row" spacing={0.25} sx={{ alignItems: "center" }}>
-            <IconButton
-              component="a"
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener"
-              aria-label="Instagram"
-              size="small"
-              sx={{ color: creamText, "&:hover": { color: amber } }}
-            >
-              <InstagramIcon sx={{ fontSize: 17 }} />
-            </IconButton>
+            {instagramUrl && (
+              <IconButton
+                component="a"
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener"
+                aria-label="Instagram"
+                size="small"
+                sx={{ color: creamText, "&:hover": { color: amber } }}
+              >
+                <InstagramIcon sx={{ fontSize: 17 }} />
+              </IconButton>
+            )}
             {whatsapp && (
               <IconButton
                 component="a"
@@ -585,6 +594,7 @@ export function SiteFooter() {
   const { t } = useTranslation();
   const settings = usePublicSettings();
   const whatsapp = settings.data?.whatsappNumber?.replace(/\D/g, "") ?? "";
+  const instagramUrl = instagramUrlFrom(settings.data?.instagramHandle);
   const location = settings.data?.visitLocation || t("layout.defaultLocation");
 
   return (
@@ -651,12 +661,14 @@ export function SiteFooter() {
           </FooterColumn>
 
           <FooterColumn heading={t("footer.connect")}>
-            <FooterLink
-              href="https://instagram.com"
-              icon={<InstagramIcon sx={{ fontSize: 16 }} />}
-            >
-              {t("footer.instagram")}
-            </FooterLink>
+            {instagramUrl && (
+              <FooterLink
+                href={instagramUrl}
+                icon={<InstagramIcon sx={{ fontSize: 16 }} />}
+              >
+                {t("footer.instagram")}
+              </FooterLink>
+            )}
             {whatsapp && (
               <FooterLink
                 href={`https://wa.me/${whatsapp}`}

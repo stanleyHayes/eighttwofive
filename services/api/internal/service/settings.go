@@ -34,6 +34,10 @@ func (s *StoreSettings) Update(ctx context.Context, settings *domain.Settings) e
 		return fmt.Errorf("%w: deposit cannot be negative", domain.ErrInvalidInput)
 	}
 
+	settings.WhatsAppNumber = strings.TrimSpace(settings.WhatsAppNumber)
+	settings.VisitLocation = strings.TrimSpace(settings.VisitLocation)
+	settings.InstagramHandle = normalizeInstagramHandle(settings.InstagramHandle)
+
 	seen := make(map[string]struct{}, len(settings.DeliveryRates))
 	for _, rate := range settings.DeliveryRates {
 		area := strings.TrimSpace(rate.Area)
@@ -58,4 +62,27 @@ func (s *StoreSettings) Update(ctx context.Context, settings *domain.Settings) e
 	}
 
 	return nil
+}
+
+// normalizeInstagramHandle reduces whatever the merchant pastes — a bare handle,
+// an @handle, or a full profile URL — to the bare handle, so the storefront can
+// build a clean profile link from it.
+func normalizeInstagramHandle(raw string) string {
+	handle := strings.TrimSpace(raw)
+	if handle == "" {
+		return ""
+	}
+
+	if i := strings.Index(handle, "instagram.com/"); i >= 0 {
+		handle = handle[i+len("instagram.com/"):]
+	}
+
+	handle = strings.TrimPrefix(strings.TrimSpace(handle), "@")
+
+	// Keep only the first path segment, dropping any trailing slash/query/hash.
+	if i := strings.IndexAny(handle, "/?#"); i >= 0 {
+		handle = handle[:i]
+	}
+
+	return handle
 }

@@ -12,6 +12,7 @@ export interface PublicSettings {
   depositPesewas: number;
   whatsappNumber: string;
   visitLocation: string;
+  instagramHandle: string;
   cloudName: string;
   deliveryRates: DeliveryRate[];
 }

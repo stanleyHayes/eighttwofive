@@ -14,10 +14,11 @@ type deliveryRateDTO struct {
 }
 
 type settingsDTO struct {
-	DepositPesewas int64             `json:"depositPesewas"`
-	WhatsAppNumber string            `json:"whatsappNumber"`
-	VisitLocation  string            `json:"visitLocation"`
-	DeliveryRates  []deliveryRateDTO `json:"deliveryRates"`
+	DepositPesewas  int64             `json:"depositPesewas"`
+	WhatsAppNumber  string            `json:"whatsappNumber"`
+	VisitLocation   string            `json:"visitLocation"`
+	InstagramHandle string            `json:"instagramHandle"`
+	DeliveryRates   []deliveryRateDTO `json:"deliveryRates"`
 }
 
 type publicSettingsDTO struct {
@@ -35,10 +36,11 @@ func toSettingsDTO(s *domain.Settings) settingsDTO {
 	}
 
 	return settingsDTO{
-		DepositPesewas: s.DepositPesewas,
-		WhatsAppNumber: s.WhatsAppNumber,
-		VisitLocation:  s.VisitLocation,
-		DeliveryRates:  rates,
+		DepositPesewas:  s.DepositPesewas,
+		WhatsAppNumber:  s.WhatsAppNumber,
+		VisitLocation:   s.VisitLocation,
+		InstagramHandle: s.InstagramHandle,
+		DeliveryRates:   rates,
 	}
 }
 
@@ -49,10 +51,11 @@ func fromSettingsDTO(dto settingsDTO) *domain.Settings {
 	}
 
 	return &domain.Settings{
-		DepositPesewas: dto.DepositPesewas,
-		WhatsAppNumber: dto.WhatsAppNumber,
-		VisitLocation:  dto.VisitLocation,
-		DeliveryRates:  rates,
+		DepositPesewas:  dto.DepositPesewas,
+		WhatsAppNumber:  dto.WhatsAppNumber,
+		VisitLocation:   dto.VisitLocation,
+		InstagramHandle: dto.InstagramHandle,
+		DeliveryRates:   rates,
 	}
 }
 

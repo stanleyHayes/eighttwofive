@@ -20,11 +20,12 @@ type deliveryRateDoc struct {
 }
 
 type settingsDoc struct {
-	ID             string            `bson:"_id"`
-	DepositPesewas int64             `bson:"depositPesewas"`
-	WhatsAppNumber string            `bson:"whatsappNumber"`
-	VisitLocation  string            `bson:"visitLocation"`
-	DeliveryRates  []deliveryRateDoc `bson:"deliveryRates"`
+	ID              string            `bson:"_id"`
+	DepositPesewas  int64             `bson:"depositPesewas"`
+	WhatsAppNumber  string            `bson:"whatsappNumber"`
+	VisitLocation   string            `bson:"visitLocation"`
+	InstagramHandle string            `bson:"instagramHandle"`
+	DeliveryRates   []deliveryRateDoc `bson:"deliveryRates"`
 }
 
 // SettingsRepository implements domain.SettingsRepository on MongoDB as a
@@ -57,10 +58,11 @@ func (r *SettingsRepository) Get(ctx context.Context) (*domain.Settings, error) 
 	}
 
 	return &domain.Settings{
-		DepositPesewas: doc.DepositPesewas,
-		WhatsAppNumber: doc.WhatsAppNumber,
-		VisitLocation:  doc.VisitLocation,
-		DeliveryRates:  rates,
+		DepositPesewas:  doc.DepositPesewas,
+		WhatsAppNumber:  doc.WhatsAppNumber,
+		VisitLocation:   doc.VisitLocation,
+		InstagramHandle: doc.InstagramHandle,
+		DeliveryRates:   rates,
 	}, nil
 }
 
@@ -72,11 +74,12 @@ func (r *SettingsRepository) Update(ctx context.Context, s *domain.Settings) err
 	}
 
 	doc := settingsDoc{
-		ID:             settingsDocID,
-		DepositPesewas: s.DepositPesewas,
-		WhatsAppNumber: s.WhatsAppNumber,
-		VisitLocation:  s.VisitLocation,
-		DeliveryRates:  rates,
+		ID:              settingsDocID,
+		DepositPesewas:  s.DepositPesewas,
+		WhatsAppNumber:  s.WhatsAppNumber,
+		VisitLocation:   s.VisitLocation,
+		InstagramHandle: s.InstagramHandle,
+		DeliveryRates:   rates,
 	}
 
 	_, err := r.col.ReplaceOne(ctx, bson.M{"_id": settingsDocID}, doc, options.Replace().SetUpsert(true))

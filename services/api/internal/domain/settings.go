@@ -21,19 +21,21 @@ type DeliveryRate struct {
 
 // Settings are the merchant-editable store settings (scope §05).
 type Settings struct {
-	DepositPesewas int64
-	WhatsAppNumber string
-	VisitLocation  string
-	DeliveryRates  []DeliveryRate
+	DepositPesewas  int64
+	WhatsAppNumber  string
+	VisitLocation   string
+	InstagramHandle string // bare handle, e.g. "eight_two_five_" (no @, no URL)
+	DeliveryRates   []DeliveryRate
 }
 
 // DefaultSettings returns the store settings before the merchant has saved any.
 func DefaultSettings() *Settings {
 	return &Settings{
-		DepositPesewas: defaultDepositPesewas,
-		WhatsAppNumber: "",
-		VisitLocation:  "",
-		DeliveryRates:  []DeliveryRate{},
+		DepositPesewas:  defaultDepositPesewas,
+		WhatsAppNumber:  "",
+		VisitLocation:   "",
+		InstagramHandle: "",
+		DeliveryRates:   []DeliveryRate{},
 	}
 }
 

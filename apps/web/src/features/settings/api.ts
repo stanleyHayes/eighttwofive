@@ -9,6 +9,7 @@ export interface Settings {
   depositPesewas: number;
   whatsappNumber: string;
   visitLocation: string;
+  instagramHandle: string;
   deliveryRates: DeliveryRate[];
 }
 

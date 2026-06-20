@@ -30,6 +30,7 @@ function SettingsForm({ initial }: SettingsFormProps) {
   const [depositGhs, setDepositGhs] = useState(pesewasToGhsInput(initial.depositPesewas));
   const [whatsapp, setWhatsapp] = useState(initial.whatsappNumber);
   const [visitLocation, setVisitLocation] = useState(initial.visitLocation);
+  const [instagram, setInstagram] = useState(initial.instagramHandle ?? "");
   const [rates, setRates] = useState<DeliveryRate[]>(
     initial.deliveryRates.length > 0 ? initial.deliveryRates : [{ area: "", ratePesewas: 0 }],
   );
@@ -41,9 +42,10 @@ function SettingsForm({ initial }: SettingsFormProps) {
       depositPesewas: parseGhs(depositGhs) ?? 0,
       whatsappNumber: whatsapp.trim(),
       visitLocation: visitLocation.trim(),
+      instagramHandle: instagram.trim(),
       deliveryRates: rates,
     }),
-    [depositGhs, whatsapp, visitLocation, rates],
+    [depositGhs, whatsapp, visitLocation, instagram, rates],
   );
 
   const handleRateAreaChange = (index: number, value: string) => {
@@ -112,13 +114,23 @@ function SettingsForm({ initial }: SettingsFormProps) {
             Contact
           </Typography>
           <TextField
-            label="WhatsApp number"
+            label="WhatsApp / phone number"
             value={whatsapp}
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
               setWhatsapp(event.target.value);
               setSaved(false);
             }}
-            helperText="Shown to customers on the contact page and order details."
+            helperText="Shown across the storefront (header, footer, contact, order details). E.g. 0530882472 or +233530882472."
+            fullWidth
+          />
+          <TextField
+            label="Instagram handle"
+            value={instagram}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              setInstagram(event.target.value);
+              setSaved(false);
+            }}
+            helperText="Your handle or profile link — paste @eight_two_five_ or the full instagram.com URL; the storefront links to it."
             fullWidth
           />
           <TextField

@@ -17,6 +17,7 @@ const defaultSettings = {
   depositPesewas: 500_00,
   whatsappNumber: "+233200000000",
   visitLocation: "Osu, Accra",
+  instagramHandle: "eight_two_five_",
   deliveryRates: [{ area: "Accra", ratePesewas: 1000 }],
 };
 
@@ -89,8 +90,8 @@ describe("AdminSettingsPage", () => {
     await userEvent.clear(screen.getByLabelText(/home-visit deposit/i));
     await userEvent.type(screen.getByLabelText(/home-visit deposit/i), "600");
 
-    await userEvent.clear(screen.getByLabelText(/whatsapp number/i));
-    await userEvent.type(screen.getByLabelText(/whatsapp number/i), "+233201111111");
+    await userEvent.clear(screen.getByLabelText(/whatsapp \/ phone number/i));
+    await userEvent.type(screen.getByLabelText(/whatsapp \/ phone number/i), "+233201111111");
 
     await userEvent.click(screen.getByRole("button", { name: /add area/i }));
     const areaInputs = screen.getAllByLabelText(/area/i);
