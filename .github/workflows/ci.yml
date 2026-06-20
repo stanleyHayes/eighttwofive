@@ -53,6 +53,10 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
+          # Pin the linter so CI matches local and can't drift: an unpinned
+          # action silently adopts each new release's default linter set, which
+          # is exactly what turned CI red without any code change.
+          version: v2.8.0
           working-directory: services/api
       - name: Build
         run: go build ./...
