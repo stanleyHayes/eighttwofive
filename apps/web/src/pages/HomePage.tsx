@@ -41,6 +41,10 @@ import {
 } from "@/theme";
 
 const HERO_PUBLIC_ID = "eightfivetwo/hero-atelier";
+// The hero is a fixed brand asset, so fall back to the brand Cloudinary cloud
+// (the same one the OG tags use) when settings haven't loaded yet — the
+// above-the-fold image then shows immediately instead of flashing dark.
+const BRAND_CLOUD = "dvoqbonr2";
 
 function byCreatedAtDesc<T extends { createdAt: string }>(a: T, b: T): number {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -70,9 +74,7 @@ function buildSteps(t: (key: string) => string) {
 
 function Hero({ cloudName }: { cloudName: string }) {
   const { t } = useTranslation();
-  const bg = cloudName
-    ? photoUrl(cloudName, HERO_PUBLIC_ID, "f_auto,q_auto,w_2000")
-    : "";
+  const bg = photoUrl(cloudName || BRAND_CLOUD, HERO_PUBLIC_ID, "f_auto,q_auto,w_2000");
 
   return (
     <Box

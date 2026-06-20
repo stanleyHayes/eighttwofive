@@ -13,6 +13,12 @@ import PersonIcon from "@mui/icons-material/PersonOutlined";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MailOutlined from "@mui/icons-material/MailOutlined";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
+import StraightenOutlinedIcon from "@mui/icons-material/StraightenOutlined";
+import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import { Link as RouterLink, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BrandMark } from "@/components/BrandMark";
@@ -650,16 +656,30 @@ export function SiteFooter() {
           </Stack>
 
           <FooterColumn heading={t("footer.shop")}>
-            <FooterLink to="/store">{t("footer.theStore")}</FooterLink>
-            <FooterLink to="/account">{t("footer.yourAccount")}</FooterLink>
-            <FooterLink to="/login">{t("footer.signIn")}</FooterLink>
+            <FooterLink to="/store" icon={<StorefrontOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.theStore")}
+            </FooterLink>
+            <FooterLink to="/account" icon={<PersonIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.yourAccount")}
+            </FooterLink>
+            <FooterLink to="/login" icon={<LoginOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.signIn")}
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn heading={t("footer.theHouse")}>
-            <FooterLink to="/about">{t("footer.ourStory")}</FooterLink>
-            <FooterLink to="/fit-guide">{t("footer.fitGuide")}</FooterLink>
-            <FooterLink to="/slots">{t("footer.bookVisit")}</FooterLink>
-            <FooterLink to="/contact">{t("footer.contact")}</FooterLink>
+            <FooterLink to="/about" icon={<AutoStoriesOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.ourStory")}
+            </FooterLink>
+            <FooterLink to="/fit-guide" icon={<StraightenOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.fitGuide")}
+            </FooterLink>
+            <FooterLink to="/slots" icon={<EventOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.bookVisit")}
+            </FooterLink>
+            <FooterLink to="/contact" icon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 16 }} />}>
+              {t("footer.contact")}
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn heading={t("footer.connect")}>
