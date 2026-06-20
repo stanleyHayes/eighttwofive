@@ -22,7 +22,7 @@ func (h *Handlers) AdminListUsers(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]userDTO, 0, len(result.Items))
 	for i := range result.Items {
-		items = append(items, h.toUserDTO(&result.Items[i]))
+		items = append(items, h.toUserDTO(r.Context(), &result.Items[i]))
 	}
 
 	respondJSON(w, http.StatusOK, pagedDTO[userDTO]{
@@ -58,5 +58,5 @@ func (h *Handlers) AdminSetUserRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})
+	respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(r.Context(), user)})
 }

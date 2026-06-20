@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -834,6 +835,7 @@ func (m *memVisits) Update(_ context.Context, visit *domain.Visit) error {
 // --- recording email sender ---------------------------------------------------
 
 type memRoles struct {
+	mu    sync.RWMutex
 	byKey map[string]domain.RoleDef
 }
 
@@ -847,6 +849,9 @@ func newMemRoles() *memRoles {
 }
 
 func (m *memRoles) List(_ context.Context) ([]domain.RoleDef, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	out := make([]domain.RoleDef, 0, len(m.byKey))
 	for _, role := range m.byKey {
 		out = append(out, role)
@@ -856,6 +861,9 @@ func (m *memRoles) List(_ context.Context) ([]domain.RoleDef, error) {
 }
 
 func (m *memRoles) Get(_ context.Context, key string) (*domain.RoleDef, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	role, ok := m.byKey[key]
 	if !ok {
 		return nil, domain.ErrNotFound
@@ -865,12 +873,18 @@ func (m *memRoles) Get(_ context.Context, key string) (*domain.RoleDef, error) {
 }
 
 func (m *memRoles) Upsert(_ context.Context, role *domain.RoleDef) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.byKey[role.Key] = *role
 
 	return nil
 }
 
 func (m *memRoles) Delete(_ context.Context, key string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	delete(m.byKey, key)
 
 	return nil
@@ -929,6 +943,7 @@ type testEnv struct {
 	sender          *recordingSender
 	orders          *memOrders
 	paymentProvider *fakePaymentProvider
+	roleStore       *memRoles // editable role store, to prove DB-driven enforcement
 }
 
 func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
@@ -956,14 +971,17 @@ func newTestEnv(t *testing.T, adminEmails ...string) *testEnv {
 	visitService := service.NewCalendarVisit(
 		slots, visitsRepo, orders, designs, users, paymentProvider, settings, sender, "http://test.local", logger,
 	)
+	roleStore := newMemRoles()
 	handlers := httpapi.NewHandlers(
 		waitlist, auth, settings, catalog, orderService, analyticsService,
-		service.NewRoles(newMemRoles()), slotService, visitService, nil, "test-cloud", false, nil,
+		service.NewRoles(roleStore), slotService, visitService, nil, "test-cloud", false, nil,
 	)
 	srv := httptest.NewServer(httpapi.NewRouter(handlers, logger, []string{"*"}))
 	t.Cleanup(srv.Close)
 
-	return &testEnv{srv: srv, sender: sender, orders: orders, paymentProvider: paymentProvider}
+	return &testEnv{
+		srv: srv, sender: sender, orders: orders, paymentProvider: paymentProvider, roleStore: roleStore,
+	}
 }
 
 func newTestServer(t *testing.T) *httptest.Server {

@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/hayfordstanley/eightfivetwo/services/api/internal/domain"
 )
 
 // userID looks up a user's id by email through the admin users listing.
@@ -149,4 +151,63 @@ func TestAdminSetUserRole(t *testing.T) {
 	// An unknown user is a 404.
 	missing := doJSON(t, http.MethodPut, base+"/admin/users/nobody/role", `{"role":"viewer"}`, admin)
 	assert.Equal(t, http.StatusNotFound, missing.status)
+}
+
+// TestRBAC_DynamicRoleEnforcement proves the HTTP layer enforces permissions
+// from the editable role store, not the static enum: editing a role's stored
+// permissions changes access on the very next request, with no restart. This
+// is the contract Phase 3's role editor relies on.
+func TestRBAC_DynamicRoleEnforcement(t *testing.T) {
+	t.Parallel()
+
+	env := newTestEnv(t, "boss@e25.com")
+	base := env.srv.URL + "/api/v1"
+	admin := env.signIn(t, "boss@e25.com")
+	staff := env.signInAs(t, admin, "staff@e25.com", "staff")
+
+	// Baseline mirrors the seeded built-in staff matrix: writes the catalogue
+	// (has catalogue:write) but cannot read the team (lacks team:read).
+	create := doJSON(t, http.MethodPost, base+"/admin/collections", `{"name":"Baseline","note":""}`, staff)
+	require.Equal(t, http.StatusCreated, create.status, "staff writes catalogue by default: %s", create.body)
+
+	teamBefore := doJSON(t, http.MethodGet, base+"/admin/users", "", staff)
+	require.Equal(t, http.StatusForbidden, teamBefore.status, "staff cannot read the team by default")
+
+	// Persist an edited staff role — exactly what a Phase 3 admin edit stores:
+	// revoke catalogue:write, grant team:read.
+	require.NoError(t, env.roleStore.Upsert(t.Context(), &domain.RoleDef{
+		Key: "staff", Name: "Staff", AdminArea: true,
+		Permissions: []domain.Permission{
+			domain.PermAnalyticsRead, domain.PermOrdersRead, domain.PermOrdersWrite,
+			domain.PermSlotsRead, domain.PermSlotsWrite, domain.PermSubscribersRead,
+			domain.PermCatalogueRead, // catalogue:write revoked
+			domain.PermTeamRead,      // team:read granted
+		},
+	}))
+
+	// Enforcement follows the store on the next request, with no restart.
+	writeNow := doJSON(t, http.MethodPost, base+"/admin/collections", `{"name":"Blocked","note":""}`, staff)
+	assert.Equal(t, http.StatusForbidden, writeNow.status, "the DB edit must revoke staff's catalogue write")
+
+	teamNow := doJSON(t, http.MethodGet, base+"/admin/users", "", staff)
+	assert.Equal(t, http.StatusOK, teamNow.status, "the DB edit must grant staff team:read: %s", teamNow.body)
+}
+
+// TestRBAC_MissingRoleFallsBackToStatic proves a role absent from the store
+// (a cold database before seeding, or a removed entry) falls back to the
+// built-in static matrix, so a built-in role is never locked out.
+func TestRBAC_MissingRoleFallsBackToStatic(t *testing.T) {
+	t.Parallel()
+
+	env := newTestEnv(t, "boss@e25.com")
+	base := env.srv.URL + "/api/v1"
+	admin := env.signIn(t, "boss@e25.com")
+	staff := env.signInAs(t, admin, "staff@e25.com", "staff")
+
+	// Drop the staff role from the store entirely.
+	require.NoError(t, env.roleStore.Delete(t.Context(), "staff"))
+
+	// Staff still reaches read routes through the static fallback.
+	read := doJSON(t, http.MethodGet, base+"/admin/collections", "", staff)
+	assert.Equal(t, http.StatusOK, read.status, "a missing role must fall back to the built-in matrix: %s", read.body)
 }

@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -44,14 +45,63 @@ func recoverer(logger *slog.Logger) func(http.Handler) http.Handler {
 
 const sessionCookieName = "e25_session"
 
+// msgAdminAccessRequired is the 403 message for users barred from the dashboard.
+const msgAdminAccessRequired = "admin access required"
+
+// msgNoAccess is the 403 message for a user whose role lacks a capability.
+const msgNoAccess = "you don't have access to this"
+
 type contextKey int
 
-const userContextKey contextKey = iota
+const (
+	userContextKey contextKey = iota
+	roleDefContextKey
+)
 
 func userFromContext(ctx context.Context) (*domain.User, bool) {
 	user, ok := ctx.Value(userContextKey).(*domain.User)
 
 	return user, ok
+}
+
+func roleDefFromContext(ctx context.Context) (*domain.RoleDef, bool) {
+	def, ok := ctx.Value(roleDefContextKey).(*domain.RoleDef)
+
+	return def, ok
+}
+
+// staticRoleDef builds a role definition from the built-in static matrix. It is
+// the fallback when the editable store has no entry for a role key — a fresh
+// database before seeding, or a deleted custom role — so the built-in roles
+// keep working and an unknown key resolves to no permissions and no admin-area
+// access (fails safe: deny).
+func staticRoleDef(role domain.Role) *domain.RoleDef {
+	return &domain.RoleDef{
+		Key:         string(role),
+		Permissions: role.Permissions(),
+		AdminArea:   role.IsAdminArea(),
+	}
+}
+
+// roleDef resolves a user's effective role definition from the editable store,
+// so an admin's permission edit takes effect with no redeploy. A missing role
+// falls back to the built-in static definition; an unexpected store error is
+// returned so security-critical callers can fail closed rather than guess.
+func (h *Handlers) roleDef(ctx context.Context, user *domain.User) (*domain.RoleDef, error) {
+	if h.roles == nil {
+		return staticRoleDef(user.Role), nil
+	}
+
+	def, err := h.roles.Resolve(ctx, string(user.Role))
+
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		return staticRoleDef(user.Role), nil
+	case err != nil:
+		return nil, fmt.Errorf("role lookup: %w", err)
+	default:
+		return def, nil
+	}
 }
 
 // RequireAuth rejects requests without a valid session and injects the user
@@ -182,7 +232,7 @@ func (h *Handlers) RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, ok := userFromContext(r.Context())
 		if !ok || user.Role != domain.RoleAdmin {
-			respondError(w, http.StatusForbidden, "forbidden", "admin access required")
+			respondError(w, http.StatusForbidden, "forbidden", msgAdminAccessRequired)
 
 			return
 		}
@@ -192,28 +242,68 @@ func (h *Handlers) RequireAdmin(next http.Handler) http.Handler {
 }
 
 // RequireAdminArea rejects users who may not enter the admin dashboard at all
-// (i.e. customers). Must run after RequireAuth.
+// (i.e. customers). It resolves the role from the editable store and stashes
+// the definition in the request context so the per-route RequirePermission
+// guard reuses it instead of resolving again. Must run after RequireAuth.
 func (h *Handlers) RequireAdminArea(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, ok := userFromContext(r.Context())
-		if !ok || !user.Role.IsAdminArea() {
-			respondError(w, http.StatusForbidden, "forbidden", "admin access required")
+		if !ok {
+			respondError(w, http.StatusForbidden, "forbidden", msgAdminAccessRequired)
 
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		def, err := h.roleDef(r.Context(), user)
+		if err != nil {
+			// Fail closed: an unexpected role-store error must not grant access.
+			logRequestError(r, err)
+			respondError(w, http.StatusForbidden, "forbidden", msgAdminAccessRequired)
+
+			return
+		}
+
+		if !def.AdminArea {
+			respondError(w, http.StatusForbidden, "forbidden", msgAdminAccessRequired)
+
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), roleDefContextKey, def)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// RequirePermission rejects users whose role lacks the given capability. Must
-// run after RequireAuth.
+// RequirePermission rejects users whose role lacks the given capability,
+// resolved from the editable role store (reusing the definition stashed by
+// RequireAdminArea when present). Must run after RequireAuth.
 func (h *Handlers) RequirePermission(permission domain.Permission) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			user, ok := userFromContext(r.Context())
-			if !ok || !user.Role.Has(permission) {
-				respondError(w, http.StatusForbidden, "forbidden", "you don't have access to this")
+			if !ok {
+				respondError(w, http.StatusForbidden, "forbidden", msgNoAccess)
+
+				return
+			}
+
+			// RequireAdminArea resolves and stashes the role for the admin group;
+			// fall back to resolving here for any route guarded standalone.
+			def, hasDef := roleDefFromContext(r.Context())
+			if !hasDef {
+				resolved, err := h.roleDef(r.Context(), user)
+				if err != nil {
+					logRequestError(r, err)
+					respondError(w, http.StatusForbidden, "forbidden", msgNoAccess)
+
+					return
+				}
+
+				def = resolved
+			}
+
+			if !def.Has(permission) {
+				respondError(w, http.StatusForbidden, "forbidden", msgNoAccess)
 
 				return
 			}

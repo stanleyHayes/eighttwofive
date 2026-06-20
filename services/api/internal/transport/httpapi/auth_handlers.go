@@ -1,8 +1,10 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -20,11 +22,19 @@ type userDTO struct {
 	IsSuperAdmin bool     `json:"isSuperAdmin"`
 }
 
-func (h *Handlers) toUserDTO(u *domain.User) userDTO {
-	perms := u.Role.Permissions()
+func (h *Handlers) toUserDTO(ctx context.Context, u *domain.User) userDTO {
+	def, err := h.roleDef(ctx, u)
+	if err != nil {
+		// Display-only: never fail a response over the role store. Enforcement is
+		// the middleware's job, so show the built-in permissions on a read error
+		// (logged so a persistent store outage is still visible).
+		slog.ErrorContext(ctx, "resolve role for user dto", "error", err)
 
-	permStrings := make([]string, 0, len(perms))
-	for _, perm := range perms {
+		def = staticRoleDef(u.Role)
+	}
+
+	permStrings := make([]string, 0, len(def.Permissions))
+	for _, perm := range def.Permissions {
 		permStrings = append(permStrings, string(perm))
 	}
 
@@ -102,7 +112,7 @@ func (h *Handlers) VerifyLogin(w http.ResponseWriter, r *http.Request) {
 		respondInternal(w, r, err)
 	default:
 		h.setSessionCookie(w, sessionToken, int(sessionCookieMaxAge.Seconds()))
-		respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})
+		respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(r.Context(), user)})
 	}
 }
 
@@ -115,7 +125,7 @@ func (h *Handlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(user)})
+	respondJSON(w, http.StatusOK, map[string]userDTO{"user": h.toUserDTO(r.Context(), user)})
 }
 
 // Logout handles POST /api/v1/auth/logout.
