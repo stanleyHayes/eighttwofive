@@ -65,10 +65,12 @@ export function StorePage() {
   const q = useDebouncedValue(term.trim(), 300);
   const [visibleCount, setVisibleCount] = useState(STORE_PAGE_SIZE);
 
-  // A new search collapses the grid back to the first page.
-  useEffect(() => {
+  // Changing the search collapses the grid back to the first page. Done in the
+  // event handler (not an effect) so it's a single, predictable reset.
+  const changeTerm = (value: string) => {
+    setTerm(value);
     setVisibleCount(STORE_PAGE_SIZE);
-  }, [q]);
+  };
 
   // Keep the page URL shareable: /store?q=… follows the debounced search.
   useEffect(() => {
@@ -223,7 +225,7 @@ export function StorePage() {
           </Box>
           <TextField
             value={term}
-            onChange={(event) => setTerm(event.target.value)}
+            onChange={(event) => changeTerm(event.target.value)}
             placeholder={t("store.searchPlaceholder")}
             size="small"
             slotProps={{
@@ -254,7 +256,7 @@ export function StorePage() {
                 title={t("store.noMatchTitle", { query: q })}
                 body={t("store.noMatchBody")}
               />
-              <Button variant="outlined" onClick={() => setTerm("")}>
+              <Button variant="outlined" onClick={() => changeTerm("")}>
                 {t("store.clearSearch")}
               </Button>
             </Stack>
