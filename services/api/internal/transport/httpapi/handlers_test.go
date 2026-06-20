@@ -2,6 +2,7 @@ package httpapi_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -86,6 +87,29 @@ func TestJoinWaitlist(t *testing.T) {
 		srv := newTestServer(t)
 		status := postJSON(t, srv.URL+"/api/v1/waitlist", `{not json`)
 		assert.Equal(t, http.StatusBadRequest, status)
+	})
+
+	t.Run("rate-limits to stop email-bombing a third party", func(t *testing.T) {
+		t.Parallel()
+
+		srv := newTestServer(t)
+		url := srv.URL + "/api/v1/waitlist"
+
+		// Each signup persists a subscriber and sends a welcome email, so a flood
+		// from one client must eventually be throttled with 429. The per-minute
+		// budget is well under 30, so this loop is guaranteed to trip it.
+		var limited bool
+
+		for i := range 30 {
+			body := fmt.Sprintf(`{"email":"victim%d@example.com","name":"X"}`, i)
+			if postJSON(t, url, body) == http.StatusTooManyRequests {
+				limited = true
+
+				break
+			}
+		}
+
+		assert.True(t, limited, "waitlist signups should be rate-limited")
 	})
 }
 

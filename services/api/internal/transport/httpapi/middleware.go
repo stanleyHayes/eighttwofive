@@ -92,6 +92,11 @@ const (
 	// transaction, to blunt abuse.
 	checkoutRateLimit  = 15
 	checkoutRateWindow = time.Minute
+	// waitlistRateLimit and waitlistRateWindow bound the unauthenticated waitlist
+	// signup, which persists a subscriber and sends a welcome email, so it can't
+	// be used for subscriber spam or to email-bomb a third-party address.
+	waitlistRateLimit  = 10
+	waitlistRateWindow = time.Minute
 	// maxRateEntries caps the limiter map; expired windows are pruned when the
 	// cap is reached so memory stays bounded under address churn.
 	maxRateEntries = 10_000

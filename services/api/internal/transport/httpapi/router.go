@@ -38,12 +38,17 @@ func NewRouter(h *Handlers, logger *slog.Logger, allowedOrigins []string) http.H
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/healthz", h.Health)
-		r.Post("/waitlist", h.JoinWaitlist)
 		r.Get("/settings", h.GetSettings)
 		r.Get("/collections", h.ListCollections)
 		r.Get("/collections/{slug}", h.GetCollection)
 		r.Get("/designs", h.ListDesigns)
 		r.Get("/designs/{slug}", h.GetDesign)
+
+		// The waitlist endpoint is unauthenticated and sends a welcome email per
+		// signup, so rate-limit it per client to blunt subscriber spam and using
+		// it to email-bomb a third-party address.
+		waitlistLimiter := newRateLimiter(waitlistRateLimit, waitlistRateWindow)
+		r.With(rateLimitByIP(waitlistLimiter)).Post("/waitlist", h.JoinWaitlist)
 
 		// Unauthenticated checkout creates DB documents + a Paystack transaction,
 		// so rate-limit it per client.
