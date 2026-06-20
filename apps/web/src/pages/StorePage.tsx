@@ -27,6 +27,9 @@ import {
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { sand, sandDeep } from "@/theme";
 
+// How many designs the all-designs grid reveals per "Load more" press.
+const STORE_PAGE_SIZE = 12;
+
 function CardGridSkeleton({ count }: { count: number }) {
   return (
     <Box
@@ -60,6 +63,12 @@ export function StorePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [term, setTerm] = useState(() => searchParams.get("q") ?? "");
   const q = useDebouncedValue(term.trim(), 300);
+  const [visibleCount, setVisibleCount] = useState(STORE_PAGE_SIZE);
+
+  // A new search collapses the grid back to the first page.
+  useEffect(() => {
+    setVisibleCount(STORE_PAGE_SIZE);
+  }, [q]);
 
   // Keep the page URL shareable: /store?q=… follows the debounced search.
   useEffect(() => {
@@ -257,7 +266,27 @@ export function StorePage() {
             />
           )
         ) : (
-          <DesignGrid designs={designs.data} cloudName={cloudName} />
+          <>
+            <DesignGrid
+              designs={designs.data.slice(0, visibleCount)}
+              cloudName={cloudName}
+            />
+            {designs.data.length > visibleCount && (
+              <Box
+                sx={{ display: "flex", justifyContent: "center", mt: { xs: 4, md: 6 } }}
+              >
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => setVisibleCount((v) => v + STORE_PAGE_SIZE)}
+                >
+                  {t("store.loadMore", {
+                    remaining: designs.data.length - visibleCount,
+                  })}
+                </Button>
+              </Box>
+            )}
+          </>
         )}
       </Box>
     </StorefrontLayout>

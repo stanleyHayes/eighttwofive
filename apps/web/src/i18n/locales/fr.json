@@ -136,6 +136,7 @@
     "noMatchTitle": "Aucun résultat pour « {{query}} ».",
     "noMatchBody": "Essayez un mot plus court — les noms des créations sont courts — ou effacez la recherche pour voir tout ce qui est disponible.",
     "clearSearch": "Effacer la recherche",
+    "loadMore": "Voir plus ({{remaining}})",
     "designsEmptyLabel": "Dans la chambre noire",
     "designsEmptyTitle": "Les créations sont en cours de prise de vue.",
     "designsEmptyBody": "Les créations disponibles apparaîtront ici sous peu. En attendant, les collections ci-dessus annoncent ce qui arrive."

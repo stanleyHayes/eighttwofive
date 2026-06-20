@@ -136,6 +136,7 @@
     "noMatchTitle": "Nothing matches “{{query}}”.",
     "noMatchBody": "Try a shorter word — design names are short — or clear the search to see everything that's live.",
     "clearSearch": "Clear search",
+    "loadMore": "Load more ({{remaining}})",
     "designsEmptyLabel": "In the darkroom",
     "designsEmptyTitle": "Designs are being photographed.",
     "designsEmptyBody": "The live designs will appear here shortly. In the meantime, the collections above show what's coming."

@@ -88,6 +88,39 @@ function mockStoreFetch() {
   });
 }
 
+const manyDesigns = Array.from({ length: 15 }, (_, i) => ({
+  id: `m${i + 1}`,
+  collectionId: "c1",
+  name: `Design ${String(i + 1).padStart(2, "0")}`,
+  slug: `design-${i + 1}`,
+  note: "",
+  photos: [],
+  sizeBands: [{ label: "8", pricePesewas: 50000, chart: {} }],
+  status: "live",
+  createdAt: "2026-03-01T10:00:00Z",
+}));
+
+function mockManyDesignsFetch() {
+  return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input), "http://localhost");
+    if ((init?.method ?? "GET") !== "GET") {
+      return jsonResponse(404, { error: { code: "not_found", message: "no route" } });
+    }
+    if (url.pathname === "/api/v1/settings") {
+      return jsonResponse(200, {
+        data: { depositPesewas: 20000, whatsappNumber: "", visitLocation: "", cloudName: "demo" },
+      });
+    }
+    if (url.pathname === "/api/v1/collections") {
+      return jsonResponse(200, { data: [] });
+    }
+    if (url.pathname === "/api/v1/designs") {
+      return jsonResponse(200, { data: manyDesigns });
+    }
+    return jsonResponse(404, { error: { code: "not_found", message: "no route" } });
+  });
+}
+
 function LocationProbe() {
   const location = useLocation();
   return <div data-testid="location-search">{location.search}</div>;
@@ -158,5 +191,22 @@ describe("StorePage", () => {
     await waitFor(() => {
       expect(screen.queryByRole("heading", { name: "Sika Dress" })).not.toBeInTheDocument();
     });
+  });
+
+  it("reveals more designs with Load more", async () => {
+    vi.stubGlobal("fetch", mockManyDesignsFetch());
+    renderPage();
+
+    // The first page (12) is shown; the 13th is withheld behind Load more.
+    expect(await screen.findByRole("heading", { name: "Design 01" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Design 12" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Design 13" })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: /load more/i }));
+
+    // The rest reveal and the button retires once everything is shown.
+    expect(await screen.findByRole("heading", { name: "Design 13" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Design 15" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /load more/i })).not.toBeInTheDocument();
   });
 });
