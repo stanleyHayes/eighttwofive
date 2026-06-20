@@ -55,13 +55,17 @@ export function getPublicDesign(slug: string): Promise<Design> {
 }
 
 // --- Cloudinary photo URLs ---
+//
+// Every transform leads with f_auto,q_auto so Cloudinary serves a modern format
+// (AVIF/WebP) at an automatically tuned quality — without it the original (often
+// a multi-MB PNG) is delivered untouched, which makes the detail image crawl.
 
 /** Card grids: cropped portrait. */
-export const CARD_TRANSFORM = "c_fill,w_600,h_780";
+export const CARD_TRANSFORM = "f_auto,q_auto,c_fill,w_600,h_780";
 /** Detail gallery main image: full width, no crop. */
-export const DETAIL_TRANSFORM = "w_1200";
+export const DETAIL_TRANSFORM = "f_auto,q_auto,w_1200";
 /** Detail gallery thumbnail strip. */
-export const THUMB_TRANSFORM = "c_fill,w_120,h_156";
+export const THUMB_TRANSFORM = "f_auto,q_auto,c_fill,w_120,h_156";
 
 export function photoUrl(cloudName: string, publicId: string, transform: string): string {
   return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${publicId}`;

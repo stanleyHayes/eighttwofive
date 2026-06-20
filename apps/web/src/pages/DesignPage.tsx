@@ -92,6 +92,10 @@ function Gallery({ design, cloudName }: { design: Design; cloudName: string }) {
         <Box
           component="img"
           src={photoUrl(cloudName, current.publicId, DETAIL_TRANSFORM)}
+          srcSet={[600, 900, 1200]
+            .map((w) => `${photoUrl(cloudName, current.publicId, "f_auto,q_auto,w_" + w)} ${w}w`)
+            .join(", ")}
+          sizes="(min-width: 900px) 580px, 100vw"
           alt={t("design.gallery.photoAlt", {
             name: design.name,
             current: selected + 1,
